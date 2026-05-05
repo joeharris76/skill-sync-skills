@@ -1,0 +1,31 @@
+version: 1
+sources:
+  - name: personal
+    type: local
+    path: ~/.skill-sync/skills
+skills:
+  - blog
+  - code
+  - test
+  - docs
+  - todo
+  - benchbox
+  - SHARED/commit-framework
+  - SHARED/verify-framework
+  - SHARED/research-framework
+  - SHARED/compare-framework
+  - SHARED/shrink-framework
+  - SHARED/review-protocol
+targets:
+  claude: ~/.claude/skills
+  codex: ~/.codex/skills
+install_mode: mirror
+projects:
+  - ~/Developer/Oxbow
+  - ~/Developer/BenchBox
+  - ~/Developer/letterops-mcp
+  - ~/Developer/textcharts
+  - ~/Developer/skill-sync
+  - ~/Developer/BenchBox.pool-02
+overrides:
+  benchbox: {}
