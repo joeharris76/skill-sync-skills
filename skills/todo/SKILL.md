@@ -38,7 +38,7 @@ TODO_INDEX="uv run --project ~/.claude/tools/todo todo-index"
 
 ## Hard Rules
 
-- Write actions auto-cleanup after verification and commit/push through SHARED/commit-framework.md.
+- Write actions auto-cleanup after verification and commit/push through SHARED/commit-framework/SKILL.md.
 - Plain `review` is read-only under SHARED/review-protocol/SKILL.md.
 - Implementation must read the TODO guardrails, research target code, respect `scope_limit`, test each work unit, mark work done, and commit incrementally.
 - Use flat `work[]` with `needs` edges; inter-item dependencies go in `deps.needs`.

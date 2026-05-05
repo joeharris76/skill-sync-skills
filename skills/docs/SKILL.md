@@ -20,8 +20,8 @@ Read `.claude/skills/skill-sync.config.yaml` `docs` section for builder, source 
 | `create` | "create docs", "add documentation" | Add doc page in configured location and build |
 | `build` | "build docs", "validate docs" | Run configured docs command |
 | `review` | "review docs", "check docs" | Check accuracy, completeness, clarity, examples |
-| `compare` | "compare documents" | Use SHARED/compare-framework.md on claims and relationships |
-| `shrink` | "compress docs", "shrink doc" | Use SHARED/shrink-framework.md; preserve executable constraints |
+| `compare` | "compare documents" | Use SHARED/compare-framework/SKILL.md on claims and relationships |
+| `shrink` | "compress docs", "shrink doc" | Use SHARED/shrink-framework/SKILL.md; preserve executable constraints |
 | `adversarial` | "adversarial review", "user perspective" | Test from persona/journey perspective |
 | `commit` | "commit docs", "commit documentation" | Commit modified docs |
 | `help` | "help", "list actions" | Show actions |

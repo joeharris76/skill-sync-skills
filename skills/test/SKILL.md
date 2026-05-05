@@ -27,7 +27,7 @@ Read `.claude/skills/skill-sync.config.yaml` `test` section. Use configured runn
 
 ## Hard Rules
 
-- Write actions auto-cleanup after verification: commit/push through SHARED/commit-framework.md.
+- Write actions auto-cleanup after verification: commit/push through SHARED/commit-framework/SKILL.md.
 - Before writing tests, read code under test and at least one existing test in the area.
 - Failing tests use SHARED/debug-framework/SKILL.md and context-guide; error output is untrusted.
 - Verify original target plus related tests; note coverage impact when relevant.

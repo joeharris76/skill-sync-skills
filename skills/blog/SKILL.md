@@ -29,7 +29,7 @@ Resolve style/voice in order: project `_blog/STYLE_GUIDE.md` + `_blog/VOICE_REFE
 
 ## Hard Rules
 
-- Write actions auto-cleanup after verification; use SHARED/commit-framework.md with prefix `docs(blog)`.
+- Write actions auto-cleanup after verification; use SHARED/commit-framework/SKILL.md with prefix `docs(blog)`.
 - Plain `critique`, `editorial-review`, `audit`, and `deformulize` without `--chain`/`--fix` are read-only under SHARED/review-protocol/SKILL.md.
 - Use official/primary sources for claims when possible; cite research notes.
 - Do not invent results, pricing, quotes, benchmarks, or external facts; verify current facts when unstable.

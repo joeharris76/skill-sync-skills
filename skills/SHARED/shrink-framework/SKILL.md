@@ -16,7 +16,7 @@ Application source, agent-facing docs, config files. Do not shrink tests, genera
 1. Validate file type and preserve constraints.
 2. Save baseline.
 3. Compress dead/repeated/verbose text only.
-4. Compare baseline vs compressed with SHARED/compare-framework.md.
+4. Compare baseline vs compressed with SHARED/compare-framework/SKILL.md.
 5. Approve if score meets threshold and relevant checks pass; otherwise iterate up to 3 times.
 
 ## Preserve
