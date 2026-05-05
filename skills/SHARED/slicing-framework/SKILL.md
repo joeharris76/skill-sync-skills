@@ -1,6 +1,6 @@
 ---
 name: slicing-framework
-description: Build multi-file changes in thin vertical slices: implement, test, verify, commit, repeat.
+description: "Build multi-file changes in thin vertical slices: implement, test, verify, commit, repeat."
 ---
 
 # Slicing Framework

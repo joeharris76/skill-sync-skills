@@ -1,6 +1,6 @@
 ---
 name: tidy-perms
-description: Consolidate accumulated permission grants across Claude Code, Codex, and Gemini: move trusted commands into project settings, clean garbage entries, verify cross-agent consistency, commit project-level configs.
+description: "Consolidate accumulated permission grants across Claude Code, Codex, and Gemini: move trusted commands into project settings, clean garbage entries, verify cross-agent consistency, commit project-level configs."
 version: 0.2.0
 tools: Bash, Read, Write, Edit
 ---
