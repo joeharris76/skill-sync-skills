@@ -29,7 +29,7 @@ Unified Substack workflow backed by the `letterops` MCP.
 - Run dry-run mutations before any execute step whenever the MCP supports it.
 - After publish or schedule, use `fetch`, not `pull`, to refresh state.
 - Never pull into `_blog/published/` without explicit user review of the dry-run output.
-- If a Substack action edits local/state files, commit via SHARED/commit-framework.md before returning.
+- If a Substack action edits local/state files, commit via SHARED/commit-framework/SKILL.md before returning.
 - If an action is read-only or leaves the worktree unchanged, do not create a commit.
 
 ## Routing
@@ -86,7 +86,7 @@ Steps:
 3. Ask for confirmation before `execute: true`.
 4. Optionally set audience and tags.
 5. Return the draft URL and post ID.
-6. Commit local/state file changes via SHARED/commit-framework.md.
+6. Commit local/state file changes via SHARED/commit-framework/SKILL.md.
 
 CLI fallback:
 - `make tools-run CMD='draft <file_path> --execute'`
@@ -97,7 +97,7 @@ Use `mcp__letterops__update` to update an existing draft without publishing it.
 
 - This is for draft lifecycle management, not sync reconciliation.
 - Preview first if the user has not recently validated the file.
-- Commit local tracking changes via SHARED/commit-framework.md.
+- Commit local tracking changes via SHARED/commit-framework/SKILL.md.
 
 ## `suggest_tags`
 
@@ -112,7 +112,7 @@ Steps:
 2. Ensure the user explicitly confirms live publication.
 3. Run dry-run if available, then `execute: true` with `confirm_live: true`.
 4. After publish, run `fetch` to refresh remote state.
-5. Commit `fetch`/state changes via SHARED/commit-framework.md.
+5. Commit `fetch`/state changes via SHARED/commit-framework/SKILL.md.
 
 CLI fallback:
 - `make tools-run CMD='publish <file_path> --execute --confirm-live'`
@@ -126,7 +126,7 @@ Steps:
 2. Confirm the schedule timestamp with the user.
 3. Run `execute: true` with `confirm_live: true`.
 4. After scheduling, run `fetch`.
-5. Commit `fetch`/state changes via SHARED/commit-framework.md.
+5. Commit `fetch`/state changes via SHARED/commit-framework/SKILL.md.
 
 CLI fallback:
 - `make tools-run CMD='schedule <file_path> "<ISO_DATETIME>" --execute --confirm-live'`
@@ -151,7 +151,7 @@ Use `mcp__letterops__fetch` to refresh remote state and local hashes without pul
 
 - Prefer this after `publish` or `schedule`.
 - Prefer this when state hashes are stale but local content should remain authoritative.
-- Commit tracked state changes via SHARED/commit-framework.md.
+- Commit tracked state changes via SHARED/commit-framework/SKILL.md.
 
 CLI fallback:
 - `make tools-run CMD='status --remote'`
@@ -165,7 +165,7 @@ Steps:
 2. Run dry-run first.
 3. Ask whether the user wants one-way push or bidirectional sync.
 4. If approved, run with `execute: true`.
-5. Commit sync state changes via SHARED/commit-framework.md.
+5. Commit sync state changes via SHARED/commit-framework/SKILL.md.
 
 Conflict handling for bidirectional sync:
 - `skip`: report conflicts, take no action
@@ -193,7 +193,7 @@ Pull safety rules:
 - Always run pull in dry-run mode first.
 - If pull shows changes to `_blog/published/`, stop and ask the user before proceeding.
 - When the real need is only state refresh, use `fetch` instead of `pull`.
-- Commit pull changes via SHARED/commit-framework.md.
+- Commit pull changes via SHARED/commit-framework/SKILL.md.
 
 ## Recommended Flow
 
