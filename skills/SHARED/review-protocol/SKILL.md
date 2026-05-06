@@ -19,6 +19,8 @@ They must not, as a side effect:
 - Enable auto-merge.
 - Chain into write-shaped skills without explicit user authorization in a separate turn.
 
+A later request to fix/address review findings is write authorization; follow the normal project commit/PR flow.
+
 Capture authorizes only the local file write. Final terminal action is a chat line such as `Recorded: <path>`; the user decides whether to PR.
 
 ## Defect Gate

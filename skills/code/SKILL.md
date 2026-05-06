@@ -21,7 +21,7 @@ Read `.claude/skills/skill-sync.config.yaml` `code` section first. Use project c
 | `review` | "review code", "code review" | Five-axis review: correctness, readability, architecture, security, performance |
 | `fix` | "fix lint", "fix type error" | Research affected path, apply narrow fix, verify |
 | `debug` | "debug error", "triage bug", "why is this failing" | Reproduce, localize, root-cause, guard, verify |
-| `iterate` | "iterate to green", "drive tests to green", "rerun until passing" | Loop command failures to green or documented hard blocker |
+| `iterate` | "iterate to green", "drive tests to green", "drive command to green", "rerun until passing" | Loop command failures to green or documented hard blocker |
 | `perf` | "improve performance", "profile" | Measure baseline, profile, optimize, remeasure |
 | `research` | "investigate code", "understand this" | Read target, callers/tests, data/control flow; no edits |
 | `compare` | "compare code", "diff modules" | Compare contracts, dependencies, control flow |
