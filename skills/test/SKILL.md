@@ -40,3 +40,4 @@ Read `.claude/skills/skill-sync.config.yaml` `test` section. Use configured runn
 - **Coverage:** run coverage command, prioritize untested behavior/error paths over line chasing, verify improvement.
 - **Perf:** use duration/profile evidence; prefer fixture scope, in-memory substitutes, and smaller data. See `references/perf.md`.
 - **Cleanup:** file scope is modified tests; prefix `test`; verify with configured test command.
+- **CI diagnosis:** inspect run/job status JSON before logs; fetch only failed-job excerpts; targeted local tests before full suites.

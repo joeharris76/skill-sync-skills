@@ -43,6 +43,7 @@ BenchBox-specific benchmark, platform, quality, and architecture workflows. Auto
 - `live`: cloud/platform smoke with approval gate. See `references/live.md`.
 - `architecture`: patterns, boundaries, duplication, extensibility. See `references/architecture.md`.
 - `plan`: research -> implementation slices -> verification -> summary. See `references/plan.md`.
+- UAT/long-run sweeps: see AGENTS.md "Long-Running UAT" and `docs/operations/uat-framework.md`.
 
 ## Output
 

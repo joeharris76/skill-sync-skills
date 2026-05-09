@@ -23,6 +23,8 @@ A later request to fix/address review findings is write authorization; follow th
 
 Capture authorizes only the local file write. Final terminal action is a chat line such as `Recorded: <path>`; the user decides whether to PR.
 
+For verification, run only commands the review scope demands. Long output goes to a temp log; cite paths/lines, do not paste large source blocks or command output.
+
 ## Defect Gate
 
 Before classifying a finding, ask: if left as-is, will the observed code behave incorrectly, leak data, or miss a performance budget?

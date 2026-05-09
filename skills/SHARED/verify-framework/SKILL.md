@@ -19,3 +19,5 @@ Run before return/stage/commit.
 - Never silently skip verification; if unavailable, report why.
 - Fix failures before committing or clearly report blocker.
 - Report command, result, and residual risk.
+
+- Narrowest check that proves the change first; full fast/preflight are final gates, not exploration. Long output → log file, report summary.
