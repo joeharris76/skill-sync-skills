@@ -1,7 +1,7 @@
 ---
 name: todo
-description: Use when the user asks to "create a TODO", "manage TODOs", "show TODO items", "prioritize TODOs", "implement a TODO", "review TODOs", "complete a TODO", "cleanup TODOs", "create TODOs from spec", "initialize TODO system", "ideate on an idea", "refine an idea", "write a spec", or "create a specification".
-version: 0.4.0
+description: Use when the user asks to "create a TODO", "manage TODOs", "show TODO items", "prioritize TODOs", "implement a TODO", "implement a batch of TODOs", "batch implement TODOs", "review TODOs", "complete a TODO", "cleanup TODOs", "create TODOs from spec", "initialize TODO system", "ideate on an idea", "refine an idea", "write a spec", or "create a specification".
+version: 0.6.0
 tools: Bash, Read, Edit, Write, Task
 ---
 
@@ -28,6 +28,7 @@ TODO_INDEX="uv run --project ~/.claude/tools/todo todo-index"
 | `create` | "create TODO", "add item" | Create validated item(s) with work units and guardrails |
 | `prioritize` | "prioritize", "rebalance" | Rebalance priorities using impact/deps/effort/time |
 | `implement` | "implement TODO", "work on" | Execute ready work units with guardrails, tests, commits |
+| `batch` | "implement these TODOs", "batch implement", "work through this group of TODOs" | Drive a deduped TODO group through implement -> verify -> complete -> `code` review -> fix -> PR; one PR per TODO; local scratch ledger; polls not-ready deps; stops only when every item is terminal |
 | `review` | "review TODO quality" | Score clarity, completeness, actionability, freshness, guardrails, work breakdown |
 | `complete` | "mark complete", "finish TODO" | Move completed item to DONE and reindex |
 | `cleanup` | "cleanup TODOs", "commit TODO changes" | Validate graph/schema, cleanup, commit |
@@ -39,6 +40,7 @@ TODO_INDEX="uv run --project ~/.claude/tools/todo todo-index"
 ## Hard Rules
 
 - Write actions auto-cleanup after verification and commit/push through SHARED/commit-framework/SKILL.md.
+- `batch` is a write action: use one local scratch state file, one PR per TODO, and no mid-batch stop for ordinary wait states — record pending CI as `waiting`; use bounded, announced monitoring only for batch-owned dependency gates that must resolve before another TODO can proceed. See `references/batch.md`.
 - Plain `review` is read-only under SHARED/review-protocol/SKILL.md.
 - Implementation must read the TODO guardrails, research target code, respect `scope_limit`, test each work unit, mark work done, and commit incrementally.
 - Use flat `work[]` with `needs` edges; inter-item dependencies go in `deps.needs`.
@@ -51,6 +53,7 @@ TODO_INDEX="uv run --project ~/.claude/tools/todo todo-index"
 - **Create:** parse title(s) or conversation; slug id; choose worktree/phase/priority/category; add `work[]`, `deferred[]`, optional `deps.needs`; for code work add specific `verification`, `must_preserve`, `approach`, and risk-only `anti_patterns`/`scope_limit`. When the TODO adds a new module, env var, or file-system convention, also add `prior_art` listing existing patterns considered (`<path>:<concept> — reuse / extend / supersede`).
 - **Prioritize:** ideal active distribution is Critical 0-2, High 3-5, Medium-High 5-10; update and reindex.
 - **Implement:** confirm ready, get `$TODO_CLI next <slug>`, move planning -> active, implement ready units using SHARED/research/slicing/verify, run verification, `$TODO_CLI done`, commit changed files only.
+- **Batch:** dedupe inputs; read all TODOs; sort in-batch `deps.needs`; keep an uncommitted scratch ledger at an already-ignored local path; process the next ready TODO; for each item run `implement` -> verification -> `complete` -> `code review` (or equivalent five-axis review) -> fix Critical/Required findings (apply Nit/Consider only within `scope_limit`; log skipped Nit/Consider in the PR body) -> re-verify/re-review as needed -> commit via SHARED/commit-framework then the project PR-open equivalent; record pending CI as `waiting`, use bounded announced monitoring only for batch-owned dependency gates, retry once; mark `blocked` only for hard blockers. An in-batch `deps.needs` edge means the upstream PR must merge before the dependent TODO becomes ready (unless a stacked-branch exception is recorded). One `batch` invocation over a named TODO set is a single authorization for the per-item implement/commit/PR/auto-merge cycle. See `references/batch.md`.
 - **Review:** grade 0-3 across clarity, completeness, actionability, freshness, guardrails, work breakdown; Required findings for vague verification, broad scope, missing dependencies, legacy nested format, or missing `prior_art` when the TODO adds a new module/env-var/file-system convention (cite at least one existing pattern with file path; score 0 if absent, 3 if present with reuse decisions). Freshness has an evidence-durability sub-axis: when `description` cites upstream evidence (specific dependency version, harness PASS, observed external behavior), require either a `w0:` re-validation work unit that captures stdout to `_project/verification-logs/<id>/w0.log`, or an explicit pin of the evidence. Score 0 for cited-but-unbound evidence, 3 for re-runnable+captured.
 - **Complete:** require all work done/no blockers, set `Completed` + date, `git mv` to DONE, reindex.
 - **Cleanup:** `$TODO_CLI check-graph`, `$TODO_CLI cleanup`, `$TODO_VALIDATE --all`, `$TODO_INDEX`, commit TODO/DONE files.
