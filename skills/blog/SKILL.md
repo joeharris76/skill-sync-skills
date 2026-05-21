@@ -30,14 +30,14 @@ Resolve style/voice in order: project `_blog/STYLE_GUIDE.md` + `_blog/VOICE_REFE
 ## Hard Rules
 
 - Write actions auto-cleanup after verification; use SHARED/commit-framework/SKILL.md with prefix `docs(blog)`.
-- Plain `critique`, `editorial-review`, `audit`, and `deformulize` without `--chain`/`--fix` are read-only under SHARED/review-protocol/SKILL.md.
+- Plain `critique`, `editorial-review`, `audit`, and `deformulize` without `--chain`/`--fix` are read-only under SHARED/review-protocol/SKILL.md; after findings, `critique`/`editorial-review`/`audit` apply its L2 audit.
 - Use official/primary sources for claims when possible; cite research notes.
 - Do not invent results, pricing, quotes, benchmarks, or external facts; verify current facts when unstable.
 
 ## Action Notes
 
-- **Plan:** single post -> define thesis, audience, type, length, outline path. Series -> create `{series}/series-plan.md` with concept, audience, tone, template, posts, cadence.
-- **Research:** read outline, series plan, style guide, related posts; gather primary/secondary/original evidence; update outline and save substantial notes under `{series}/research/`.
+- **Plan:** single post -> define thesis, audience, type, length, outline path. Series -> create `{series}/series-plan.md` with concept, audience, tone, template, posts, cadence. Before committing thesis/audience/outline, apply plan-deepening L3; note any thesis reframe.
+- **Research:** read outline, series plan, style guide, related posts; gather primary/secondary/original evidence; update outline and save substantial notes under `{series}/research/`. When findings change the outline or thesis, apply plan-deepening L3 before updating.
 - **Draft:** save to `{series}/drafts/{slug}.md`; include title, hook, TL;DR when appropriate, sectioned argument, reproducible commands/data for technical posts, references.
 - **Critique:** evaluate style, technical accuracy, methodology, sources, limitations, hook, flow, title, evidence, links, length. Score 9-10 publish-ready, 7-8 targeted, 5-6 significant, <5 structural. See `references/critique.md`.
 - **Critique --chain:** apply non-structural fixes only; leave thesis/positioning changes for user judgment; commit when verified.

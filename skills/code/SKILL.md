@@ -44,7 +44,8 @@ Read `.claude/skills/skill-sync.config.yaml` `code` section first. Use project c
 - **Fix:** lint uses configured lint/fix; type uses typecheck and annotations; runtime applies research framework and minimal code change.
 - **Debug:** use SHARED/debug-framework/SKILL.md and context-guide. A blocker requires known root cause, tried/ruled fix hierarchy, and remaining work outside authority.
 - **Iterate:** run command, cluster failures by signature, debug/fix/verify one cluster at a time, record `_project/iterate/<slug>/` artifacts, stop on green/blocker/cap. See `references/iterate.md`. For verification-only commits (re-validating upstream evidence, no functional change), capture stdout under `_project/verification-logs/<todo-id>/<work-id>.log` and commit it -- terminal output cited in commit messages isn't durable. Post-`pr-open`: skip preflight/broad diffs unless mergeability flips, required check fails, or `develop` advanced into PR paths.
-- **Perf:** use measured timings/profiles, not recall; keep performance budget explicit.
+- **Perf:** use measured timings/profiles, not recall; keep performance budget explicit. Before optimizing, apply plan-deepening L3: confirm the measured bottleneck is the real constraint.
 - **Compare:** see `references/compare.md`; score >=0.95 equivalent, 0.85-0.94 review, <0.70 breaking.
 - **Shrink:** see SHARED/shrink-framework/SKILL.md plus `references/shrink.md`.
+- **To-spec:** if the observed API implies a different boundary than requested, apply plan-deepening L3 before finalizing.
 - **Handoff:** see `references/handoff.md`; include verification commands and residual risk.

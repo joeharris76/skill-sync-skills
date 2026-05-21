@@ -41,7 +41,7 @@ TODO_INDEX="uv run --project ~/.claude/tools/todo todo-index"
 
 - Write actions auto-cleanup after verification and commit/push through SHARED/commit-framework/SKILL.md.
 - `batch` is a write action: use one local scratch state file, one PR per TODO, and no mid-batch stop for ordinary wait states — record pending CI as `waiting`; use bounded, announced monitoring only for batch-owned dependency gates that must resolve before another TODO can proceed. See `references/batch.md`.
-- Plain `review` is read-only under SHARED/review-protocol/SKILL.md.
+- Plain `review` is read-only under SHARED/review-protocol/SKILL.md; after findings apply its L2 audit.
 - Implementation must read the TODO guardrails, research target code, respect `scope_limit`, test each work unit, mark work done, and commit incrementally.
 - Use flat `work[]` with `needs` edges; inter-item dependencies go in `deps.needs`.
 - See `references/structure.md` for schema, statuses, commands, and layout.
@@ -57,8 +57,8 @@ TODO_INDEX="uv run --project ~/.claude/tools/todo todo-index"
 - **Review:** grade 0-3 across clarity, completeness, actionability, freshness, guardrails, work breakdown; Required findings for vague verification, broad scope, missing dependencies, legacy nested format, or missing `prior_art` when the TODO adds a new module/env-var/file-system convention (cite at least one existing pattern with file path; score 0 if absent, 3 if present with reuse decisions). Freshness has an evidence-durability sub-axis: when `description` cites upstream evidence (specific dependency version, harness PASS, observed external behavior), require either a `w0:` re-validation work unit that captures stdout to `_project/verification-logs/<id>/w0.log`, or an explicit pin of the evidence. Score 0 for cited-but-unbound evidence, 3 for re-runnable+captured.
 - **Complete:** require all work done/no blockers, set `Completed` + date, `git mv` to DONE, reindex.
 - **Cleanup:** `$TODO_CLI check-graph`, `$TODO_CLI cleanup`, `$TODO_VALIDATE --all`, `$TODO_INDEX`, commit TODO/DONE files.
-- **From-Spec:** parse markdown/yaml/text into items and work units; support `--dry-run`; write planning items, validate, index.
-- **Ideate:** restate as problem, ask only material questions, generate options, stress-test assumptions, recommend MVP/not-doing/open questions; save only after confirmation.
-- **Spec:** state assumptions, define objective, commands, structure, style, tests, boundaries, success criteria, and review gate; save only after confirmation.
+- **From-Spec:** parse markdown/yaml/text into items and work units; support `--dry-run`; write planning items, validate, index. If the spec was authored outside the spec/ideate flow, apply plan-deepening L3 to separate requirements from upstream constraints.
+- **Ideate:** restate as problem, ask only material questions, generate options, stress-test assumptions, recommend MVP/not-doing/open questions; before recommending, apply plan-deepening L3 and the L2 missed-dimension question inline, note any reframe; save only after confirmation.
+- **Spec:** state assumptions, define objective, commands, structure, style, tests, boundaries, success criteria, and review gate; before finalizing apply plan-deepening L3, include a reframe only if it changes the spec; save only after confirmation.
 
 - Read `scope_limit`/`must_preserve`/`anti_patterns`/`verification` before broad code. Read TODO `verification:` first; run the narrowest listed/targeted check before broad gates. For TODO-backed PRs, diff `--name-only` against `scope_limit.only_modify` before content.
