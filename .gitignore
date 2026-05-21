@@ -1,1 +1,7 @@
 .DS_Store
+
+# Platform-managed Codex/OpenAI system skills (skill-creator, imagegen,
+# etc.). Dropped in by the agent runtime, versioned via
+# .codex-system-skills.marker, and not referenced by skill-sync.yaml /
+# skill-sync.lock -- so skill-sync does not source or distribute them.
+skills/.system/
