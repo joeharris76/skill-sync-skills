@@ -40,7 +40,7 @@ TODO_INDEX="uv run --project ~/.claude/tools/todo todo-index"
 ## Hard Rules
 
 - Write actions auto-cleanup after verification and commit/push through SHARED/commit-framework/SKILL.md.
-- `batch` is a write action: use one local scratch state file, one PR per TODO, and no mid-batch stop for ordinary wait states — record pending CI as `waiting`; use bounded, announced monitoring only for batch-owned dependency gates that must resolve before another TODO can proceed. See `references/batch.md`.
+- `batch` is a write action: use one local scratch state file, one PR per TODO, and no mid-batch stop for ordinary wait states — record pending CI as `waiting`; use bounded, announced monitoring only for batch-owned dependency gates that must resolve before another TODO can proceed. Deterministic gate runs (per-item suite, PR-open equivalent, CI status) are delegatable to a low-effort subagent for run-and-report only — see SHARED/verify-framework/SKILL.md. See `references/batch.md`.
 - Plain `review` is read-only under SHARED/review-protocol/SKILL.md; after findings apply its L2 audit.
 - Implementation must read the TODO guardrails, research target code, respect `scope_limit`, test each work unit, mark work done, and commit incrementally.
 - Use flat `work[]` with `needs` edges; inter-item dependencies go in `deps.needs`.

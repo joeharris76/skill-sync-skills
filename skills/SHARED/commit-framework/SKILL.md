@@ -29,3 +29,4 @@ Use only when a calling skill authorizes a write-shaped commit.
 - Commit only authorized/session-modified files.
 - Use Conventional Commits.
 - Do not commit if verification fails or scope is ambiguous.
+- Push and other deterministic close-out gates (PR-open equivalent, CI status) may be delegated to a low-effort subagent for run-and-report only; the caller keeps failure analysis and fixes. See SHARED/verify-framework/SKILL.md.
