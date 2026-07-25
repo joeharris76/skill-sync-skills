@@ -7,9 +7,12 @@ skills:
   - blog
   - code
   - test
-  - docs
   - todo
+  - todo-db
   - benchbox
+  - substack
+  - tidy-perms
+  - skill-sync
   - SHARED/commit-framework
   - SHARED/verify-framework
   - SHARED/research-framework

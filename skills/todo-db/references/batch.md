@@ -12,7 +12,8 @@ item.
 
 ## The database is the record
 
-Tracker state lives in the DB, reachable through `_project/scripts/todo`:
+Tracker state lives in the DB, reachable through the resolved `todo` command
+(see SKILL.md):
 claim/lease (`claim`), per-unit worktree+branch (`start`/`done`), completion
 and PR (`complete --pr`). Never write tracker state to files. Reconstruct
 progress from `todo list`, `todo stats`, and `todo deps <id>` — not a parallel

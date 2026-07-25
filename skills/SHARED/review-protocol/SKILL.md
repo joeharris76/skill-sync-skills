@@ -7,7 +7,7 @@ description: Shared protocol for review-shaped actions, authorization scope, def
 
 Governs code reviews, audits, research, compare, to-spec, security reviews, and L2 blind-spot audits. If a wrapper conflicts with this file, this file wins.
 
-## Scope
+## 1. Scope
 
 Review-shaped actions are read-only plus local capture. They may read code, run analyses, produce findings, and write capture files to designated TODO/blind-spot/audit/decision/handoff locations.
 
@@ -25,13 +25,13 @@ Capture authorizes only the local file write. Final terminal action is a chat li
 
 For verification, run only commands the review scope demands. Long output goes to a temp log; cite paths/lines, do not paste large source blocks or command output.
 
-## Defect Gate
+## 2. Defect Gate
 
 Before classifying a finding, ask: if left as-is, will the observed code behave incorrectly, leak data, or miss a performance budget?
 
 If yes, it is a defect. Defects belong in the severity table/action items and may become a TODO/fix only after authorization. They do not belong in blind-spots. Treat uncertain cases as defects; over-capturing TODOs is safer than degrading blind-spot signal.
 
-## L2 Audit Scope
+## 3. L2 Audit Scope
 
 Layer 2 asks what class of issue the review framework failed to catch. It captures framework gaps, not the instance-level defects already found.
 
@@ -39,6 +39,8 @@ Layer 2 asks what class of issue the review framework failed to catch. It captur
 - Critical/Required defects need an owner/action item even if L2 also captures a broader class.
 - New concrete defects found during L2 become Required action items, not blind-spots.
 
-## Project Bindings
+## 4. Project Bindings
 
 Projects provide storage locations/specs and sweep workflows. This protocol governs behavior; project docs govern storage format. Do not duplicate behavior rules in storage docs.
+
+Projects without their own binding: capture findings drafts out-of-tree to `~/.todo-db/finding-drafts/<project-id>/` as `YYYY-MM-DD-HHMMSS-<slug>.md` with the standard frontmatter (`id`, `date`, `status`, `finding_kind`, `review_context`, `related_paths`, `suggested_sweep`, `todo_id`) and record the path in chat; promote via the tracker's deferral/finding flow when available.
