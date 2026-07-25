@@ -14,7 +14,11 @@ otherwise the `todo-db` CLI (compat alias `todo`) from the standalone todo-db
 package. The wrapper injects project identity
 (`--db`/`--project-id`/`--repository`); when invoking the standalone CLI
 directly, supply them or set `TODO_DB_PATH`/`TODO_DB_URL` plus identity
-env/flags. Exit 2 means fix the cause.
+env/flags.
+Exit codes: 2 means fix the cause; 4 means hosted auth failure — STOP all
+tracker writes, run `todo doctor`, and surface the alert to the user. Never
+continue batch work past an exit-4 leaving items un-updated (the wrapper
+already auto-remints a token and retries once before exiting 4).
 Global `--db` / `--actor` flags go before the subcommand.
 
 ## Actions
@@ -22,6 +26,7 @@ Global `--db` / `--actor` flags go before the subcommand.
 | Action | Read |
 |---|---|
 | `bootstrap` / `init` | `references/bootstrap.md` |
+| `doctor` | `references/bootstrap.md` |
 | `ready` | `references/implement.md` |
 | `claim` | `references/implement.md` |
 | `start` | `references/implement.md` |
@@ -33,6 +38,7 @@ Global `--db` / `--actor` flags go before the subcommand.
 | `promote` | `references/implement.md` |
 | `dismiss` | `references/implement.md` |
 | `create` | `references/queries.md` |
+| `update` | `references/queries.md` |
 | `list` | `references/queries.md` |
 | `show` | `references/queries.md` |
 | `stats` | `references/queries.md` |

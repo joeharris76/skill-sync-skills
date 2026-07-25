@@ -65,6 +65,10 @@ TODO_DB_AUTH_TOKEN=... todo-db init-project \
 - `verify --run` against a hosted database refuses without
   `TODO_DB_ALLOW_HOSTED_VERIFY_RUN=1`: stored commands are written by other
   actors, and executing them locally is a lateral code-execution channel.
+- Preflight: `todo-db doctor` (>= 0.3.0) is a side-effect-free health check
+  over config, identity, database reachability, and turso CLI auth; `--json`
+  for automation. Exit 4 = auth failure (see SKILL.md halt rule); the
+  generated wrapper auto-remints a token and retries once before exiting 4.
 - Live validation: `scripts/turso_acceptance.sh` in the todo-db checkout
   provisions a throwaway database, exercises the full lifecycle, and
   destroys it (run deliberately — real resources).
