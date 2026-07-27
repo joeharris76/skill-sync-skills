@@ -80,6 +80,11 @@ from any other reader's vantage point. Push this repo's commits *before*
 merging or publishing anything that references their content, not after —
 otherwise the citation is correct only on the machine that wrote it.
 
+For policy-contract changes, stable policy IDs are the cross-repository join
+key. Land and push the canonical skill first; then regenerate downstream
+mirrors and update any unabridged project protocol to carry the same IDs and
+semantics. Never hand-edit a generated mirror to make a parity check pass.
+
 ## Observed failure (2026-07-26)
 
 Concrete instance of (a) and (d) compounding: `feat/minimize-wrapper-skills`

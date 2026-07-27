@@ -25,6 +25,14 @@ Use only when a calling skill authorizes a write-shaped commit.
 
 ## Rules
 
+- **[COMMIT-IDENTITY-001] Preserve configured identity.** Use the repository
+  and user's existing Git author and committer identity. Do not pass `--author`
+  or set `GIT_AUTHOR_*` / `GIT_COMMITTER_*` unless the current authorized task
+  explicitly names the exact override. A task-local identity override applies
+  only to that task; never convert it into standing project or skill policy.
+- After committing, verify the resulting author and committer with
+  `git show -s --format=fuller HEAD` when identity was explicitly overridden or
+  identity is part of the acceptance criteria.
 - Never `git add -A`.
 - Commit only authorized/session-modified files.
 - Use Conventional Commits.
