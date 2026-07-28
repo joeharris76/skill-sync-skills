@@ -9,3 +9,6 @@ category: content
 targets:
   claude: true
   codex: true
+# Documentary optional global style-guide path, not a runtime dependency.
+portability_allow:
+  - "~/.claude/blog/*"
