@@ -36,8 +36,9 @@ Global `--db` / `--actor` flags go before the subcommand.
 | `lint` | `references/review.md` |
 | `batch` | `references/batch.md` |
 
-Standalone-only actions (declared in `skill.yaml` `standalone_only_commands`,
-currently `update`) exist only in todo-db >= 0.3; rule 4 applies to wrappers.
+Standalone-only actions — declared machine-readably in the skill sidecar as
+`standalone_only_commands`, currently `update` — exist only in todo-db >= 0.3;
+rule 4 applies to wrappers.
 
 ## Rules
 
