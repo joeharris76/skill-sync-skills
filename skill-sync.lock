@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-07-28T13:13:38.622Z",
+  "lockedAt": "2026-07-29T00:18:03.695Z",
   "skills": {
     "blog": {
       "source": {
@@ -143,6 +143,45 @@
         }
       }
     },
+    "docs": {
+      "source": {
+        "type": "local",
+        "name": "personal",
+        "path": "~/.skill-sync/skills/docs",
+        "fetchedAt": "2026-07-29T00:17:22.060Z"
+      },
+      "installMode": "mirror",
+      "files": {
+        "SKILL.md": {
+          "sha256": "df3cac9e0ab65b76d0f24006ceb038a1f80a5169c3262620d53d0943b0451c78",
+          "size": 1655
+        },
+        "references/adversarial.md": {
+          "sha256": "9443a86129d03aa00c2facb4c504bb541e530cdef7f1e6da647e79e51d791528",
+          "size": 167
+        },
+        "references/build.md": {
+          "sha256": "5f7adc15b0b22557f26bf1e29ccf7831737b22d0aa5ddd1868e2ff969ddfecd1",
+          "size": 169
+        },
+        "references/commit.md": {
+          "sha256": "794ab65275449b0d10e4cad5d9d4c7342b1b2e1d931c3351334cb47d8be9e924",
+          "size": 139
+        },
+        "references/create.md": {
+          "sha256": "aa32e1edca7e1339ed5f95821df6a9015239c248006e6c1e50bd7356f6e54132",
+          "size": 171
+        },
+        "references/review.md": {
+          "sha256": "8995cad71c54b59c07c4be1324f7fbe5f75ac7a1c250a96539dfcc7a942f1475",
+          "size": 176
+        },
+        "skill.yaml": {
+          "sha256": "b348d06c928d986a3714d5337723e59c40a45939e31405a8de2019171de32970",
+          "size": 204
+        }
+      }
+    },
     "todo": {
       "source": {
         "type": "local",
@@ -230,13 +269,13 @@
         "type": "local",
         "name": "personal",
         "path": "~/.skill-sync/skills/SHARED/commit-framework",
-        "fetchedAt": "2026-07-27T16:18:20.865Z"
+        "fetchedAt": "2026-07-29T00:18:03.695Z"
       },
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "1c89aa9b9824bd84744b57c2e9d5fafc605b21e88c26c31316793320a804aad8",
-          "size": 2149
+          "sha256": "2ab8e7e92eb18cf3b6860beaab9339352ee1a3895c6cba0849795ff203cadadc",
+          "size": 2402
         },
         "skill.yaml": {
           "sha256": "39b007a53d9126d3fe4e8938a67d616a52be210a82ba211753afa92a073d06bd",
@@ -325,13 +364,13 @@
         "type": "local",
         "name": "personal",
         "path": "~/.skill-sync/skills/SHARED/review-protocol",
-        "fetchedAt": "2026-07-27T16:18:20.867Z"
+        "fetchedAt": "2026-07-29T00:18:03.695Z"
       },
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "35bf4baa8853977047bf18fd134f48ca62e486c5545b4d9c364821dd170e62a5",
-          "size": 3296
+          "sha256": "5b1ff1adb2e4c2b4bc358d1a0b7a94e6a47147fa30a9d801ab2e1a1fcc88b816",
+          "size": 3671
         },
         "skill.yaml": {
           "sha256": "187c448569159314ce05ce063ab529bf4509cae7faa37ce7fab57b4d306360c9",
