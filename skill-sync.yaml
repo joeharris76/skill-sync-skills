@@ -20,6 +20,10 @@ skills:
   - SHARED/compare-framework
   - SHARED/shrink-framework
   - SHARED/review-protocol
+  - SHARED/context-guide
+  - SHARED/debug-framework
+  - SHARED/plan-deepening-framework
+  - SHARED/slicing-framework
 targets:
   claude: ~/.claude/skills
   codex: ~/.codex/skills
