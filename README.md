@@ -15,6 +15,32 @@ Any tool or hook that writes through `/Users/joe/.claude/skills` now edits the
 canonical repo. Review `git -C /Users/joe/.skill-sync status --short` before and
 after skill work.
 
+## Lock invariant
+
+`skill-sync.lock` records a sha256 and size for every file of every managed
+skill. It only means anything if it is committed in the **same commit** as the
+skill files it describes: a commit that edits a skill and keeps the old lock
+ships a snapshot describing something other than what is in the tree, and
+consumers cannot tell, because they trust the lock.
+
+`scripts/verify_lock.py` enforces this. It fails when a declared skill is
+missing from the lock, a locked skill is undeclared, a locked file is missing,
+a recorded hash or size disagrees with disk, or a file exists under a locked
+skill but the lock has never seen it — the last case being the one a hash
+comparison alone cannot catch.
+
+```bash
+python3 scripts/verify_lock.py     # exit 0 when the lock matches the tree
+```
+
+It runs on every PR to `main` via `.github/workflows/verify-lock.yml`. When it
+fails, regenerate the lock and commit it with the skill change, not after.
+
+This is distinct from the `skill-sync` CLI's own commands: `verify` checks
+committed mirrors in *consumer* projects, `status` compares *installed* targets
+under `~/.claude/skills`, and `validate` checks manifest portability. None of
+them check this repository's own tree against its own lock.
+
 ## Recovery
 
 If the local canonical checkout is missing or damaged:
