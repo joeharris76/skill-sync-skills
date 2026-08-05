@@ -5,3 +5,6 @@
 # .codex-system-skills.marker, and not referenced by skill-sync.yaml /
 # skill-sync.lock -- so skill-sync does not source or distribute them.
 skills/.system/
+
+# Mirror output that can leak into the source tree; not a source file.
+skills/skill-sync.config.yaml

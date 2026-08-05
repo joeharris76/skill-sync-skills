@@ -1,7 +1,6 @@
 depends:
-  - SHARED/commit-framework
+  - SHARED/change-framework
   - SHARED/review-protocol
-  - SHARED/plan-deepening-framework
 tags:
   - writing
   - blog

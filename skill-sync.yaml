@@ -14,16 +14,9 @@ skills:
   - substack
   - tidy-perms
   - skill-sync
-  - SHARED/commit-framework
-  - SHARED/verify-framework
-  - SHARED/research-framework
-  - SHARED/compare-framework
-  - SHARED/shrink-framework
+  - SHARED/change-framework
+  - SHARED/investigation-framework
   - SHARED/review-protocol
-  - SHARED/context-guide
-  - SHARED/debug-framework
-  - SHARED/plan-deepening-framework
-  - SHARED/slicing-framework
 targets:
   claude: ~/.claude/skills
   codex: ~/.codex/skills
