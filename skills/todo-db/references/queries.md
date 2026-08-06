@@ -1,19 +1,26 @@
-# TODO Queries And Lifecycle
+# TODO Queries and Updates
 
-- Create: `todo create --title ... --worktree ... --priority ...`, or
-  `--from -` with JSON. Code items need scope, must-preserve, anti-pattern,
-  and verification guardrails.
-- Update: `todo update <id>` corrects items after creation —
-  `--title/--description/--priority/--worktree`, `--add-work`, `--edit-work`
-  (pending units only; done units carry evidence and are immutable),
-  `--add-verify`, `--drop-verify SEQ --reason ...`. Every update is one chained
-  audit event with from/to diffs; edits to done/dropped items require
-  `--reason`. Id, state, and identity are immutable — state moves only through
-  lifecycle verbs. Prefer `update` over drop-and-recreate: it preserves history
-  and links. (Exposed on the BenchBox project wrapper; not standalone-only.)
-- Inspect: `todo list [filters]`, `todo show <id> [--json]`, `todo stats`,
-  `todo deps <id>`, and `todo export`.
-- Rank / group open work (skill-only, read-only by default): follow
-  `prioritize.md` — not a CLI subcommand; do not invent a prioritize verb.
-- Block/release/drop: use `todo block <id> --reason ...`, `todo unblock <id>`,
-  `todo release <id>`, `todo sweep-stale`, or `todo drop <id> --reason ...`.
+## Create and update
+
+* Create: `todo create --title ... --worktree ... --priority ...`, or `--from -` with JSON. Items that involve code need scope rules, must-preserve notes, anti-patterns, and verification steps.
+* Update: `todo update <id>` changes an item after you create it. You can change `--title`, `--description`, `--priority`, `--worktree`, `--add-work`, `--edit-work` (only for work units that are still pending; done units are immutable because they carry evidence), `--add-verify`, and `--drop-verify SEQ --reason ...`. Each update creates one audit event with before/after diffs. You must give `--reason` when you edit items that are done or dropped. The id, state, and identity never change through `update` — use lifecycle commands to change state. Prefer `update` over dropping and recreating. It keeps history and links.
+
+## Inspect
+
+* `todo list [filters]` — list items
+* `todo show <id> [--json]` — show one item
+* `todo stats` — counts by state, priority, worktree, and deferral
+* `todo deps <id>` — show dependencies
+* `todo export` — write a deterministic snapshot (JSONL plus a markdown index). This is the CLI command. It is different from the committed snapshot at `_project/todo-db-export/` (written by `write_export`). Prefer live commands (`list`, `show`, `stats`) for day-to-day work. Use the committed snapshot only for offline review.
+
+## Rank and group
+
+Ranking and grouping open work is a skill-only analysis. It has no CLI command. Follow `references/prioritize.md`. Do not invent a `prioritize` command.
+
+## Block, release, and drop
+
+* `todo block <id> --reason ...` — mark blocked
+* `todo unblock <id>` — clear the blocked flag
+* `todo release <id>` — release a claim
+* `todo sweep-stale` — release expired claims
+* `todo drop <id> --reason ...` — drop an item

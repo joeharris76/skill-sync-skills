@@ -7,47 +7,40 @@ tools: Bash, Read, Edit, Write, Task
 
 # TODO Tracker
 
-Route the request to its guide before acting. The DB is the record; most
-actions are CLI subcommands, a few (skill-only) are analysis workflows.
-Resolve the `todo` command for CLI actions, not by file presence alone:
+## Purpose
 
-1. If `_project/scripts/todo` exists, inspect its top-level `--help`.
-2. Use that wrapper only when it advertises the requested subcommand.
-3. Else use standalone todo-db >= 0.3 (`todo-db` / `todo`) only when help
-   advertises the action and db/project identity come from config, env, or flags.
-4. If neither supports the action, report the gap and stop; never send a
-   standalone-only action to a legacy wrapper.
-5. Skill-only actions (currently `prioritize`) have no CLI verb — follow their
-   guide and use only the inspect verbs it names.
+Use this skill to manage TODO items in the shared database. The database is the only record. Do not write tracker state to files.
 
-Exit 2 is generic failure. Exit 4 is hosted auth failure only when the selected
-command documents that contract: stop writes, run supported `doctor`, surface
-the alert. Auto-remint is only for todo-db >= 0.3 wrappers. Global `--db` /
-`--actor` go before the subcommand.
+## How to run commands
+
+Use `_project/scripts/todo`. Check that the wrapper supports the command you need:
+
+* Run `_project/scripts/todo --help` and confirm the subcommand appears.
+* If the subcommand is missing, report the gap and stop.
+
+`prioritize` has no CLI command. It is a skill-only analysis. Follow `references/prioritize.md` and use only the inspect commands it lists.
+
+Put global flags before the subcommand: `todo --db <path> --actor <name> <command>`.
+
+Exit code 2 means a general failure. Exit code 4 means the hosted database rejected your credentials. When you get exit code 4, stop all writes, run `todo doctor`, and show the error. Some wrappers try once to refresh the token before they return exit code 4.
+
+The `--help` output for the command you chose is the full contract.
 
 ## Actions
 
-| Action | Read |
+| Action | Guide |
 |---|---|
-| `bootstrap` / `init` / `doctor` | `references/bootstrap.md` |
-| `ready` / `claim` / `start` / `done` / `defer` / `check-scope` / `verify` / `complete` / `promote` / `dismiss` | `references/implement.md` |
-| `create` / `update` / `list` / `show` / `stats` / `deps` / `export` / `block` / `unblock` / `release` / `sweep-stale` / `drop` | `references/queries.md` |
-| `prioritize` (skill-only; no CLI verb) | `references/prioritize.md` |
+| `bootstrap`, `init`, `doctor` | `references/bootstrap.md` |
+| `ready`, `claim`, `start`, `done`, `defer`, `check-scope`, `verify`, `complete`, `promote`, `dismiss` | `references/implement.md` |
+| `create`, `update`, `list`, `show`, `stats`, `deps`, `export`, `block`, `unblock`, `release`, `sweep-stale`, `drop` | `references/queries.md` |
+| `prioritize` — skill-only, no CLI command | `references/prioritize.md` |
 | `lint` | `references/review.md` |
-| `finding candidates` / `finding triage` / `finding sync` / `finding promote` | `references/implement.md` |
-| `batch` | `references/batch.md` |
+| `finding candidates`, `finding triage`, `finding sync`, `finding promote` | `references/implement.md` |
+| `batch` — a set of related TODOs | `references/batch.md` |
 
-`ready`/`stats` emit a one-line stderr banner when untriaged findings exist
-(open findings or unsynced drafts); run `todo finding candidates` to triage.
-Banner is stderr-only and zero-suppressed, so stdout stays machine-readable.
-
-Standalone-only actions are declared in the skill sidecar as
-`standalone_only_commands` (currently none for the BenchBox wrapper once it
-exposes `update`); rule 4 applies when a future verb is declared.
+`todo ready` and `todo stats` may print a one-line warning on stderr when there are untriaged findings (open findings or unsynced drafts). The warning does not affect stdout. When you see it, run `todo finding candidates` to triage. The warning is silent when there are no findings.
 
 ## Rules
 
-- Follow the selected guide; commit only through `SHARED/change-framework/SKILL.md`.
-- The selected command's `--help` is the full CLI contract. Never hand-write
-  tracker state into repo files. `TODO_DB_URL` may set the hosted DB; the CLI
-  never echoes its DSN.
+* Follow the guide you selected. Commit only through `SHARED/change-framework/SKILL.md`.
+* Never write tracker state to files by hand. `TODO_DB_URL` can set the hosted database. The CLI never prints its connection string.
