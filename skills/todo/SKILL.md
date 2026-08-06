@@ -5,21 +5,24 @@ version: 0.7.0
 tools: Bash, Read, Edit, Write, Task
 ---
 
-# Idea → Spec Authoring
+# Idea to Spec
 
-This is the pre-tracker thinking workflow. Route to `ideate` or `spec` and
-read the file in the Read column before acting; all tracker state belongs to
-`todo-db`, never this skill.
+Use this skill for thinking work that happens before you create a TODO. It does not write to the tracker.
+
+## Purpose
+
+Turn a rough idea into a clear spec. The `todo-db` skill owns all tracker state.
 
 ## Actions
 
-| Action | Trigger | Read |
+| Action | When to use it | Guide |
 |---|---|---|
-| `ideate` | ideate/refine/brainstorm | `references/ideate.md` |
-| `spec` | write/create a specification | `references/spec.md` |
-| `help` | help/list actions | this table |
+| `ideate` | You need to refine or brainstorm an idea | `references/ideate.md` |
+| `spec` | You need to write a spec | `references/spec.md` |
+| `help` | You need the action list | This table |
+
+Read the guide in the Read column before you act.
 
 ## Handoff
 
-Once the spec is agreed, use `todo-db`: `todo create` (or its create-from-spec
-flow). Do not write TODO state to files; the tracker database is the record.
+When the spec is agreed, switch to `todo-db`: run `todo create` (or create from spec). Do not write TODO state to files. The database is the record.

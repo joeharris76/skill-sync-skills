@@ -1,45 +1,29 @@
 # Prioritize TODOs
 
-Produce a ranked shortlist of open tracker items, grouped by topic, without
-rewriting tracker state. This is a **skill action**, not a CLI verb: the
-resolved `todo` command has no `prioritize` subcommand. Read-only by default.
+Rank open items and group them by topic. Do not change tracker state unless the user asks you to. This is a skill-only analysis. There is no `prioritize` CLI command.
 
-Triggers: "prioritize TODOs", "top N most important", "what should we work on",
-"rank the backlog", "group ready work by topic".
+Use it when the user says: "prioritize TODOs", "top N most important", "what should we work on", "rank the backlog", or "group ready work by topic".
 
-## Preconditions
+## Before you start
 
-1. Resolve the `todo` command per SKILL.md (wrapper only when it advertises
-   the inspect verbs you need: at least `doctor`, `stats`, `ready`, `list`,
-   `show`, `deps`).
-2. Run `todo doctor`. Prefer the production backend:
-   - Hosted: `TODO_DB_URL` + `TODO_DB_AUTH_TOKEN` (or the wrapper's remint).
-   - Acceptable read fallback: an explicit embedded replica
-     (`--db <git-root>/.todo-db/replica.db` or `TODO_DB_REPLICA`) when doctor
-     reports schema OK and a non-trivial item count.
-   - Refuse the silent local fallback DB when doctor warns it is **not** the
-     production tracker, unless the user explicitly authorizes analysis on
-     that file. Never run `todo migrate` just to make a stale local spike
-     readable.
-3. If doctor fails on schema/auth/identity, stop and report the gap. Do not
-   invent a parallel backlog from `_project/TODO`, export archives, or chat
-   history.
+1. Confirm the wrapper supports the inspect commands you need. Run `_project/scripts/todo --help` and check for at least `doctor`, `stats`, `ready`, `list`, `show`, and `deps`.
+2. Run `todo doctor`. Use the production database:
+   * Hosted: `TODO_DB_URL` plus `TODO_DB_AUTH_TOKEN` (the wrapper may refresh the token once).
+   * Acceptable fallback for reads: an explicit replica path (`--db <git-root>/.todo-db/replica.db` or `TODO_DB_REPLICA`) — only if `doctor` reports the schema is OK and shows a non-trivial item count.
+   * Do not use a silent local fallback database when `doctor` warns it is not the production tracker, unless the user explicitly asks for analysis on that file. Never run `todo migrate` to make a stale local copy readable.
+3. If `doctor` fails on schema, auth, or identity, stop and report the gap. Do not build a backlog from `_project/TODO`, the committed snapshot at `_project/todo-db-export/`, or chat history.
 
 ## Inputs
 
-Parse the request; use defaults when omitted:
-
 | Input | Default | Notes |
 |---|---|---|
-| `N` | 25 | Max ranked items to present |
-| Scope | all open (`planning` + `active`) | May restrict to a worktree, category, or ready-only |
-| Write-back | off | Only rewrite priorities with explicit user authorization |
+| `N` | 25 | Max items to show |
+| Scope | all open (`planning` + `active`) | Can limit to a worktree, category, or ready-only |
+| Write-back | off | Only rewrite priorities when the user explicitly asks |
 
 ## Workflow
 
-### 1. Inventory via CLI (always)
-
-Collect the machine picture first:
+Collect the live picture first. Always start here:
 
 ```sh
 todo doctor
@@ -47,121 +31,81 @@ todo stats
 todo ready
 todo list --priority critical
 todo list --priority high
+todo list --priority medium-high
 todo list --state active
 ```
 
-When `N` is large or medium-high matters, also list `--priority medium-high`
-and, if still short, open `medium`. Surface the untriaged-findings stderr
-banner from `ready`/`stats` as a side note (triage via `todo finding
-candidates`); findings are **not** ranked items.
+When `N` is large or medium-high matters, also list `medium`. Always surface the stderr warning from `ready`/`stats` about untriaged findings as a side note — triage with `todo finding candidates`. Findings are not ranked items.
 
-Use `todo show <id>` / `todo show <id> --json` and `todo deps <id>` for any
-item you cannot classify from the list line alone.
+Use `todo show <id>` and `todo deps <id>` for any item you cannot classify from the list line.
 
-### 2. Structured ranking (when CLI lists are too flat)
+If the open set is small (about 15 or fewer) or you can answer from the CLI lists, you can stop here. Pick up to `N` items by hand using severity, then ready, then unlock value, then keyword risk (see signals below). Group by `category` or worktree from the list lines.
 
-When the open high-priority set is larger than ~15 or the user wants topic
-groups, build a candidate table. Prefer, in order:
+### When you need a structured ranking
 
-1. `todo export` JSONL/index if present and fresh enough for the question.
-2. Read-only SQL against the **explicit** replica/local path already accepted
-   by doctor (never against a guessed file). Schema is the tracker's own
-   tables (`items`, `item_deps`, optional `findings`); do not assume column
-   names beyond what `PRAGMA table_info` / a sample row shows.
+Use this branch when the open high-priority set is large (more than about 15) or the user asked for topic groups. You need a bulk view.
 
-For each open candidate compute:
+Choose one source, in this order:
 
-| Signal | How |
+1. `todo export` output (the CLI command) — only if it is fresh enough for the question.
+2. Read-only SQL on the explicit replica or local path that `doctor` already approved. Never query a file you guessed. The tracker tables are `items`, `item_deps`, and optionally `findings`. Check column names with `PRAGMA table_info` and a sample row first.
+
+For each open candidate, compute:
+
+| Signal | How to get it |
 |---|---|
 | Severity | `critical` > `high` > `medium-high` > `medium` > `low` |
-| Readiness | unblocked (`blocked_reason` empty) and no open dependency edges |
-| Unlock value | count of open items that `needs` this id |
-| In-flight | `active` and/or currently claimed (slight boost, not a free pass) |
-| Blast-radius keywords | privacy/security/correctness tokens in title or category (e.g. leak, secret, credential, egress, pseudonym, oracle, misclassif, provenance, silently, orphan) |
-| Human-only | demote maintainer/admin/settings-only work out of the agent-actionable top N (still list under a "maintainer" footnote when critical) |
+| Ready | unblocked (`blocked_reason` empty) and no open dependency edges |
+| Unlock value | count of open items that depend on this id |
+| In-flight | `active` or currently claimed — small boost only |
+| Risk keywords | words in title or category that suggest privacy, security, or correctness risk (for example, leak, secret, credential, egress, provenance, silent) |
+| Human-only | maintainer or admin work — demote out of the agent-actionable top N (still note it in a footnote when it is critical) |
 
-Default composite order:
+Default order:
 
 1. severity band
-2. ready before blocked/dependent
-3. blast-radius keyword boost within band
+2. ready before blocked or dependent
+3. risk keyword boost within the band
 4. unlock value
-5. active/claimed
+5. active or claimed
 6. stable tie-break on `id`
 
-Do **not** treat "claimed by me" as automatic #1 when a higher-severity
-unclaimed ready item exists.
+Do not treat "claimed by me" as rank 1 when a higher-severity ready item is unclaimed.
 
-### 3. Topic grouping
+### Topic groups
 
-Assign each ranked item exactly one topic. Prefer, in order:
+Give each ranked item exactly one topic.
 
-1. Explicit `category` when it is stable and human-meaningful.
-2. Worktree when it is a real program (not a catch-all like `main`).
-3. Keyword buckets from title/description. Reuse buckets that already appear
-   in the inventory rather than inventing a new taxonomy every run. Common
-   BenchBox-shaped buckets (adapt per project): public privacy / credential
-   egress; result integrity & explorer trust; CI / merge / release safety;
-   tracker reliability; UAT operational defects; product/feature spine;
-   architecture / platform.
+1. Use `category` when it is stable and meaningful.
+2. Else use worktree when it names a real program (not a catch-all like `main`).
+3. Else use keyword buckets from the title or description. Reuse buckets you already saw in the inventory. Keep 4 to 8 groups for a top-25. Merge singletons into the nearest group or an "Other high-priority" group.
 
-Keep 4–8 topic groups for a top-25. Merge singletons into a nearest neighbor
-or an "Other high-priority" group rather than emitting fifteen headings.
+### Report
 
-### 4. Present the shortlist
+Include:
 
-Default report shape:
+1. Method line — which database you used (hosted or replica path), open counts by priority, `N`, and that write-back is off.
+2. Tables per topic — rank, id, priority, state, ready, unlocks, one-line reason.
+3. Suggested order — a short, dependency-aware sequence across groups. Put privacy, security, and tracker-reliability before product work.
+4. Demotions — high or critical items you left out of the top N, with reason (blocked, human-only, narrow risk, waiting on deps).
+5. Side notes — open findings warning, stale-replica caveat, blocked criticals the user still owns.
 
-1. **Method line** — backend used (hosted / replica path), open counts by
-   priority, `N`, write-back off.
-2. **Grouped tables** — for each topic: rank, id, priority, state, ready?,
-   unlocks, one-line why.
-3. **Suggested execution order** — a short dependency-aware sequence across
-   groups (privacy/security before product spine; tracker lies-to-agents
-   before large batches).
-4. **Demotions** — high/critical items excluded from the top N with reason
-   (blocked, human-only, narrow blast radius, behind deps).
-5. **Side notes** — open findings banner, stale-replica caveat, blocked
-   criticals the user still owns.
+These ranks are recommendations for this session. They do not change the database.
 
-Ranks are **session recommendations**. They do not change `priority` in the
-DB.
+### Write-back — only when the user asks
 
-## Write-back (opt-in only)
+Only when the user says to apply the ranking (for example, "write these priorities back"):
 
-Only when the user explicitly asks to apply the ranking (e.g. "write these
-priorities back", "update priorities to match"):
+1. Confirm the wrapper supports `update` (`todo update --help` returns 0). If it does not, report the gap. Do not drop and recreate to change priority.
+2. Update only items whose stored priority differs from the recommended band.
+3. Give a one-line reason per update. Prefer band moves (`medium` → `high`) over invented ranks the schema cannot store.
+4. Re-run `todo stats` and show before/after counts.
 
-1. Confirm the resolved command supports `update` (`todo update --help`
-   exits 0). If it does not, report the capability gap — do not drop+recreate
-   to change priority.
-2. Update only items whose recommended band differs from stored priority.
-3. Record a one-line reason per update. Prefer band moves
-   (`medium` → `high`) over inventing fractional ranks the schema cannot
-   store.
-4. Re-run `todo stats` and show the before/after open-by-priority counts.
+Do not do these even when ranking:
 
-## Anti-patterns
-
-- Ranking from the silent local fallback DB after doctor warned it is not
-  production.
-- Running `todo migrate` on a local spike to "make prioritize work".
-- Treating export archives or `_project/TODO` trees as the live backlog.
-- Rewriting priorities, blocking, or claiming as a side effect of a read-only
-  prioritize request.
-- Dumping all open medium items when the user asked for top 25.
-- One topic per item (topic soup) or a single undifferentiated list when
-  groups were requested.
-- Scoring scripts that hard-code one project's worktree names as the only
-  possible topics without falling back to category/keywords.
-
-## Minimal CLI-only path
-
-If SQL/export is unavailable, still deliver value:
-
-1. `stats` + `ready` + `list --priority critical` + `list --priority high`.
-2. Manually pick up to `N` using severity → ready → unlock (via `todo deps`)
-   → keyword blast radius.
-3. Group by worktree/category from the list lines.
-4. State that unlock counts and blocked reasons may be incomplete without
-   structured dep expansion.
+* Use a silent local fallback database after `doctor` warned it is not production.
+* Run `todo migrate` on a local copy to make ranking work.
+* Treat the committed snapshot at `_project/todo-db-export/` or `_project/TODO` trees as the live backlog.
+* Change priorities, block, or claim as a side effect of a read-only ranking request.
+* Dump all open medium items when the user asked for the top 25.
+* Make one topic per item or one flat list when groups were requested.
