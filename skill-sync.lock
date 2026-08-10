@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-10T15:24:52.605106Z",
+  "lockedAt": "2026-08-10T15:46:42.000Z",
   "skills": {
     "blog": {
       "source": {
@@ -364,16 +364,16 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "07fddec0ae3c0253bcca4b36bdb52991f2f43b296988e2ed40a3555a62d98754",
-          "size": 1627
+          "sha256": "0264f64484bd31941fad4cbf09db9e170ac4372916346cd131335705a2914e34",
+          "size": 1259
         },
         "skill.yaml": {
-          "sha256": "a65d60707d5db13f2d80a7ecb375cf42d624e393da19fb72956426c32efe007e",
-          "size": 167
+          "sha256": "01ece1a29901cca51c02f6042d087f1053b7e22c3d5102458ec8b8bf13436804",
+          "size": 219
         },
         "references/operations.md": {
-          "sha256": "d5ac7f9bd137367e9cfb9332e40ceaf949ad0bb07e5a77584f32217e8db20b05",
-          "size": 1100
+          "sha256": "26f661822c7a6be5ac81e68a80827ba4b0bd2a0f375772eb239dd9baa2c8d47a",
+          "size": 1910
         }
       }
     },

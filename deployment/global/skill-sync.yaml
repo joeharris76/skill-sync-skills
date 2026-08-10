@@ -1,0 +1,33 @@
+version: 1
+sources:
+  - name: product
+    type: git
+    url: https://github.com/joeharris76/skill-sync.git
+    ref: ffe5070bd07f635f3373b99286a5e0d474ce1ffe
+    subdir: skills
+  - name: catalog
+    type: git
+    url: https://github.com/joeharris76/skill-sync-skills.git
+    ref: 0ca2405929602b0a7c85cbff5c42bcda3c08fe4d
+    subdir: skills
+skills:
+  - blog
+  - code
+  - test
+  - docs
+  - todo
+  - benchbox
+  - substack
+  - tidy-perms
+  - skill-sync
+  - SHARED/change-framework
+  - SHARED/investigation-framework
+  - SHARED/review-protocol
+targets:
+  codex: store/skills
+install_mode: mirror
+project_registry:
+  auto_register: false
+overrides:
+  skill-sync:
+    source_name: product

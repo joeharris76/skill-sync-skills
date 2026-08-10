@@ -1,85 +1,46 @@
 # skill-sync-skills
 
-Canonical personal skill source for Claude, Codex, and project-local skill
-mirrors.
+Canonical source for personal and shared workflow skills. The public
+`skill-sync` product repository owns the bundled `skill-sync` operator skill.
 
-## Active Loader Topology
+## Ownership
 
-- `/Users/joe/.skill-sync/skills` is the authoritative editable skill tree.
-- `/Users/joe/.claude/skills` is expected to be a symlink to that canonical
-  tree, not a separate tracked copy.
-- Project mirrors such as `BenchBox/.claude/skills` and `BenchBox/.codex/skills`
-  are generated materializations. Do not edit them as source of truth.
+- Edit catalog skills in `skills/`, except `skills/skill-sync`.
+- Edit the operator in `skill-sync/skills/skill-sync` with its CLI contract.
+- Treat agent and project targets as generated copies.
+- `skills/skill-sync` is a transitional generated copy until the stable global
+  store is activated; do not edit it here.
 
-Any tool or hook that writes through `/Users/joe/.claude/skills` now edits the
-canonical repo. Review `git -C /Users/joe/.skill-sync status --short` before and
-after skill work.
+## Stable global store
+
+`deployment/global/skill-sync.yaml` composes exact product and catalog commits
+into one store. After the product ownership PR merges:
+
+```bash
+mkdir -p ~/.skill-sync-deployment
+cp deployment/global/skill-sync.yaml ~/.skill-sync-deployment/skill-sync.yaml
+node /Users/joe/Developer/skill-sync/dist/cli/index.js sync --dry-run --project ~/.skill-sync-deployment
+node /Users/joe/Developer/skill-sync/dist/cli/index.js sync --project ~/.skill-sync-deployment
+node /Users/joe/Developer/skill-sync/dist/cli/index.js validate --exit-code --project ~/.skill-sync-deployment
+uv run scripts/activate_global_store.py ~/.skill-sync-deployment/store/skills --apply
+```
+
+The activation script refuses to replace real directories and atomically
+updates only symlinks. Test feature branches through project-local targets; do
+not repoint this store to an authoring worktree.
 
 ## Lock invariant
 
-`skill-sync.lock` records a sha256 and size for every file of every managed
-skill. It only means anything if it is committed in the **same commit** as the
-skill files it describes: a commit that edits a skill and keeps the old lock
-ships a snapshot describing something other than what is in the tree, and
-consumers cannot tell, because they trust the lock.
-
-`scripts/verify_lock.py` enforces this. It fails when a declared skill is
-missing from the lock, a locked skill is undeclared, a locked file is missing,
-a recorded hash or size disagrees with disk, or a file exists under a locked
-skill but the lock has never seen it — the last case being the one a hash
-comparison alone cannot catch.
+`skill-sync.lock` must describe the skill tree in the same commit.
+`scripts/verify_lock.py` checks declarations, files, hashes, sizes, and untracked
+skill files. Run it after each skill change:
 
 ```bash
-python3 scripts/verify_lock.py     # exit 0 when the lock matches the tree
+uv run --with pyyaml scripts/verify_lock.py
 ```
 
-It runs on every PR to `main` via `.github/workflows/verify-lock.yml`. When it
-fails, regenerate the lock and commit it with the skill change, not after.
+The pre-commit hook and `.github/workflows/verify-lock.yml` run the same gate.
+This source check differs from `skill-sync verify`, which checks tracked
+consumer targets against a consumer lock.
 
-### Enforce it locally
-
-The CI job **cannot be made a required status check**: this repository is
-private on a plan without branch protection (the API returns
-`403 Upgrade to GitHub Pro or make this repository public`). CI therefore only
-goes red *after* a stale lock has already merged.
-
-Install the pre-commit hook so the gate lands at the commit instead, which is
-also where the fix lives:
-
-```bash
-pre-commit install     # once per checkout
-```
-
-It runs only when a commit touches `skills/`, `skill-sync.lock` or
-`skill-sync.yaml` — nothing else can break the invariant — and prints the exact
-files that drifted:
-
-```
-skill-sync lock is out of date with the tree (2 problem(s)):
-  - todo/SKILL.md: size 1019 != locked 972
-  - todo/SKILL.md: sha256 ba417d6e2126… != locked 039a3ff5e610…
-```
-
-This is distinct from the `skill-sync` CLI's own commands: `verify` checks
-committed mirrors in *consumer* projects, `status` compares *installed* targets
-under `~/.claude/skills`, and `validate` checks manifest portability. None of
-them check this repository's own tree against its own lock.
-
-## Recovery
-
-If the local canonical checkout is missing or damaged:
-
-1. Restore it from `github.com/joeharris76/skill-sync-skills`.
-2. Re-create the Claude loader symlink:
-
-   ```bash
-   ln -sfn /Users/joe/.skill-sync/skills /Users/joe/.claude/skills
-   ```
-
-3. Regenerate project mirrors from each project that tracks a `skill-sync.yaml`:
-
-   ```bash
-   make skill-sync
-   ```
-
-Stage explicit paths only when committing; never use `git add -A`.
+Stage explicit paths only; never use `git add -A`.
