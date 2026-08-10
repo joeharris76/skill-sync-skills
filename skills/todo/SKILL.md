@@ -26,6 +26,8 @@ Put global flags before the subcommand: `todo --db <path> --actor <name> <comman
 
 Exit code 2 means a general failure. Exit code 4 means the hosted database rejected your credentials. When you get exit code 4, stop all writes, run `todo doctor`, and show the error. Some wrappers try once to refresh the token before they return exit code 4.
 
+Only the holder can release a claim. `todo release` fails with exit 2 if another actor holds it. Checking `claimed_by` with `todo show --json` can still race. `complete` and `drop` can still clear any claim. The actor comes from `--actor`, so this prevents mistakes, not impersonation.
+
 The `--help` output for the command you chose is the full contract.
 
 * Read the selected action guide before acting.
