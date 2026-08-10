@@ -1,0 +1,26 @@
+# The lock is only meaningful when it is committed alongside the skill files it
+# describes. .github/workflows/verify-lock.yml enforces that on PRs to main, but
+# this repository is private on a plan without branch protection -- the GitHub
+# API returns 403 "Upgrade to GitHub Pro or make this repository public" for
+# branch protection -- so that job can never be made a REQUIRED check. A stale
+# lock still merges; CI only goes red afterwards.
+#
+# This hook moves the gate to the commit itself, which is also where the remedy
+# lives: regenerate the lock and include it in the same commit. No plan change
+# needed.
+#
+# Install once per checkout:  pre-commit install
+repos:
+  - repo: local
+    hooks:
+      - id: verify-lock
+        name: skill-sync lock matches the tree
+        entry: python scripts/verify_lock.py
+        language: python
+        additional_dependencies: [pyyaml]
+        # The checker validates the whole tree against the lock, so it takes no
+        # filenames. `files` only decides *when* it is worth running: a commit
+        # touching neither the skills tree nor the lock/manifest cannot break
+        # the invariant.
+        pass_filenames: false
+        files: ^(skills/.*|skill-sync\.lock|skill-sync\.yaml)$

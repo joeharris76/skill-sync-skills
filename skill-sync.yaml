@@ -9,16 +9,12 @@ skills:
   - test
   - docs
   - todo
-  - todo-db
   - benchbox
   - substack
   - tidy-perms
   - skill-sync
-  - SHARED/commit-framework
-  - SHARED/verify-framework
-  - SHARED/research-framework
-  - SHARED/compare-framework
-  - SHARED/shrink-framework
+  - SHARED/change-framework
+  - SHARED/investigation-framework
   - SHARED/review-protocol
 targets:
   claude: ~/.claude/skills

@@ -1,5 +1,5 @@
 depends:
-  - SHARED/commit-framework
+  - SHARED/change-framework
 tags:
   - publishing
   - substack

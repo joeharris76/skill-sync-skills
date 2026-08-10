@@ -1,35 +1,46 @@
 # skill-sync-skills
 
-Canonical personal skill source for Claude, Codex, and project-local skill
-mirrors.
+Canonical source for personal and shared workflow skills. The public
+`skill-sync` product repository owns the bundled `skill-sync` operator skill.
 
-## Active Loader Topology
+## Ownership
 
-- `/Users/joe/.skill-sync/skills` is the authoritative editable skill tree.
-- `/Users/joe/.claude/skills` is expected to be a symlink to that canonical
-  tree, not a separate tracked copy.
-- Project mirrors such as `BenchBox/.claude/skills` and `BenchBox/.codex/skills`
-  are generated materializations. Do not edit them as source of truth.
+- Edit catalog skills in `skills/`, except `skills/skill-sync`.
+- Edit the operator in `skill-sync/skills/skill-sync` with its CLI contract.
+- Treat agent and project targets as generated copies.
+- `skills/skill-sync` is a transitional generated copy until the stable global
+  store is activated; do not edit it here.
 
-Any tool or hook that writes through `/Users/joe/.claude/skills` now edits the
-canonical repo. Review `git -C /Users/joe/.skill-sync status --short` before and
-after skill work.
+## Stable global store
 
-## Recovery
+`deployment/global/skill-sync.yaml` composes exact product and catalog commits
+into one store. After the product ownership PR merges:
 
-If the local canonical checkout is missing or damaged:
+```bash
+mkdir -p ~/.skill-sync-deployment
+cp deployment/global/skill-sync.yaml ~/.skill-sync-deployment/skill-sync.yaml
+node /Users/joe/Developer/skill-sync/dist/cli/index.js sync --dry-run --project ~/.skill-sync-deployment
+node /Users/joe/Developer/skill-sync/dist/cli/index.js sync --project ~/.skill-sync-deployment
+node /Users/joe/Developer/skill-sync/dist/cli/index.js validate --exit-code --project ~/.skill-sync-deployment
+uv run scripts/activate_global_store.py ~/.skill-sync-deployment/store/skills --apply
+```
 
-1. Restore it from `github.com/joeharris76/skill-sync-skills`.
-2. Re-create the Claude loader symlink:
+The activation script refuses to replace real directories and atomically
+updates only symlinks. Test feature branches through project-local targets; do
+not repoint this store to an authoring worktree.
 
-   ```bash
-   ln -sfn /Users/joe/.skill-sync/skills /Users/joe/.claude/skills
-   ```
+## Lock invariant
 
-3. Regenerate project mirrors from each project that tracks a `skill-sync.yaml`:
+`skill-sync.lock` must describe the skill tree in the same commit.
+`scripts/verify_lock.py` checks declarations, files, hashes, sizes, and untracked
+skill files. Run it after each skill change:
 
-   ```bash
-   make skill-sync
-   ```
+```bash
+uv run --with pyyaml scripts/verify_lock.py
+```
 
-Stage explicit paths only when committing; never use `git add -A`.
+The pre-commit hook and `.github/workflows/verify-lock.yml` run the same gate.
+This source check differs from `skill-sync verify`, which checks tracked
+consumer targets against a consumer lock.
+
+Stage explicit paths only; never use `git add -A`.

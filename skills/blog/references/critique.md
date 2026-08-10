@@ -1,6 +1,6 @@
 # Blog Critique Reference
 
-Use for adversarial draft review. Default is read-only unless `--chain`/`--fix` is explicitly requested.
+Use for adversarial draft review.
 
 ## Rubric
 
@@ -30,6 +30,8 @@ Apply when the post responds to a vendor or source-author publication; skip on e
 
 Lead with blocking issues, then targeted improvements, suggested rewrites when useful, and publish readiness. Separate factual corrections from taste/preferences.
 
-## Chain Mode
+## Authorized follow-up fixes
 
-Only apply non-structural fixes: broken links, formatting, obvious factual corrections, localized rewrites. Leave thesis, framing, and controversial judgment calls for the user.
+After a later user message authorizes fixes, change only broken links,
+formatting, obvious factual errors, and localized wording. Leave thesis,
+framing, and controversial judgments to the user.
