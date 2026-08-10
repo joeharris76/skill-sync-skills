@@ -49,7 +49,7 @@ The `--help` output for the command you chose is the full contract.
 | `create`, `update`, `list`, `show`, `stats`, `deps`, `export`, `block`, `unblock`, `release`, `sweep-stale`, `drop` | You query or change items | `references/queries.md` |
 | `prioritize` — skill-only, no CLI command | You rank open items and group by topic | `references/prioritize.md` |
 | `lint` | You review an item | `references/review.md` |
-| `finding candidates`, `finding triage`, `finding sync`, `finding promote` | You triage findings | `references/implement.md` |
+| `finding candidates`, `finding triage`, `finding import`, `finding sync`, `finding promote` | You triage findings | `references/implement.md` |
 | `batch` — a set of related TODOs | You implement several TODOs in order | `references/batch.md` |
 | `help` | You need the action list | This table |
 
