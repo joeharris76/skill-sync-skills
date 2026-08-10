@@ -5,11 +5,9 @@ Canonical source for personal and shared workflow skills. The public
 
 ## Ownership
 
-- Edit catalog skills in `skills/`, except `skills/skill-sync`.
+- Edit catalog skills in `skills/`.
 - Edit the operator in `skill-sync/skills/skill-sync` with its CLI contract.
 - Treat agent and project targets as generated copies.
-- `skills/skill-sync` is a transitional generated copy until the stable global
-  store is activated; do not edit it here.
 
 ## Stable global store
 

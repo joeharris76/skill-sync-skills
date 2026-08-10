@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-10T15:46:42.000Z",
+  "lockedAt": "2026-08-10T15:50:12.000Z",
   "skills": {
     "blog": {
       "source": {
@@ -351,29 +351,6 @@
         "skill.yaml": {
           "sha256": "6d78cd1a38c54d7c83954e28c997e980ed0e5cd02a5b190c2c2cd38663cb21c5",
           "size": 405
-        }
-      }
-    },
-    "skill-sync": {
-      "source": {
-        "type": "local",
-        "name": "personal",
-        "path": "~/.skill-sync/skills/skill-sync",
-        "fetchedAt": "2026-08-10T14:20:26.073043Z"
-      },
-      "installMode": "mirror",
-      "files": {
-        "SKILL.md": {
-          "sha256": "0264f64484bd31941fad4cbf09db9e170ac4372916346cd131335705a2914e34",
-          "size": 1259
-        },
-        "skill.yaml": {
-          "sha256": "01ece1a29901cca51c02f6042d087f1053b7e22c3d5102458ec8b8bf13436804",
-          "size": 219
-        },
-        "references/operations.md": {
-          "sha256": "26f661822c7a6be5ac81e68a80827ba4b0bd2a0f375772eb239dd9baa2c8d47a",
-          "size": 1910
         }
       }
     },
