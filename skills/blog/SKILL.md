@@ -15,6 +15,16 @@ editing.
 Read project `_blog/STYLE_GUIDE.md` and `_blog/VOICE_REFERENCE.md` first, then
 global `~/.claude/blog/*`. If neither exists, proceed and note the gap.
 
+## Critical rules
+
+- Write actions use `SHARED/change-framework/SKILL.md` with prefix `docs(blog)`
+  after verification and cleanup.
+- `critique`, `editorial-review`, `audit`, and `deformulize` follow
+  `SHARED/review-protocol/SKILL.md` [REVIEW-AUTH-001]. After findings,
+  `critique`, `editorial-review`, and `audit` apply its L2 audit.
+- Use official or primary sources when possible. Cite research notes and verify
+  unstable facts. Never invent results, prices, quotes, benchmarks, or facts.
+
 ## Actions
 
 | Action | Trigger | Read |
@@ -28,14 +38,3 @@ global `~/.claude/blog/*`. If neither exists, proceed and note the gap.
 | `audit` | audit blog/series/drafts | `references/audit.md` |
 | `cleanup` | commit blog changes | `references/cleanup.md` |
 | `help` | help/list actions | this table |
-
-## Global rules
-
-- Write actions use `SHARED/change-framework/SKILL.md` with prefix `docs(blog)`
-  after verification and cleanup.
-- Plain `critique`, `editorial-review`, `audit`, and `deformulize` are
-  read-only under `SHARED/review-protocol/SKILL.md`; `--chain`/`--fix` may
-  apply only the fixes allowed by the action reference. After findings,
-  `critique`, `editorial-review`, and `audit` apply its L2 audit.
-- Use official/primary sources when possible, cite research notes, and verify
-  unstable facts. Never invent results, pricing, quotes, benchmarks, or facts.
