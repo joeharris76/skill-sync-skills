@@ -192,8 +192,8 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "a6ce5f83c7f96f821398af48445da9cf3c92b559e138726cb32b706e618f4173",
-          "size": 3804
+          "sha256": "d99e75fc988617478450689c70081ea92466444610dd555184b4fff7b048ab3e",
+          "size": 3822
         },
         "references/batch.md": {
           "sha256": "c11f0eb48fa21d8a47ddaf501b98600a128cbf43bf8ab2f75159927555297ab6",
