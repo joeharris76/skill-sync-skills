@@ -1,7 +1,7 @@
 ---
 name: blog
 description: Use when the user asks to "plan a blog post", "research for blog", "draft a blog post", "critique a draft", "deformulize a post", "commit blog changes", "editorial review", "voice check", "style check", "audit blog", "content audit", "audit series", or "audit drafts".
-version: 0.5.0
+version: 0.6.0
 tools: Bash, Read, Write, Edit, Agent, Glob, Grep
 ---
 

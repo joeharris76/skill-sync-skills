@@ -21,7 +21,8 @@ Verify, do not assume; each failure has a recovery path in the guide:
    fails `validate-base`.
 2. The latest release-canary run is green, <48h old, and its tested
    `develop` SHA is an ancestor of the intended release head.
-3. `develop` is green and up to date.
+3. The local `develop` branch matches `origin/develop`, and the latest required
+   checks on that revision are green.
 
 ## Hard rules
 
@@ -31,15 +32,24 @@ Verify, do not assume; each failure has a recovery path in the guide:
 - A failed or interrupted cut is **resumable**; prefer resume
   (`git checkout vX.Y.Z && make release-cut VERSION=X.Y.Z`) over
   `release-cut-abort`. Abort only to start over deliberately.
-- Curation is the targets' job. Never hand-delete release-branch paths;
-  route classification gaps through `scripts/check_release_curation.py`
-  per the guide.
+- Let `release-cut` remove dev-only paths. Do not run `git rm` by hand on the
+  release branch. Route classification gaps through
+  `scripts/check_release_curation.py` as the guide directs.
 - Post-merge and PyPI failures: follow the guide's "Recovering from common
   failures" / "Recovering from a broken PyPI release" sections rather than
   improvising.
 
+## Publication verification
+
+After `release-finalize` pushes the tag, monitor the matching `release.yml`
+run through `test-installation`. Confirm the GitHub release and PyPI version
+exist before reporting the release complete. If the workflow is still running,
+report publication as pending. If it fails, follow the guide's recovery path;
+never force-push or replace the tag.
+
 ## Report
 
-Version, release PR URL and merge state, tag, finalize result, and the
-verification evidence consulted (UAT gate summary, canary run). If stopped
-at a gate, name the gate, the exact blocker, and the resume command.
+Version, release PR URL and merge state, tag, finalize result, `release.yml`
+run URL and state, GitHub release, PyPI version, installation verification,
+and the UAT/canary evidence consulted. If stopped at a gate, name the gate,
+the exact blocker, and the resume command.

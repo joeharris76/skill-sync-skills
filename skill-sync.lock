@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-10T15:50:12.000Z",
+  "lockedAt": "2026-08-11T13:32:13.967Z",
   "skills": {
     "blog": {
       "source": {
@@ -12,7 +12,7 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "5968b27afcf8f8416e09fdb2b1c63e4fa080f583ad57e7f54c0012ef75e9dacf",
+          "sha256": "bd552c8cea0e744adaef275a5f16bb36f9e8d6bd60aa6fbd0032c333d91499c4",
           "size": 1761
         },
         "references/audit.md": {
@@ -24,8 +24,8 @@
           "size": 144
         },
         "references/critique.md": {
-          "sha256": "9b9075e9f9339658f195b2ab0d33d07b1e6ca70cdd110dd2684ae42fa327472c",
-          "size": 2077
+          "sha256": "0667fe9ccc298c6dd3e5ea576314deb79787e8412c1fc1fd7ed7b09026e31b67",
+          "size": 2224
         },
         "references/deformulize.md": {
           "sha256": "17cf904d4fd63b1e1615e6865c77c477f895f5d54a4949039e186c5637a32024",
@@ -63,8 +63,8 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "d81024b00b652eb717f3dad1e18fc730de4cda3d621e07b0184081a30f37a7b1",
-          "size": 2341
+          "sha256": "db5702473f8f5a341a5e3ff6effc973d7bb4012bde71be8bc953b20e2df7bcf3",
+          "size": 2631
         },
         "references/analysis.md": {
           "sha256": "9d7220de017bc316337f8069e4ba24728b9c27a24d7ec6bb9558c876720459bf",
@@ -153,12 +153,12 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "89c8178054d76c06245e697e6ffb2b60037fc217efc5b50a340c2a378f6ebbfc",
+          "sha256": "7b0d79bffa60b73a519e8c9be2e4bea48d868d27129652748a21002c4025f5da",
           "size": 1703
         },
         "references/adversarial.md": {
-          "sha256": "9443a86129d03aa00c2facb4c504bb541e530cdef7f1e6da647e79e51d791528",
-          "size": 167
+          "sha256": "ecad096267b1dec8ecd4aca836e69bcb23040a66fc3c75a505c1b9a8c7217e73",
+          "size": 308
         },
         "references/build.md": {
           "sha256": "5f7adc15b0b22557f26bf1e29ccf7831737b22d0aa5ddd1868e2ff969ddfecd1",
@@ -192,8 +192,8 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "d99e75fc988617478450689c70081ea92466444610dd555184b4fff7b048ab3e",
-          "size": 3822
+          "sha256": "d45d4c905dcf92985643a0f7b036d45e2fde4fb9bf732f6f6cc2b9a62bac6f23",
+          "size": 4330
         },
         "references/batch.md": {
           "sha256": "c11f0eb48fa21d8a47ddaf501b98600a128cbf43bf8ab2f75159927555297ab6",
@@ -202,6 +202,14 @@
         "references/bootstrap.md": {
           "sha256": "ea29918ad420016d5f65adf5777c8fe3f6c86311045bcdc3c45fae5ada05bf39",
           "size": 3853
+        },
+        "references/closeout.md": {
+          "sha256": "d2bd9ba6965e76020f2184d3aca1434c067bbfaa6dfcb43e1f6f51078af01773",
+          "size": 1894
+        },
+        "references/handoff.md": {
+          "sha256": "ccbb1ccdb25a1c501ea5099bf9fbefda7ea2b3ee700da857da51872c1c92f2c1",
+          "size": 1607
         },
         "references/ideate.md": {
           "sha256": "00733f03658b2f215eaeebc25739a4ab7d57898fed162045e18f0c389cdc2609",
@@ -243,8 +251,8 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "d289c3cb7fa3d02ac74257e99b848102a3ed2a780aebe1a00f184adb3fdd0542",
-          "size": 1996
+          "sha256": "6171b6c07d395637b3795c3418f1d8fb85a25cfc01f938b32755a0841dc3e081",
+          "size": 2255
         },
         "references/architecture.md": {
           "sha256": "fd90971630c08e93c8edc6d549da9a758f565981f8e25a376c87bef263797bee",
@@ -274,9 +282,17 @@
           "sha256": "351a0594dfa490ef847f6f81c54a898941e78e58ce04b2deb7b3f696f0cadb7c",
           "size": 827
         },
+        "references/pr-sweep.md": {
+          "sha256": "bc7d9d2f301a304f52eaf93442a48bb55ede26dce24cc39730895d1dd2a27857",
+          "size": 1416
+        },
         "references/quality.md": {
           "sha256": "eb1bdef3d86edb12dccc15d96af3f90f2d89f408f100605383ff0d14d258032c",
           "size": 471
+        },
+        "references/release.md": {
+          "sha256": "5c54005ab99497d511f5b747d15517ff6161acc9c1be727f763e646268a99189",
+          "size": 2505
         },
         "references/test.md": {
           "sha256": "e8028378a9f13c7b748eee201335b7448c52ccbb4fc68c3f9271fab8954d15db",
@@ -402,8 +418,12 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "b4f5e06a2f0139ec311f084cfcbd39b0a2d5d9933c499bccb394f8f15269bc4c",
-          "size": 4673
+          "sha256": "658eb70a1cf6465b34ddae3ebb38fc5de655da99ec7583f575be94a58a6ef566",
+          "size": 4800
+        },
+        "references/adversarial-review.md": {
+          "sha256": "923ea419ffa1244a15faabc0f5f3dd2a03b7db2fe0dae40f508e81d78063b2ce",
+          "size": 1852
         },
         "skill.yaml": {
           "sha256": "187c448569159314ce05ce063ab529bf4509cae7faa37ce7fab57b4d306360c9",

@@ -1,7 +1,7 @@
 ---
 name: benchbox
-description: Use when the user asks to "test TPC-H", "check compliance", "review architecture", "run quality checks", "check binaries", "test dialect translation", "compare implementations", "run live platform tests", "cut a release", "finalize a release", or "plan and execute" a benchmark feature.
-version: 0.3.0
+description: Use when the user asks to "test TPC-H", "check compliance", "review architecture", "run quality checks", "check binaries", "test dialect translation", "compare implementations", "run live platform tests", "address PR review follow-ups", "run a PR review follow-up sweep", "cut a release", "finalize a release", or "plan and execute" a benchmark feature.
+version: 0.4.0
 tools: Bash, Read, Write, Edit, Glob, Grep, Task
 ---
 
@@ -25,12 +25,14 @@ artifacts when supported.
 | `live` | `references/live.md` |
 | `architecture` | `references/architecture.md` |
 | `plan` | `references/plan.md` |
+| `review-sweep` | `references/pr-sweep.md` |
 | `release` | `references/release.md` |
 
 Aliases remain accepted: `benchmark-test`, `quality-check`, `qa`,
 `tpc-compliance`, `dialect-translation`, `sql`, `binary-check`, `binaries`,
 `compare-impl`, `live-test`, `platform-test`, `arch`, `arch-review`,
-`plan-execute`, `implement`, `release-cut`, and `release-finalize`.
+`plan-execute`, `implement`, `pr-sweep`, `review-followups`, `release-cut`,
+and `release-finalize`.
 
 ## Hard rules
 
