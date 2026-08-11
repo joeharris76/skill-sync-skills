@@ -1,7 +1,7 @@
 ---
 name: code
-description: Use for "implement code", "build a feature", "refactor code", "commit code", "review code", "fix lint/type error", "improve performance", "compare code", "shrink code", "generate spec from code", "investigate code", "debug an error", "triage a bug", "iterate to green", or "create handoff prompt".
-version: 0.3.0
+description: Use for "implement code", "build a feature", "refactor code", "commit code", "review code", "adversarial review", "review all work in this session", "sweep PR review comments", "PR review follow-up sweep", "fix lint/type error", "improve performance", "compare code", "shrink code", "generate spec from code", "investigate code", "debug an error", "triage a bug", "iterate to green", or "create handoff prompt".
+version: 0.4.0
 tools: Bash, Read, Write, Edit, Task
 ---
 
@@ -23,6 +23,8 @@ fall back to the Makefile, manifests, and project agent docs.
 | `implement` | implement/build/refactor code | `references/implementation.md` |
 | `commit` | commit changes/code | `references/implementation.md` |
 | `review` | review code | `references/five-axis-review.md` |
+| `adversarial` | adversarial review of session/change/feature/project | `references/adversarial-review.md` |
+| `sweep` | sweep review comments across merged PRs | `references/pr-sweep.md` |
 | `fix` | fix lint/type/runtime issue | `references/implementation.md` |
 | `debug` | debug/triage a failure | `references/implementation.md` |
 | `iterate` | drive a command/tests to green | `references/iterate.md` |
@@ -40,7 +42,8 @@ fall back to the Makefile, manifests, and project agent docs.
   `SHARED/change-framework/SKILL.md` Section 1. Use the same framework for
   slicing, verification, and authorized commits and pushes. Use the project's
   publication flow for PRs.
-- `review`, `research`, `compare`, `to-spec`, and `handoff` are read-only
+- `review`, `adversarial`, `research`, `compare`, `to-spec`, and `handoff`
+  are read-only
   under `SHARED/review-protocol/SKILL.md`: no commits, pushes, PRs, or
   auto-merge unless the user explicitly authorizes chained writes.
   `review --chain` and `shrink` follow their action references.

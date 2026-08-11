@@ -1,7 +1,7 @@
 ---
 name: todo
-description: Use when the user asks to "ideate on an idea", "refine an idea", "brainstorm", "write a spec", "create a specification", "create a TODO", "show TODO items", "manage TODOs", "prioritize TODOs", "top N most important todos", "rank the backlog", "what should we work on", "implement a TODO", "implement a batch of TODOs", "complete a TODO", "cleanup TODOs", "review TODO quality", "claim a TODO", "what's ready" / "ready queue", "defer this work", "promote a deferral", "dismiss a deferral", "block"/"unblock a TODO", "create TODOs from a spec", or "todo stats". Covers the lifecycle from idea to specification, implementation, and completion.
-version: 0.8.0
+description: Use when the user asks to "ideate on an idea", "refine an idea", "brainstorm", "write a spec", "create a specification", "create a TODO", "show TODO items", "manage TODOs", "prioritize TODOs", "top N most important todos", "rank the backlog", "what should we work on", "implement a TODO", "implement a batch of TODOs", "complete a TODO", "cleanup TODOs", "review TODO quality", "claim a TODO", "what's ready" / "ready queue", "defer this work", "promote a deferral", "dismiss a deferral", "block"/"unblock a TODO", "create TODOs from a spec", "validate a batch", "close out a batch", "deep-review and close out", or "todo stats". Covers the lifecycle from idea to specification, implementation, and completion.
+version: 0.9.0
 tools: Bash, Read, Edit, Write, Task
 ---
 
@@ -51,6 +51,7 @@ The `--help` output for the command you chose is the full contract.
 | `lint` | You review an item | `references/review.md` |
 | `finding candidates`, `finding triage`, `finding import`, `finding sync`, `finding promote` | You triage findings | `references/implement.md` |
 | `batch` — a set of related TODOs | You implement several TODOs in order | `references/batch.md` |
+| `closeout` — skill-only, no CLI command | You validate and close out a prior session's batch | `references/closeout.md` |
 | `help` | You need the action list | This table |
 
 `todo ready` and `todo stats` may print a one-line warning on stderr when there are untriaged findings (open findings or unsynced drafts). The warning does not affect stdout. When you see it, run `todo finding candidates` to triage. The warning is silent when there are no findings.
