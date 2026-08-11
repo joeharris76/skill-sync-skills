@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-11T13:32:13.967Z",
+  "lockedAt": "2026-08-11T14:20:53.268Z",
   "skills": {
     "blog": {
       "source": {
@@ -63,8 +63,8 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "db5702473f8f5a341a5e3ff6effc973d7bb4012bde71be8bc953b20e2df7bcf3",
-          "size": 2631
+          "sha256": "8dee8552361ffaeb3f921ef4514c3a78ebf5ac22027aa98b58ffbe675906576b",
+          "size": 2798
         },
         "references/analysis.md": {
           "sha256": "9d7220de017bc316337f8069e4ba24728b9c27a24d7ec6bb9558c876720459bf",
@@ -89,6 +89,10 @@
         "references/iterate.md": {
           "sha256": "f3293cadaf137a5e5bf8dd47e1096072f3622a005a786921c752abea559a89be",
           "size": 1946
+        },
+        "references/pr-sweep.md": {
+          "sha256": "bee294e08f87475c24167d9ce1eda0146369f6489a4d1c15f4a5a4f2c0e8cc8a",
+          "size": 3933
         },
         "references/shrink.md": {
           "sha256": "29304d2b2a63d20051c5a7a2eb10978e7bda519ea8c15f48a20d020ca47cf951",
@@ -251,8 +255,8 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "6171b6c07d395637b3795c3418f1d8fb85a25cfc01f938b32755a0841dc3e081",
-          "size": 2255
+          "sha256": "8a0766da3627b7d40e5c990456cc807854658469fb000f41f45dc15937d11122",
+          "size": 2110
         },
         "references/architecture.md": {
           "sha256": "fd90971630c08e93c8edc6d549da9a758f565981f8e25a376c87bef263797bee",
@@ -281,10 +285,6 @@
         "references/plan.md": {
           "sha256": "351a0594dfa490ef847f6f81c54a898941e78e58ce04b2deb7b3f696f0cadb7c",
           "size": 827
-        },
-        "references/pr-sweep.md": {
-          "sha256": "bc7d9d2f301a304f52eaf93442a48bb55ede26dce24cc39730895d1dd2a27857",
-          "size": 1416
         },
         "references/quality.md": {
           "sha256": "eb1bdef3d86edb12dccc15d96af3f90f2d89f408f100605383ff0d14d258032c",
