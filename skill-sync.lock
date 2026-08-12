@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-11T14:20:53.268Z",
+  "lockedAt": "2026-08-12T03:08:54.300Z",
   "skills": {
     "blog": {
       "source": {
@@ -212,8 +212,8 @@
           "size": 1894
         },
         "references/handoff.md": {
-          "sha256": "ccbb1ccdb25a1c501ea5099bf9fbefda7ea2b3ee700da857da51872c1c92f2c1",
-          "size": 1607
+          "sha256": "6b90193cb0411471ba2727baf7d14ef44d6fb4eca65636bc0b3f31bd58af291a",
+          "size": 1704
         },
         "references/ideate.md": {
           "sha256": "00733f03658b2f215eaeebc25739a4ab7d57898fed162045e18f0c389cdc2609",
@@ -240,8 +240,8 @@
           "size": 598
         },
         "skill.yaml": {
-          "sha256": "e2c0b40d9935492621e6d21ab216a6227f4bae8f3808ed004d995d0f1b5bbff3",
-          "size": 213
+          "sha256": "d29288a7968d6d04ffc07f8b303c881a13aa4d4f6c3cd79dd0d0fcb08aad7628",
+          "size": 243
         }
       }
     },
