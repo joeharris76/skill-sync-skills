@@ -20,11 +20,7 @@ Use `_project/scripts/todo`. Check that the wrapper supports the command you nee
 * Run `_project/scripts/todo --help` and confirm the subcommand appears.
 * If the subcommand is missing, report the gap and stop.
 
-`prioritize` has no CLI command. It is a skill-only analysis. Follow `references/prioritize.md` and use only the inspect commands it lists.
-
-`batch`, `handoff`, and `closeout` are also skill-only actions, not CLI
-commands. Do not run them through `_project/scripts/todo`; follow their
-reference guides instead.
+Skill-only actions: `prioritize`, `batch`, `handoff`, and `closeout`; follow their guides, not the CLI.
 
 If one request combines review or validation with close-out, perform the
 read-only review and stop at findings under `SHARED/review-protocol/SKILL.md`.
