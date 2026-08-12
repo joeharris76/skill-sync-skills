@@ -26,14 +26,13 @@ Use the matching `letterops` MCP action; do not invent higher-level aliases.
 
 ## Global rules
 
-- Prefer read-only checks: `auth`, `status`, `preview`, `pending`.
-- Dry-run mutations first. After publish or schedule, use `fetch`, not `pull`.
+- Start with read-only `auth`, `status`, `preview`, and `pending` checks. Dry-run
+  mutations before execution. After publishing or scheduling, use `fetch`, not
+  `pull`.
 - Never pull into `_blog/published/` without explicit review of the dry-run.
 - If a write action changes local/state files, commit through
   `SHARED/change-framework/SKILL.md`; read-only actions do not create commits.
 - Config is read from `_project/substack/config.yaml` through
   `LETTEROPS_CONFIG`. Paths may be repo-relative or absolute; published
   markdown under `_blog/published/` is the local source of truth.
-
-Run read-only checks, then dry-run mutations, then execute only after the user
-reviews or confirms the required live operation.
+- Execute live mutations only after the required user confirmation.
