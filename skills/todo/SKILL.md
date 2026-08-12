@@ -22,6 +22,10 @@ Use `_project/scripts/todo`. Check that the wrapper supports the command you nee
 
 `prioritize` has no CLI command. It is a skill-only analysis. Follow `references/prioritize.md` and use only the inspect commands it lists.
 
+`batch`, `handoff`, and `closeout` are also skill-only actions, not CLI
+commands. Do not run them through `_project/scripts/todo`; follow their
+reference guides instead.
+
 If one request combines review or validation with close-out, perform the
 read-only review and stop at findings under `SHARED/review-protocol/SKILL.md`.
 A later user message may authorize `closeout`.
@@ -54,7 +58,7 @@ The `--help` output for the command you chose is the full contract.
 | `prioritize` — skill-only, no CLI command | You rank open items and group by topic | `references/prioritize.md` |
 | `lint` | You review an item | `references/review.md` |
 | `finding candidates`, `finding triage`, `finding import`, `finding sync`, `finding promote` | You triage findings | `references/implement.md` |
-| `batch` — a set of related TODOs | You implement several TODOs in order | `references/batch.md` |
+| `batch` — skill-only, no CLI command | You implement several TODOs in order | `references/batch.md` |
 | `handoff` — skill-only, no CLI command | You create a self-contained batch handoff | `references/handoff.md` |
 | `closeout` — skill-only, no CLI command | You remediate a separately reviewed batch and close its items | `references/closeout.md` |
 | `help` | You need the action list | This table |
