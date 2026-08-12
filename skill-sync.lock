@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-11T14:20:53.268Z",
+  "lockedAt": "2026-08-12T03:34:00.000Z",
   "skills": {
     "blog": {
       "source": {
@@ -196,8 +196,8 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "d45d4c905dcf92985643a0f7b036d45e2fde4fb9bf732f6f6cc2b9a62bac6f23",
-          "size": 4330
+          "sha256": "0adbddfca726a6b0ba61c923fdbb06e50b6518603bce1ef237ca9cda281aa277",
+          "size": 4298
         },
         "references/batch.md": {
           "sha256": "0edc7a9dfff97583d26c61a83a519111bf6e56ec3031151d96753bcafb27fa1c",
@@ -212,8 +212,8 @@
           "size": 1894
         },
         "references/handoff.md": {
-          "sha256": "ccbb1ccdb25a1c501ea5099bf9fbefda7ea2b3ee700da857da51872c1c92f2c1",
-          "size": 1607
+          "sha256": "3c35c0001a14dae4c000750de7ccc75f89ee89daee6bd426a1677c894730dfe9",
+          "size": 1657
         },
         "references/ideate.md": {
           "sha256": "00733f03658b2f215eaeebc25739a4ab7d57898fed162045e18f0c389cdc2609",
