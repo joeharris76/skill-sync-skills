@@ -1,43 +1,43 @@
 # Batch Implementation
 
-Use `batch` to implement a related set of TODOs in order. For each item,
-implement, verify, complete, review, fix findings, commit, and open one PR. Use
-the `code` skill review when available. Otherwise, apply the same five-axis
-review by hand.
-
-One `batch` call over an explicit named set authorizes implementation, commits,
-PRs, and conditional auto-merge only for those TODOs. It does not authorize
-work outside their work orders or bypass repository approval gates. Do not ask
-again for the same authority per item.
+Use `batch` to implement a named set of related TODOs in dependency order. One
+call authorizes implementation, its required named branches and commits, PRs,
+and conditional auto-merge only for that set. It does not authorize
+out-of-scope work or bypass approval gates; do not request the same authority
+for each item.
 
 ## Before you start
 
-Run `todo doctor` through `_project/scripts/todo`. If the wrapper does not support `doctor`, report that you skipped the preflight. Fix any failure before you claim the first item.
+Run `todo doctor` through `_project/scripts/todo`. If unsupported, report the
+skipped preflight. Fix failures before claiming an item.
 
-If a command that documents the exit-code contract returns exit code 4, stop
-the batch. The wrapper may already have tried to refresh the token once.
+If a command documents exit code 4 and returns it, stop the batch. The wrapper
+may already have tried one token refresh.
 
-1. Record each stale tracker item and its blocker in the local ledger.
+1. Record stale tracker items and blockers in the ledger.
 2. Show the authentication error and its documented recovery command.
 3. Do not implement more work or open PRs while tracker writes fail.
-4. After authentication is restored, replay missed tracker writes before
-   taking another item.
+4. After recovery, replay missed tracker writes before taking another item.
 
 ## Tracker commands
 
-Use `_project/scripts/todo` for claims and leases (`claim`), per-unit worktrees
-and branches (`start`/`done`), and completion and PRs (`complete --pr`). Rebuild
+Use `_project/scripts/todo` for claims and leases (`claim`), worktrees and
+branches (`start` and `done`), and completion and PRs (`complete --pr`). Rebuild
 progress with `todo list`, `todo stats`, and `todo deps <id>`.
 
 ## Local ledger — batch bookkeeping only
 
-`batch` spans many TODOs, PRs, and CI waits. Keep one small local ledger for the facts the database does not track:
+Keep one local ledger for facts absent from the database:
 
-* the batch set and order after you remove duplicates and sort by dependencies;
-* each item's batch-local status (`pending`, `waiting`, `in_progress`, `in_review`, `pr_open`, `done`, `blocked`) — this is local to the ledger, not the tracker's own state;
-* the blocker or wait reason.
+- Deduplicated, dependency-sorted item order.
+- Batch-local status: `pending`, `waiting`, `in_progress`, `in_review`,
+  `pr_open`, `done`, or `blocked`.
+- Blocker or wait reason.
 
-Per-item worktree, branch, and PR already live in the database (`start`/`complete`). Do not duplicate them. Put the ledger on an ignored local path (for example, an existing scratch dir or `.todo-batch/<slug>.yaml`). If that path is visible to git, add `.todo-batch/` to `.git/info/exclude` — not to the committed `.gitignore`. Never commit the ledger. On resume, read it first.
+Do not duplicate worktrees, branches, or PRs recorded by `start` and `complete`.
+Store the ledger in an ignored scratch path or `.todo-batch/<slug>.yaml`. If
+Git sees that path, add `.todo-batch/` to `.git/info/exclude`, not the committed
+`.gitignore`. Never commit the ledger; read it first when resuming.
 
 ```yaml
 batch: <slug>
@@ -46,34 +46,45 @@ items:
   todo-a: {status: pending, note: ""}
 ```
 
-The ledger preserves only the temporary orchestration state needed to resume
-this batch.
-
 ## Setup
 
-1. Remove exact duplicate ids. Confirm each one with `todo show <id>`.
-2. Read each item's work order (`todo claim` shows scope, must-preserve, anti-patterns, verification steps, ready units, and deferrals) or preview with `todo show <id> --json` and `todo deps <id>`.
-3. Sort by in-batch dependencies (`deps.needs`). Items in a cycle are `blocked`. Continue with the rest.
+1. Remove duplicate IDs and confirm each with `todo show <id>`.
+2. Read each work order with `todo claim`, including scope, must-preserve notes,
+   anti-patterns, verification, ready units, and deferrals. To preview without
+   claiming, use `todo show <id> --json` and `todo deps <id>`.
+3. Sort by `deps.needs`. Mark cyclic items `blocked` and continue.
 
 ## Scheduler
 
-After a failed attempt, make one focused retry. If the retry fails, mark the
-item `blocked` and continue with other TODOs.
+After a failure, make one focused retry. If it fails, mark the item `blocked`
+and continue.
 
 Repeat until every item is `done` or `blocked`:
 
-1. Re-read the ledger. Refresh readiness with `todo ready` and `todo deps`. `ready`/`stats` may print a warning on stderr about untriaged findings — triage with `todo finding candidates`. Findings are not batch items and never enter the ready queue.
+1. Re-read the ledger. Refresh with `todo ready` and `todo deps`. If warned,
+   triage findings with `todo finding candidates`; findings are not batch items.
 2. Classify each non-terminal item (`ready` is derived, not stored):
-   * `ready`: ledger status is `pending`, every in-batch dependency is `done` (its PR is merged into the integration branch), and external deps are clear per `todo ready`.
-   * `waiting`: a dependency PR, external dep, CI check, or merge is pending and can still resolve this session.
-   * `blocked`: missing or malformed item, dependency cycle, the failed-retry rule above, or a wait with no resolution path this session. Record the reason. If it is a hard tracker blocker, run `todo block <id> --reason ...`.
+   - `ready`: status is `pending`, every in-batch dependency is `done` and
+     merged, and `todo ready` reports no external dependency.
+   - `waiting`: a dependency PR, external dependency, CI check, or merge can
+     still resolve this session.
+   - `blocked`: the item is missing or malformed, has a cycle, failed its retry,
+     or cannot resolve this session. Record why. For a hard tracker blocker,
+     run `todo block <id> --reason ...`.
 3. If a TODO is ready, implement it (see below).
-4. If none are ready: mark ordinary pending CI as `waiting`. Use bounded, announced monitoring (command, max time, log path, stop condition — for example, `gh pr checks` or the project PR-status target) only for a dependency gate that blocks another TODO. You can delegate a deterministic gate check to a subagent for run-and-report. Apply the failed-retry rule to red batch-owned PRs. Being not-ready is `waiting`, not `blocked`.
+4. If none are ready, mark ordinary pending CI as `waiting`. Monitor only a
+   dependency gate that blocks another TODO. Announce the command, maximum time,
+   log path, and stop condition, such as `gh pr checks`. A subagent may run and
+   report a deterministic gate. Apply the retry rule to red batch-owned PRs.
+   Not-ready means `waiting`, not `blocked`.
 
 ## For each ready TODO
 
 1. Mark `in_progress` in the ledger.
-2. For implementation work, create and use a fresh linked worktree off the integration branch before editing. Keep the work isolated there, and after the PR or PRs merge, verify the tree is clean and remove that exact linked worktree according to repository policy. Do not assume a retained slot or worktree pool. If a dependency PR merged since you created the worktree, refresh onto the updated branch first.
+2. For implementation, create a fresh linked worktree from the integration
+   branch before editing. After its PRs merge, verify it is clean and remove
+   that exact worktree under repository policy. Do not assume a retained pool.
+   Refresh it if a dependency merged after creation.
 3. Run `todo claim <id>` and follow the work order. For each work unit, run
    `todo start`, apply `SHARED/change-framework/SKILL.md` Section 1 before
    source-code edits, implement, then record evidence with `todo done`. Defer
@@ -81,18 +92,24 @@ Repeat until every item is `done` or `blocked`:
 4. Run `todo check-scope <id>` and `todo verify <id> --run`.
 5. Mark `in_review`. As internal implementation verification under
    `SHARED/review-protocol/SKILL.md` [REVIEW-AUTH-001], run the `code` skill
-   review on the diff or apply the same five-axis review. Fix every Critical or
-   Required finding unless you can prove it is invalid. Apply Nit or Consider
-   only when it is in scope. List every skipped finding in the PR body.
-   Re-verify and re-review after non-trivial fixes.
-6. Commit only explicit paths (never `git add -A`) through `SHARED/change-framework`, then open the PR.
-7. Run `todo complete <id> --pr <n>` — but first resolve deferrals with `promote` or `dismiss`, or it will refuse.
-8. If a later TODO in the batch needs this PR merged: mark `pr_open`, enable auto-merge only when the integration branch gate is CI checks (not required human approval), then monitor until merged and mark `done`. Else mark `done` after you open the PR and complete the item.
+   review or apply its five axes. Fix valid Critical and Required findings.
+   Apply Nit and Consider findings only when in scope. List skipped findings in
+   the PR body. Re-verify and re-review after non-trivial fixes.
+6. Commit through `SHARED/change-framework`, open one PR, then run
+   `todo complete <id> --pr <n>` after resolving deferrals.
+7. If another batch item needs the PR, mark `pr_open`. Enable auto-merge only
+   when CI—not human approval—is the integration gate. Monitor until merged,
+   then mark `done`. Otherwise mark `done` after PR creation and completion.
 
 ## Workers
 
-Run one item at a time by default. Parallel workers increase churn for little gain. Use one worker per TODO only when you have worker sessions. The orchestrator still owns order, ledger, monitors, and the final report. Each worker must return: `TODO`, `STATUS: done|pr_open|blocked`, `PR`, `WORKTREE`, `BRANCH`, `NOTES`.
+Run one item at a time by default. Use one worker per TODO only when worker
+sessions exist. The orchestrator retains ordering, the ledger, monitoring, and
+the final report. Each worker returns `TODO`, `STATUS: done|pr_open|blocked`,
+`PR`, `WORKTREE`, `BRANCH`, and `NOTES`.
 
 ## Final report
 
-Report `TODO | PR # | status | note`. List blockers with unblock steps and the ledger path. If the session ends before every item is terminal, state the ledger path and the resume command (run `batch` again with the same inputs — the ledger plus the database resumes progress).
+Report `TODO | PR # | status | note`, blockers, unblock steps, and the ledger
+path. If items remain non-terminal, give the ledger path and tell the user to
+rerun `batch` with the same inputs.

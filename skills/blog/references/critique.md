@@ -16,14 +16,20 @@ scope. This file adds the blog-specific rubric and readiness score.
 | Voice | Does it match the voice guide and avoid banned patterns? |
 | Utility | Does the reader leave with a usable insight, command, or decision? |
 | Risk | What could be misleading, stale, partisan, overclaimed, or underqualified? |
-| Shelf-life | Date the outline against the source publication; flag if the response window has expired (typical: 1-2 weeks). Vendor-response posts only. |
+| Shelf-life | For vendor-response posts, compare outline and source dates; flag a response window beyond the typical 1-2 weeks. |
 
 ## Vendor-Response Checks
 
-Apply when the post responds to a vendor or source-author publication; skip on evergreen content.
+Apply only when a post responds to a vendor or source author.
 
-- **Currency** (Risk lane): if the outline cites blocked TODOs, honest deferrals, or "not yet shipped" caveats, verify against `git log` and the current tracker state (`todo list`, `todo show <id>`). Flag any item shipped since the outline was written.
-- **Partisan-Reader** (Voice lane): identify framings that contrast the source against BenchBox's coverage (boring/novel, surface/hidden, obvious/clever). For each, ask "would a reader from the source's team find this dismissive?" Substitute technical specificity for editorial contrast where the answer is yes: name the exact API, benchmark coverage, or operational limitation instead of ranking the source's work.
+- **Currency (Risk lane):** verify blocked TODOs, deferrals, and "not yet
+  shipped" claims
+  against `git log`, `todo list`, and `todo show <id>`. Flag work shipped after
+  the outline date.
+- **Partisan reader (Voice lane):** flag contrasts such as boring/novel,
+  surface/hidden, and obvious/clever when the source's team could find them
+  dismissive. Replace rankings with the exact API, benchmark coverage, or
+  operational limitation.
 
 ## Scoring
 
@@ -31,10 +37,11 @@ Apply when the post responds to a vendor or source-author publication; skip on e
 
 ## Output
 
-Lead with blocking issues, then targeted improvements, suggested rewrites when useful, and publish readiness. Separate factual corrections from taste/preferences.
+Lead with blockers, then targeted improvements, useful rewrites, and publish
+readiness. Separate factual corrections from taste.
 
 ## Authorized follow-up fixes
 
-After a later user message authorizes fixes, change only broken links,
-formatting, obvious factual errors, and localized wording. Leave thesis,
-framing, and controversial judgments to the user.
+After later authorization, fix only broken links, formatting, obvious factual
+errors, and local wording. Leave thesis, framing, and controversial judgments
+to the user.

@@ -7,8 +7,7 @@ tools: Bash, Read, Write, Edit, Agent, Glob, Grep
 
 # Blog Workflow
 
-Route the request to one action below. Resolve voice before drafting or
-editing.
+Route the request below. Resolve voice before drafting or editing.
 
 ## Guides
 
@@ -17,13 +16,15 @@ global `~/.claude/blog/*`. If neither exists, proceed and note the gap.
 
 ## Critical rules
 
-- Write actions use `SHARED/change-framework/SKILL.md` with prefix `docs(blog)`
-  after verification and cleanup.
+- After cleanup, repository write actions use
+  `SHARED/change-framework/SKILL.md` with prefix `docs(blog)` for the required
+  named branch, verification, commit, and approved-plan PR. The `cleanup`
+  action handles existing blog changes.
 - `critique`, `editorial-review`, `audit`, and `deformulize` follow
   `SHARED/review-protocol/SKILL.md` [REVIEW-AUTH-001]. After findings,
   `critique`, `editorial-review`, and `audit` apply its L2 audit.
-- Use official or primary sources when possible. Cite research notes and verify
-  unstable facts. Never invent results, prices, quotes, benchmarks, or facts.
+- Prefer official or primary sources. Cite research notes, verify unstable
+  facts, and never invent results, prices, quotes, benchmarks, or facts.
 
 ## Actions
 
