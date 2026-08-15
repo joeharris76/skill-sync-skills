@@ -24,6 +24,10 @@ Compare artifact behavior, contracts, and relationships, not wording alone.
 | 0.70-0.84 | Significant differences |
 | <0.70 | Breaking/not equivalent |
 
+These weights and thresholds are default heuristics, not measurements. The
+numeric score remains the Shrink accept/reject input. State any critical
+contract that overrides the aggregate score.
+
 Breaking contract changes halve the score; lost critical relationships multiply by 0.7.
 
 ### Limits
@@ -79,6 +83,8 @@ forbidden, or optional, identify its authority. Use these stable labels:
   enforced without checking the enforcement path.
 - If authorities conflict, stop and report the sources and effective scope;
   do not silently choose the most convenient interpretation.
+- Shared-versus-wrapper document precedence is resolved by the owning shared
+  protocol before this authority-conflict rule applies.
 
 - Before editing, read each target, related tests, and one local pattern.
 - Re-read after modifications when continuing work.

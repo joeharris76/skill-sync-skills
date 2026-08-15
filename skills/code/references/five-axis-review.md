@@ -121,6 +121,8 @@ other data artifacts.
 **Trigger:** A verification-only PR or a commit that claims evidence without a
 durable artifact.
 
-- Require a committed, replayable transcript or pin file under the project's
-  convention.
+- Require durable, replayable evidence under the project's convention: a
+  committed command with a pinned SHA or version and a PASS/FAIL result. A
+  referenced retained CI artifact may accompany that pin. Raw logs need not be
+  committed.
 - Reject claims supported only by transient terminal output.

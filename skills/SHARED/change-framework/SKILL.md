@@ -87,16 +87,18 @@ capture remains local under `SHARED/review-protocol/SKILL.md`.
 
 ### Steps
 
-1. Create or reuse a clearly named non-default branch for this task before
+1. Inspect the current branch, upstream, worktree status, worktree list, and
+   recent log before selecting a branch.
+2. Create or reuse a clearly named non-default branch for this task before
    editing. Reuse it only when its name matches the scope. If edits began on
    the default branch, switch before further edits.
-2. Discover files from `file_scope`. If none exist, report "No files to commit."
-3. Inspect `git status --porcelain {files}`, `git diff {files}`, and recent log.
+3. Discover files from `file_scope`. If none exist, report "No files to commit."
+   Inspect `git status --porcelain {files}` and `git diff {files}`.
 4. Run Section 3. Fix failures or stop without committing.
 5. Stage and commit the explicit files in one shell command.
 6. Push the branch. Use `-u origin {branch}` when it has no upstream.
-7. If the work implements a plan that the user approved in a later message,
-   open a draft PR.
+7. Open a draft PR as part of the same repository-write authorization unless
+   the user explicitly requires local-only work or another publication mode.
 
 ### Rules
 
@@ -123,6 +125,9 @@ capture remains local under `SHARED/review-protocol/SKILL.md`.
 - Branch creation and commits are required close-out steps for completed
   repository write actions, not separate permissions. A later user message may
   explicitly require local-only work or another publication mode.
+- If repository policy explicitly uses trunk-based or direct-default-branch
+  development, follow that policy and report the deviation from the default
+  task-branch workflow.
 - A task branch is cheap isolation; it does not alter another user's branch or
   linked worktree.
 - If a required push or PR is mechanically unavailable, keep the verified

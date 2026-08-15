@@ -7,8 +7,10 @@ tools: Bash, Read, Write, Edit
 
 # Permissions Consolidation
 
-Route below and read the selected action file. Keep unclear entries PERSONAL,
-ask for direction, and never weaken safety.
+Route below and read the selected action file. Keep unclear entries PERSONAL and
+ask for direction. Do not add, broaden, or relocate an entry when the change
+would permit, in the destination scope, a command that is not already allowed
+in that scope.
 
 ## Actions
 

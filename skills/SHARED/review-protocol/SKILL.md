@@ -26,6 +26,11 @@ An internal quality check within an authorized write action is verification,
 not review, when it stays in scope and adds no permissions. A user-requested
 review or audit remains review-shaped.
 
+A named write-shaped action that inspects before changing state, such as a
+sweep, iteration, batch, or closeout, is not review-shaped when the request
+explicitly invokes its write behavior. A request only to inspect, review, or
+audit that action remains review-shaped.
+
 Review-shaped actions must not:
 
 - Commit any file.
@@ -51,7 +56,10 @@ leak data, or miss a performance budget if left unchanged.
 
 If yes, classify it as a defect. Put defects in the severity table and action
 items, never in blind-spots. Create a TODO or fix only after authorization.
-Treat uncertain cases as defects to protect the blind-spot signal.
+Route uncertain concrete cases through defect action items rather than
+blind-spots. Mark their evidence incomplete and make the action item the needed
+verification. Do not assign Critical without source, contract, reproduction, or
+equivalent runtime evidence.
 
 ## 3. Planning-Depth Layers (L1/L2/L3) [REVIEW-DEPTH-001]
 
