@@ -31,11 +31,16 @@ not repoint this store to an authoring worktree.
 
 `skill-sync.lock` must describe the skill tree in the same commit.
 `scripts/verify_lock.py` checks declarations, files, hashes, sizes, and untracked
-skill files. Run it after each skill change:
+skill files. Regenerate and verify the lock after each skill change:
 
 ```bash
+uv run --with pyyaml scripts/verify_lock.py --write
 uv run --with pyyaml scripts/verify_lock.py
 ```
+
+The writer refreshes only file metadata and `lockedAt`; it preserves source,
+install-mode, and other provenance fields. It refuses manifest/lock skill-set
+changes, which require the provenance-aware catalog workflow.
 
 The pre-commit hook and `.github/workflows/verify-lock.yml` run the same gate.
 This source check differs from `skill-sync verify`, which checks tracked
