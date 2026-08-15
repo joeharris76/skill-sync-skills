@@ -20,22 +20,28 @@ This checker makes that invariant mechanical. It fails when:
 The last case is the one a hash comparison alone cannot catch: adding a file
 without regenerating the lock leaves every recorded hash correct.
 
-Usage: python3 scripts/verify_lock.py [--root DIR]
+Use ``--write`` to refresh file metadata and ``lockedAt`` while preserving the
+lock's provenance and install metadata. The writer refuses to change the set of
+skills because adding or removing a skill requires a provenance-aware workflow.
+
+Usage: uv run --with pyyaml scripts/verify_lock.py [--root DIR] [--write]
 Exits 0 when the lock matches the tree, 1 otherwise.
 """
 
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 
 try:
     import yaml
 except ModuleNotFoundError:  # pragma: no cover - depends on the interpreter
-    sys.exit("verify_lock: PyYAML is required to read skill-sync.yaml (pip install pyyaml)")
+    sys.exit("verify_lock: run with `uv run --with pyyaml scripts/verify_lock.py`")
 
 # Editor and OS droppings are never part of a skill's content.
 IGNORED_NAMES = frozenset({".DS_Store"})
@@ -64,27 +70,74 @@ def tracked_files(skill_dir: Path) -> set[str]:
     return found
 
 
-def verify(root: Path) -> list[str]:
-    """Return a list of problems; empty means the lock matches the tree."""
-    problems: list[str] = []
-
+def load_catalog(root: Path) -> tuple[Path, dict, list[str]]:
+    """Load the lock and manifest, returning structural problems separately."""
     lock_path = root / "skill-sync.lock"
     manifest_path = root / "skill-sync.yaml"
     for required in (lock_path, manifest_path):
         if not required.is_file():
-            return [f"missing {required.name} at {required}"]
+            return lock_path, {}, [f"missing {required.name} at {required}"]
 
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
     manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
-
     locked_skills = lock.get("skills") or {}
     declared_skills = manifest.get("skills") or []
+    problems: list[str] = []
 
-    # 1/2. The manifest and the lock must describe the same set of skills.
     for name in sorted(set(declared_skills) - set(locked_skills)):
-        problems.append(f"{name}: declared in skill-sync.yaml but absent from the lock; regenerate the lock")
+        problems.append(f"{name}: declared in skill-sync.yaml but absent from the lock")
     for name in sorted(set(locked_skills) - set(declared_skills)):
-        problems.append(f"{name}: present in the lock but not declared in skill-sync.yaml; add it or drop it")
+        problems.append(f"{name}: present in the lock but not declared in skill-sync.yaml")
+
+    return lock_path, lock, problems
+
+
+def write_lock(root: Path) -> list[str]:
+    """Refresh file metadata atomically; return problems without writing on error."""
+    lock_path, lock, problems = load_catalog(root)
+    if problems:
+        return problems
+
+    locked_skills = lock.get("skills") or {}
+    refreshed_files: dict[str, dict[str, dict[str, str | int]]] = {}
+    for name in sorted(locked_skills):
+        skill_dir = root / "skills" / name
+        if not skill_dir.is_dir():
+            problems.append(f"{name}: locked but {skill_dir.relative_to(root)} does not exist")
+            continue
+        refreshed_files[name] = {
+            relpath: {
+                "sha256": sha256_of(skill_dir / relpath),
+                "size": (skill_dir / relpath).stat().st_size,
+            }
+            for relpath in sorted(tracked_files(skill_dir))
+        }
+
+    if problems:
+        return problems
+
+    for name, files in refreshed_files.items():
+        locked_skills[name]["files"] = files
+    lock["lockedAt"] = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+    temporary_path = lock_path.with_name(f".{lock_path.name}.tmp")
+    try:
+        temporary_path.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
+        os.replace(temporary_path, lock_path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
+
+    return []
+
+
+def verify(root: Path) -> list[str]:
+    """Return a list of problems; empty means the lock matches the tree."""
+    problems: list[str] = []
+
+    lock_path, lock, problems = load_catalog(root)
+    if problems and not lock:
+        return problems
+    locked_skills = lock.get("skills") or {}
 
     # 3/4/5. Every locked skill's files must match the tree exactly.
     for name in sorted(locked_skills):
@@ -126,9 +179,23 @@ def main() -> int:
         default=Path(__file__).resolve().parent.parent,
         help="repository root (defaults to the checkout containing this script)",
     )
+    parser.add_argument(
+        "--write",
+        action="store_true",
+        help="refresh file hashes, sizes, and lockedAt without changing skill provenance",
+    )
     args = parser.parse_args()
 
     root = args.root.resolve()
+    if args.write:
+        write_problems = write_lock(root)
+        if write_problems:
+            print(f"skill-sync lock was not written at {root} ({len(write_problems)} problem(s)):", file=sys.stderr)
+            for problem in write_problems:
+                print(f"  - {problem}", file=sys.stderr)
+            print("\nResolve manifest, lock, or skill-directory structure before regenerating.", file=sys.stderr)
+            return 1
+
     problems = verify(root)
 
     if problems:

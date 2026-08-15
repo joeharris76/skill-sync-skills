@@ -35,8 +35,8 @@ A later user message may authorize `closeout`.
 ### Lifecycle rules
 
 - Read the selected action guide before acting.
-- When the user approves a specification, create its item with `todo create`
-  or the supported create-from-spec command.
+- When the user approves a specification and asks to track it, create its item
+  with `todo create` or the supported create-from-spec command.
 - Store tracker state only in the database; do not create tracker files by hand.
 - Commit through `SHARED/change-framework/SKILL.md`.
 - `TODO_DB_URL` may select the hosted database. The CLI never prints its
