@@ -1,6 +1,6 @@
 ---
 name: change-framework
-description: "Unified source-code selection and change-execution workflow: reuse ladder, vertical slicing, post-edit verification, named branches, commits, and approved-plan PRs."
+description: "Unified source-code selection and change-execution workflow: reuse ladder, vertical slicing, post-edit verification, named branches, commits, and authorized-write PRs."
 ---
 
 # Change Framework

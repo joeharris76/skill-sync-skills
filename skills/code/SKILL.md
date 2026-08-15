@@ -39,7 +39,7 @@ fall back to the Makefile, manifests, and project agent docs.
 
 - Apply `SHARED/change-framework/SKILL.md` before source-code edits and use it
   for slicing, verification, the required named branch and commit, and
-  approved-plan PRs.
+  authorized-write PRs.
 - The `commit` action handles existing changes; other repository write actions
   commit without a separate commit request.
 - `review`, `adversarial`, `research`, `compare`, `to-spec`, and `handoff`

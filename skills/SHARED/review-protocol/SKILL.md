@@ -39,9 +39,10 @@ Review-shaped actions must not:
 - Enable auto-merge.
 - Chain into write-shaped skills without authorization in a later turn.
 
-A later request to fix review findings is a repository write action. Use a
-clearly named task branch and commit the verified changes. If the request
-approves a reviewed plan, push the branch and open a draft PR.
+A later request to fix review findings is a repository write action. Follow
+`SHARED/change-framework/SKILL.md`, including its branch, commit, push, and
+draft-PR workflow unless the user requires local-only work or another
+publication mode.
 
 Capture authorizes only the local file write. End with `Recorded: <path>`; the
 user decides whether to open a PR.
