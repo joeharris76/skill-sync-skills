@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-15T15:15:51.540Z",
+  "lockedAt": "2026-08-16T21:37:30.275Z",
   "skills": {
     "blog": {
       "source": {
@@ -200,8 +200,8 @@
           "size": 3933
         },
         "references/batch.md": {
-          "sha256": "04ead05c4bcc2df29b95847286be853dc7621169e8a399bb7362efa619adcd0d",
-          "size": 5327
+          "sha256": "25a1a8ae5b9d70d4644a1ad87ff7b47f0d2426afcf532d2aa498195bd590a4ee",
+          "size": 6430
         },
         "references/bootstrap.md": {
           "sha256": "7b3fbbe13006548df81be94aa7b6d38b177ee1f883b0f5770111c5700f8fa334",
