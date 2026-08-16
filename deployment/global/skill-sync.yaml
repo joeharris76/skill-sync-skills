@@ -3,12 +3,12 @@ sources:
   - name: product
     type: git
     url: https://github.com/joeharris76/skill-sync.git
-    ref: 6d09682dabe2ff0d68f400d60f8ba8b87f8c02aa
+    ref: 286f3a736101e00af52e3d71427359bec09f94ab
     subdir: skills
   - name: catalog
     type: git
     url: https://github.com/joeharris76/skill-sync-skills.git
-    ref: 3d12164ad5b4b83f5b862a62f3002af9a0966989
+    ref: 3e476a64514e143e0fdfeaf3c3129d52f5bc0f08
     subdir: skills
 skills:
   - blog
