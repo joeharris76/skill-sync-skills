@@ -8,7 +8,7 @@ sources:
   - name: catalog
     type: git
     url: https://github.com/joeharris76/skill-sync-skills.git
-    ref: 77ab905fe66cc86a8d8a11fdc4b3500e28d8e0d0
+    ref: d665b4a11957bc5dedf63581495874fb5de98276
     subdir: skills
 skills:
   - blog
