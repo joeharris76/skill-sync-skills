@@ -1,6 +1,6 @@
 ---
 name: review-protocol
-description: Shared protocol for review-shaped actions, authorization scope, defect routing, L1/L2/L3 planning-depth layers, and local-only capture.
+description: Shared protocol for review-shaped actions, authorization scope, defect routing, L1/L2/L3 planning-depth layers, local-only capture, and plan prior-decision reconciliation.
 ---
 
 # Review Protocol
@@ -27,9 +27,9 @@ not review, when it stays in scope and adds no permissions. A user-requested
 review or audit remains review-shaped.
 
 A named write-shaped action that inspects before changing state, such as a
-sweep, iteration, batch, or closeout, is not review-shaped when the request
-explicitly invokes its write behavior. A request only to inspect, review, or
-audit that action remains review-shaped.
+sweep, backlog clearance, iteration, batch, or closeout, is not review-shaped
+when the request explicitly invokes its write behavior. A request only to
+inspect, review, or audit that action remains review-shaped.
 
 Review-shaped actions must not:
 
@@ -105,7 +105,22 @@ and their semantics:
 - `REVIEW-L2-001`
 - `REVIEW-CAPTURE-001`
 - `REVIEW-PARITY-001`
+- `REVIEW-PLAN-RECON-001`
 
 Wording and layout may differ. Missing IDs or contradictory semantics are
 drift. Until reconciled, this skill governs behavior and the project document
 governs only project-specific storage.
+
+## 7. Plan prior-decision reconciliation [REVIEW-PLAN-RECON-001]
+
+Claim-against-code checking is necessary and not sufficient for plan reviews.
+Before judging a plan's steps, enumerate the recorded decision surfaces the
+plan's scope touches:
+
+- future-state index and its priority tiers
+- migration gates in design docs
+- readiness and evidence documents
+- open tracker items at the relevant priority
+
+The plan must cite each one or explicitly supersede it. An unexplained
+demotion of recorded priority, or a dropped open gate, is a plan defect.
