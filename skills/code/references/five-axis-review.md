@@ -13,9 +13,9 @@ planning depth, defect handling, capture, and remediation.
 - Load project-specific checks, such as SQLGlot dialect checks, only from
   `code.review_checklist` (`code/skill.yaml:28`) when `skill-sync.config.yaml`
   configures it. Do not add them here.
-- `review --chain` remains read-only under [REVIEW-AUTH-001]. After a later
-  message authorizes remediation, fix only non-structural issues, verify them,
-  then use the commit framework and project PR flow.
+- `review --chain` remains read-only under [REVIEW-AUTH-001] unless remediation
+  is explicitly authorized. When authorized, fix only non-structural issues,
+  verify them, then follow the change framework and project PR flow.
 
 ## The Five Axes
 

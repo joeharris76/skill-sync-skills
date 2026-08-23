@@ -18,9 +18,20 @@ Review-shaped actions are read-only except for local capture. They may inspect
 artifacts, run analyses, report findings, and write only to designated TODO,
 blind-spot, audit, decision, or handoff locations.
 
-A request that combines review and remediation remains review-only. Report the
-findings without changing tracked worktree content. Remediation requires a
-later user message, sent after the findings, that explicitly authorizes it.
+A request for review alone (e.g. "review this code", "audit this module") is
+strictly read-only: report findings without changing repository content outside
+designated capture paths.
+
+When a request explicitly combines review with remediation (e.g. "review and
+fix", "review, accept/rebut, and implement"):
+1. Identify and report the findings.
+2. Implement the fixes within the reviewed scope.
+3. Verify the changes against the project's test and lint ladder.
+
+Authorization is verb-scoped: requests to fix or implement authorize local
+edits and verification tests. Committing, pushing to a remote, or opening PRs
+require those actions to be requested or authorized by the calling change
+workflow.
 
 An internal quality check within an authorized write action is verification,
 not review, when it stays in scope and adds no permissions. A user-requested
@@ -37,7 +48,7 @@ Review-shaped actions must not:
 - Push to a remote.
 - Open PRs or run `make pr-open` / `gh pr create`.
 - Enable auto-merge.
-- Chain into write-shaped skills without authorization in a later turn.
+- Chain into write-shaped skills without user authorization.
 
 A later request to fix review findings is a repository write action. Follow
 `SHARED/change-framework/SKILL.md`, including its branch, commit, push, and
