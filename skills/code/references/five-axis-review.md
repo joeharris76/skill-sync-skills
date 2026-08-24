@@ -8,14 +8,17 @@ planning depth, defect handling, capture, and remediation.
 
 - Accept a file, directory, staged diff, commit range, PR, topic, or repository.
   List Critical, Required, Nit, and Consider findings first.
-- For multi-PR work, run `gh pr diff <N> --name-only` and classify blockers
-  before content; avoid `--json body,files` unless needed.
+- For a PR, record the live head SHA and check status before content review.
+  Classify a failing required check as Critical when the change caused it;
+  distinguish infrastructure failures and pending protected gates explicitly.
+- For multi-PR work, run `gh pr diff <N> --name-only` and perform that blocker
+  triage for every PR; avoid `--json body,files` unless needed.
 - Load project-specific checks, such as SQLGlot dialect checks, only from
   `code.review_checklist` (`code/skill.yaml:28`) when `skill-sync.config.yaml`
   configures it. Do not add them here.
-- `review --chain` remains read-only under [REVIEW-AUTH-001] unless remediation
-  is explicitly authorized. When authorized, fix only non-structural issues,
-  verify them, then follow the change framework and project PR flow.
+- `review --chain` remains read-only under [REVIEW-AUTH-001]. After a later
+  message authorizes remediation, fix only non-structural issues, verify them,
+  then use the commit framework and project PR flow.
 
 ## The Five Axes
 

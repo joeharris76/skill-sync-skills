@@ -44,9 +44,9 @@ fall back to the Makefile, manifests, and project agent docs.
 - The `commit` action handles existing changes; other repository write actions
   commit without a separate commit request.
 - `review`, `adversarial`, `research`, `compare`, `to-spec`, and `handoff`
-  are read-only under `SHARED/review-protocol/SKILL.md` unless the request
-  explicitly combines review with remediation. `review --chain` and `shrink`
-  follow their action references.
+  are read-only under `SHARED/review-protocol/SKILL.md`. Remediation requires a
+  later user message after findings. `review --chain` and `shrink` follow their
+  action references.
 - An inspection-only request for `sweep` or `backlog` remains read-only under
   `SHARED/review-protocol/SKILL.md`. A request to run, execute, or clear
   executes their authorized workflow.
