@@ -53,6 +53,27 @@
         }
       }
     },
+    "bossmode": {
+      "source": {
+        "type": "git",
+        "name": "bossmode",
+        "url": "https://github.com/joeharris76/bossmode.git",
+        "ref": "2709dabbb5cde9a129d1ad5a61fca3cfd3c3089e",
+        "subdir": ".agents/skills",
+        "fetchedAt": "2026-08-25T16:15:00.000Z"
+      },
+      "installMode": "mirror",
+      "files": {
+        "SKILL.md": {
+          "sha256": "3c18182b8df2d6041ba20e8774e2b9381f8eea5a62af4949c69332b7ebb231c4",
+          "size": 10293
+        },
+        "skill.yaml": {
+          "sha256": "6ceb8ac77a646a81d17370124ddbce8b931b5784c97a81f0027ba26354307763",
+          "size": 94
+        }
+      }
+    },
     "code": {
       "source": {
         "type": "local",
