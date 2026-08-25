@@ -4,6 +4,7 @@ sources:
     type: local
     path: ~/.skill-sync/skills
 skills:
+  - bossmode
   - blog
   - code
   - test
