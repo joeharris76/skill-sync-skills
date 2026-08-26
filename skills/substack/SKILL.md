@@ -31,7 +31,7 @@ Use the matching `letterops` MCP action; do not invent higher-level aliases.
   `pull`.
 - Never pull into `_blog/published/` without explicit review of the dry-run.
 - If a write action changes local/state files, commit through
-  `SHARED/change-framework/SKILL.md`; read-only actions do not create commits.
+  `shared-change-framework/SKILL.md`; read-only actions do not create commits.
 - Config is read from `_project/substack/config.yaml` through
   `LETTEROPS_CONFIG`. Paths may be repo-relative or absolute; published
   markdown under `_blog/published/` is the local source of truth.

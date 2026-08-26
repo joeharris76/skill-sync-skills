@@ -21,9 +21,9 @@ skills:
   - substack
   - tidy-perms
   - skill-sync
-  - SHARED/change-framework
-  - SHARED/investigation-framework
-  - SHARED/review-protocol
+  - shared-change-framework
+  - shared-investigation-framework
+  - shared-review-protocol
 targets:
   codex: store/skills
 install_mode: mirror
