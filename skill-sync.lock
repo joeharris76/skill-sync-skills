@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-19T22:24:31.053Z",
+  "lockedAt": "2026-08-24T19:02:03.371Z",
   "skills": {
     "blog": {
       "source": {
@@ -96,8 +96,8 @@
           "size": 785
         },
         "references/five-axis-review.md": {
-          "sha256": "0f680c20be75bad2067b96ecbd0a656ef7d42e1627693de83104650346b1ac0d",
-          "size": 5045
+          "sha256": "9029378b858df2d3cb880dafb01dd0c6d5342f0b24261e8dc90e928f9a46f619",
+          "size": 5283
         },
         "references/handoff.md": {
           "sha256": "37ecdbe8e88662d8bda26b8b87412081750ba1e23fb804a68e0803fe7cf7e8c2",
@@ -443,8 +443,8 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "73d9ce014eb3d273d433ddd21e001b4bf8f05317aa0a26a0c5921d2ab6ca5d36",
-          "size": 5396
+          "sha256": "804cd1618521e8602577efd83ff02fadcbc18a221f138c228e6b3fdca14d18ae",
+          "size": 6140
         },
         "references/adversarial-review.md": {
           "sha256": "923ea419ffa1244a15faabc0f5f3dd2a03b7db2fe0dae40f508e81d78063b2ce",
