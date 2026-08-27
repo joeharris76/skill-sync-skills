@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-27T22:14:11.708Z",
+  "lockedAt": "2026-08-27T23:55:44.765Z",
   "skills": {
     "blog": {
       "source": {
@@ -392,6 +392,29 @@
         "skill.yaml": {
           "sha256": "af7b0283958278c7a251304afdb058a793d1e33687c0574f27492462c8780be6",
           "size": 289
+        }
+      }
+    },
+    "shared-agent-execution": {
+      "source": {
+        "type": "local",
+        "name": "personal",
+        "path": "~/.skill-sync/skills/shared-agent-execution",
+        "fetchedAt": "2026-08-27T23:55:00.000Z"
+      },
+      "installMode": "mirror",
+      "files": {
+        "SKILL.md": {
+          "sha256": "a183622d2e3caca9ecf9442c063293b45d52b2ead2c57955a40027299aa52823",
+          "size": 4191
+        },
+        "references/external-harnesses.md": {
+          "sha256": "e7452512d9a760061b4b6d3808f14a2bcfce1e790413895545fb08f084b83dbc",
+          "size": 4934
+        },
+        "skill.yaml": {
+          "sha256": "ec71a233b04c9c9d860316b330baab2898f7ad3641a68c91cb48359ce4a653fa",
+          "size": 111
         }
       }
     },
