@@ -29,7 +29,7 @@ Authorization has three independent dimensions:
   findings, that explicitly authorizes it.
 - **Workflow.** A later user request to fix, address, or implement the findings
   authorizes the narrow repository-write workflow. Follow
-  `SHARED/change-framework/SKILL.md`, including its branch, verification,
+  `shared-change-framework/SKILL.md`, including its branch, verification,
   commit, push, and draft-PR steps, unless the user requires local-only work or
   another publication mode. It does not authorize unrelated cleanup,
   auto-merge, destructive actions, or hosted tracker writes.

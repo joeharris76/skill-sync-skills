@@ -13,9 +13,9 @@ skills:
   - benchbox
   - substack
   - tidy-perms
-  - SHARED/change-framework
-  - SHARED/investigation-framework
-  - SHARED/review-protocol
+  - shared-change-framework
+  - shared-investigation-framework
+  - shared-review-protocol
 targets:
   claude: ~/.claude/skills
   codex: ~/.codex/skills

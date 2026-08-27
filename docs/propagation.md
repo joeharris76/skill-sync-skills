@@ -18,6 +18,8 @@ routes `skill-sync` to the product source.
 
 1. Edit only an authoritative source.
 2. Merge and push source changes before advancing deployment or consumer pins.
+   For a breaking skill rename, merge the catalog first, then replace
+   feature-branch pins in consumers with the permanent `main` commit SHA.
 3. Regenerate each source or consumer lock with the files it describes.
 4. Serve global loaders from the generated store, never an authoring checkout.
 5. Do not hand-edit generated global or project-local targets.
@@ -41,3 +43,12 @@ branch without changing global loaders or other sessions.
 The deployment lock records the exact resolved revisions. Activation changes
 only loader symlinks after the generated store contains
 `skill-sync/SKILL.md`.
+
+## Renamed shared skills
+
+The shared framework skills were renamed from `SHARED/<name>` to
+`shared-<name>` so one-level workspace loaders can discover them. Consumers
+using the old names must update their manifest, dependency references, and
+lock in the same change before switching to the new catalog revision. Do not
+pin a consumer to a temporary catalog branch after the catalog PR merges;
+regenerate the consumer lock against the permanent `main` commit.
