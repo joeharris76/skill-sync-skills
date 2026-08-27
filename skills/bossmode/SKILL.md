@@ -1,7 +1,7 @@
 ---
 name: bossmode
 description: Organize and execute complex multi-step work through an executive, accountable managers, focused workers, and independent review. Use when work divides across multiple parallel workstreams or requires an independent review gate.
-version: 0.2.0
+version: 0.2.1
 tools: Bash, Read, Write, Edit, Task
 ---
 
@@ -21,6 +21,16 @@ The loading agent session acts as coordinator (Executive and Manager). Two separ
 2. **Reviewer Independence**: The reviewer must be a separate dispatch running an enforced read-only configuration.
 
 Use Bossmode when a goal requires parallel workstreams in separate worktrees or an explicit independent review gate. For single-file, single-symbol, or routine edits, act directly without spawning a hierarchy. Project tracking (e.g. `todo-db`, BenchBox `todo`) remains authoritative.
+
+## Executive Session Output
+
+While Bossmode is active, begin every user-facing Executive message with this exact line:
+
+```text
+-B-O-S-S-M-O-D-E-
+```
+
+Keep using the header through the Close message so the operating mode remains visible until it ends. Do not add it to internal Manager, Worker, or Reviewer reports.
 
 ## Roles and Authority
 
