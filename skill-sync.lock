@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-28T01:29:14.977Z",
+  "lockedAt": "2026-08-28T01:38:28.051Z",
   "skills": {
     "blog": {
       "source": {
@@ -58,19 +58,27 @@
         "type": "git",
         "name": "bossmode",
         "url": "https://github.com/joeharris76/bossmode.git",
-        "ref": "2709dabbb5cde9a129d1ad5a61fca3cfd3c3089e",
+        "ref": "507755f1eb11bdcfb5163db2f56e17f70823608e",
         "subdir": ".agents/skills",
-        "fetchedAt": "2026-08-25T16:15:00.000Z"
+        "fetchedAt": "2026-08-28T01:38:04.000Z"
       },
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "a8bda38516875a212f98cc94cd10c1064594eeff00600e9a1cea100e0b995fda",
-          "size": 12932
+          "sha256": "4d2b11f17e417af5abe8f8342d13eb8e468b6c0e20701e314a8d67188547aae1",
+          "size": 5549
+        },
+        "references/manager.md": {
+          "sha256": "d2bd90e263a5635a3a73aeb6cda341c62baed4ed65dd907d6cea9a8655c094a3",
+          "size": 3144
+        },
+        "references/recovery.md": {
+          "sha256": "3f4374e30b9b0fa7e6cc7aaa71fc37cb1ceaa06189be1faf5b62ad36be73cbf6",
+          "size": 1602
         },
         "skill.yaml": {
-          "sha256": "6ceb8ac77a646a81d17370124ddbce8b931b5784c97a81f0027ba26354307763",
-          "size": 94
+          "sha256": "7cf9c029395227756a5bff96c059c13668249531198b1f66f2441f2c857b2cfb",
+          "size": 185
         }
       }
     },
