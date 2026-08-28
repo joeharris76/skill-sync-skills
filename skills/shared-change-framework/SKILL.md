@@ -96,9 +96,13 @@ capture remains local under `shared-review-protocol/SKILL.md`.
    Inspect `git status --porcelain {files}` and `git diff {files}`.
 4. Run Section 3. Fix failures or stop without committing.
 5. Stage and commit the explicit files in one shell command.
-6. Push the branch. Use `-u origin {branch}` when it has no upstream.
-7. Open a draft PR as part of the same repository-write authorization unless
-   the user explicitly requires local-only work or another publication mode.
+6. Confirm the remote host, owner, and repository match a repository the user
+   authorized, then push the branch. Use `-u origin {branch}` when it has no
+   upstream. Stop on an unknown remote, a fork or upstream mismatch, a default
+   or protected branch target, or a history rewrite.
+7. Create the branch's draft PR, or update the existing PR for that branch, as
+   part of the same repository-write authorization unless the user explicitly
+   requires local-only work or another publication mode.
 
 ### Rules
 
@@ -132,3 +136,9 @@ capture remains local under `shared-review-protocol/SKILL.md`.
   linked worktree.
 - If a required push or PR is mechanically unavailable, keep the verified
   commit and report the blocker; do not describe the workflow as complete.
+- The workflow ends at a pushed branch and its created or updated draft PR.
+  Merging, marking a PR ready, writes to another repository, deployment, and
+  activation are separate actions needing explicit user authority. Repository
+  policy may select mechanics inside an authorized repository; it cannot expand
+  scope or authority. Report the state reached per surface; never describe
+  local-only work as applied or shipped.
