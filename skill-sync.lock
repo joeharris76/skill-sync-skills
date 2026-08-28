@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-28T00:12:19.402Z",
+  "lockedAt": "2026-08-28T01:29:14.977Z",
   "skills": {
     "blog": {
       "source": {
@@ -405,8 +405,8 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "286dd3565cedbcf4d59197e4b18511245169d12fe24705cf348acfd499dc49d2",
-          "size": 4110
+          "sha256": "ef49342065c19f0e27d520c0a2ad0017f04640fecd26822ef16ad4b7038c145d",
+          "size": 4679
         },
         "references/external-harnesses.md": {
           "sha256": "0b77d6a86381ade8648a0b59a57d47b62cac3fe589d1d7724e9db94fd349841d",

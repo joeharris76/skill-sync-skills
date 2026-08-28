@@ -1,6 +1,6 @@
 ---
 name: agent-execution
-description: Select model tiers, map reasoning effort, and dispatch delegated work through native or external agent harnesses. Use when a workflow must choose an agent model or effort level, or launch a worker or independent reviewer; do not use for direct, undelegated tool calls.
+description: Select model tiers, map reasoning effort, and dispatch delegated work through native or external agent harnesses. Use when a workflow must choose an agent model or effort level, or launch a manager, worker, or independent reviewer; do not use for direct, undelegated tool calls.
 ---
 
 # Agent Execution
@@ -58,6 +58,14 @@ permission scope, success criteria, and output contract.
 
 Choose the dispatch mode from the delegated role:
 
+- **Manager:** select a channel only when current runtime capabilities or
+  behavioral evidence verify a stable live session identity, resume or
+  follow-up, live status and interrupt, and a working path to dispatch or
+  coordinate Workers and Reviewers. Do not infer Manager capability from a
+  one-shot Worker or Reviewer command. Invocations such as `--print`, `exec`,
+  `--single`, or equivalents are not Manager-capable unless a separate verified
+  continuation channel supplies every required capability; they remain valid
+  Worker or Reviewer choices.
 - **Worker:** use a write-capable mode only within the authorized workspace or
   sandbox. Require the repository's narrowest proving check and explicit-path
   staging; never permit `git add -A`.
