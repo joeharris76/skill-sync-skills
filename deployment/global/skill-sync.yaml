@@ -8,7 +8,7 @@ sources:
   - name: catalog
     type: git
     url: https://github.com/joeharris76/skill-sync-skills.git
-    ref: 104150cffcb2fbfc610c1993803912f42a9b25ed
+    ref: f1db3a4c3c6af383c9b3e60fb685bc9d706d178b
     subdir: skills
 skills:
   - bossmode
@@ -21,6 +21,7 @@ skills:
   - substack
   - tidy-perms
   - skill-sync
+  - shared-agent-execution
   - shared-change-framework
   - shared-investigation-framework
   - shared-review-protocol
