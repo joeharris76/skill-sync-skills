@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-28T23:31:32.859Z",
+  "lockedAt": "2026-08-28T23:51:40.292Z",
   "skills": {
     "blog": {
       "source": {
@@ -444,8 +444,8 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "c1e173b04a6418c26b4fd586b5a0b4c4680ba7b0b1f8758894f1d3d9ebd8bd45",
-          "size": 6795
+          "sha256": "c45057998c62b86eaa6aefc92dad502c3aa61b3b9fe449140a8a249f2a96a23e",
+          "size": 7392
         },
         "skill.yaml": {
           "sha256": "39b007a53d9126d3fe4e8938a67d616a52be210a82ba211753afa92a073d06bd",
@@ -482,8 +482,8 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "f4306f9bd8ac37b22f89116cffa7e68ff14f7fb260e0ee92fd462ee1d90bb1c3",
-          "size": 7099
+          "sha256": "c55e46de57fa7c71300032124bb69afd259eca0d7b756f13f895911b2a3b6636",
+          "size": 7662
         },
         "references/adversarial-review.md": {
           "sha256": "bd29021f6186767a8bb705631afb3eeaa969eb3c6a5d1d3a23f9a8f9c7dd368d",
