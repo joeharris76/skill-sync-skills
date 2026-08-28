@@ -26,11 +26,12 @@ uv run scripts/activate_global_store.py ~/.skill-sync-deployment/store/skills --
 
 Activation rechecks every lock-owned file before changing a loader symlink. The
 exact top-level `.system/` directory is loader-owned and excluded from managed-
-payload attestation, so the loader root itself is not immutable. All other
-payload must match the generated lock exactly. The activation script refuses
-to replace real directories and atomically updates only symlinks. Test feature
-branches through project-local targets; do not repoint this store to an
-authoring worktree.
+payload attestation, so the loader root itself is not immutable. Attestation
+may check that entry's type without following it, but it never traverses or
+reads `.system/` contents. All other payload must match the generated lock
+exactly. The activation script refuses to replace real directories and
+atomically updates only symlinks. Test feature branches through project-local
+targets; do not repoint this store to an authoring worktree.
 
 ## Lock invariant
 

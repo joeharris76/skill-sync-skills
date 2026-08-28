@@ -3,10 +3,13 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
+from scripts import verify_deployment_store as verifier
 from scripts.verify_deployment_store import default_lock_path, verify_managed_payload
 
 
@@ -89,6 +92,36 @@ class VerifyDeploymentStoreTest(unittest.TestCase):
         (self.store / "skill-sync" / "LINK.md").symlink_to(target)
 
         self.assertTrue(any("symlink is not allowed" in problem for problem in self.problems()))
+
+    def test_rejects_file_swapped_to_symlink_between_lstat_and_open(self) -> None:
+        outside = self.project / "outside"
+        outside.write_bytes(b"skill-sync\n")
+        displaced = self.project / "displaced"
+        real_open = os.open
+        swapped = False
+
+        def swap_before_open(path: object, flags: int, *args: object, **kwargs: object) -> int:
+            nonlocal swapped
+            if path == "SKILL.md" and kwargs.get("dir_fd") is not None and not swapped:
+                swapped = True
+                self.skill_file.replace(displaced)
+                self.skill_file.symlink_to(outside)
+            return real_open(path, flags, *args, **kwargs)
+
+        with mock.patch.object(verifier.os, "open", side_effect=swap_before_open):
+            problems = self.problems()
+
+        self.assertTrue(swapped)
+        self.assertTrue(any("without following links" in problem for problem in problems))
+
+    @unittest.skipUnless(hasattr(os, "mkfifo"), "FIFO creation is unavailable")
+    def test_rejects_special_file_without_opening_it(self) -> None:
+        fifo = self.store / "skill-sync" / "PIPE"
+        os.mkfifo(fifo)
+
+        problems = self.problems()
+
+        self.assertTrue(any("special file is not allowed" in problem for problem in problems))
 
     def test_rejects_unsafe_lock_paths(self) -> None:
         cases = [

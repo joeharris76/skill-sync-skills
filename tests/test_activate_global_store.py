@@ -8,6 +8,9 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
+
+from scripts import activate_global_store as activation
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -134,6 +137,80 @@ class ActivateGlobalStoreTest(unittest.TestCase):
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("refusing to replace non-symlink", result.stderr)
+
+    def test_invalid_second_loader_leaves_first_unchanged(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            project, store = make_deployment(root)
+            previous = root / "previous"
+            previous.mkdir()
+            first = root / "claude" / "skills"
+            second = root / "codex" / "skills"
+            first.parent.mkdir(parents=True)
+            second.mkdir(parents=True)
+            first.symlink_to(previous, target_is_directory=True)
+            first_before = os.readlink(first)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    str(store),
+                    "--lock",
+                    str(project / "skill-sync.lock"),
+                    "--link",
+                    str(first),
+                    "--link",
+                    str(second),
+                    "--apply",
+                ],
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(os.readlink(first), first_before)
+            self.assertTrue(second.is_dir())
+            self.assertFalse(second.is_symlink())
+
+    def test_second_replacement_failure_rolls_back_first_exactly(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            project, store = make_deployment(root)
+            first = root / "loaders" / "first"
+            second = root / "loaders" / "second"
+            first.parent.mkdir()
+            first.symlink_to("../prior-one", target_is_directory=True)
+            second.symlink_to("../prior-two", target_is_directory=True)
+            first_before = os.readlink(first)
+            second_before = os.readlink(second)
+            real_replace = os.replace
+            failed = False
+
+            def fail_second_once(source: object, destination: object) -> None:
+                nonlocal failed
+                if Path(destination) == second and not failed:
+                    failed = True
+                    real_replace(source, destination)
+                    raise OSError("induced second replacement failure")
+                real_replace(source, destination)
+
+            with mock.patch.object(
+                activation.os, "replace", side_effect=fail_second_once
+            ):
+                with self.assertRaisesRegex(
+                    RuntimeError, "prior loader state restored"
+                ):
+                    activation.activate_store(
+                        store,
+                        project / "skill-sync.lock",
+                        [first, second],
+                        apply=True,
+                    )
+
+            self.assertTrue(failed)
+            self.assertEqual(os.readlink(first), first_before)
+            self.assertEqual(os.readlink(second), second_before)
 
 
 if __name__ == "__main__":

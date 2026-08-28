@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Attest a generated skill-sync payload without traversing loader-owned .system."""
+"""Attest managed skills while leaving loader-owned ``.system`` untraversed."""
 
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 import hashlib
 import json
 import os
@@ -16,6 +17,8 @@ from typing import Any
 
 LOADER_OWNED_ROOT = ".system"
 SHA256_RE = re.compile(r"[0-9a-f]{64}")
+DIRECTORY_OPEN_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+FILE_OPEN_FLAGS = os.O_RDONLY | os.O_NOFOLLOW
 
 
 def default_lock_path(store: Path) -> Path:
@@ -43,14 +46,6 @@ def safe_relative_path(value: object, label: str) -> tuple[PurePosixPath | None,
     ):
         return None, f"{label} is not a normalized relative path: {value!r}"
     return path, None
-
-
-def sha256_of(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def expected_payload(lock: object) -> tuple[dict[str, tuple[str, int] | None], set[str], list[str]]:
@@ -135,101 +130,312 @@ def expected_payload(lock: object) -> tuple[dict[str, tuple[str, int] | None], s
     return expected_files, expected_dirs, problems
 
 
-def actual_payload(store: Path) -> tuple[dict[str, Path], set[str], list[str]]:
-    """Walk managed payload without statting or traversing exact top-level .system."""
-    files: dict[str, Path] = {}
-    directories: set[str] = set()
+def _object_identity(value: os.stat_result) -> tuple[int, int, int]:
+    return value.st_dev, value.st_ino, stat.S_IFMT(value.st_mode)
+
+
+def _same_object(left: os.stat_result, right: os.stat_result) -> bool:
+    return _object_identity(left) == _object_identity(right)
+
+
+def _same_snapshot(left: os.stat_result, right: os.stat_result) -> bool:
+    return _same_object(left, right) and (
+        left.st_size,
+        left.st_mtime_ns,
+        left.st_ctime_ns,
+    ) == (
+        right.st_size,
+        right.st_mtime_ns,
+        right.st_ctime_ns,
+    )
+
+
+def _read_regular_file_at(
+    directory_fd: int, name: str, before: os.stat_result, relative_name: str
+) -> tuple[tuple[str, int] | None, list[str]]:
+    """Hash one already-open regular file and prove the path still names its inode."""
     problems: list[str] = []
+    try:
+        file_fd = os.open(name, FILE_OPEN_FLAGS, dir_fd=directory_fd)
+    except OSError as error:
+        return None, [f"cannot open managed file {relative_name} without following links: {error}"]
 
     try:
-        root_stat = store.lstat()
-    except OSError as error:
-        return {}, set(), [f"cannot inspect store {store}: {error}"]
-    if stat.S_ISLNK(root_stat.st_mode) or not stat.S_ISDIR(root_stat.st_mode):
-        return {}, set(), [f"store must be a real directory, not a symlink: {store}"]
+        opened = os.fstat(file_fd)
+        if not stat.S_ISREG(opened.st_mode) or not _same_object(before, opened):
+            return None, [f"managed file changed inode or type while opening: {relative_name}"]
 
-    stack: list[tuple[Path, PurePosixPath]] = [(store, PurePosixPath("."))]
-    while stack:
-        directory, relative_directory = stack.pop()
+        digest = hashlib.sha256()
+        size = 0
+        while True:
+            chunk = os.read(file_fd, 1 << 20)
+            if not chunk:
+                break
+            size += len(chunk)
+            digest.update(chunk)
+
+        after_read = os.fstat(file_fd)
+        if not _same_snapshot(opened, after_read):
+            problems.append(f"managed file changed while reading: {relative_name}")
         try:
-            entries = sorted(os.scandir(directory), key=lambda entry: entry.name)
+            after_path = os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
         except OSError as error:
-            problems.append(f"cannot traverse {directory}: {error}")
+            problems.append(f"managed file changed after reading {relative_name}: {error}")
+        else:
+            if not _same_object(opened, after_path) or not stat.S_ISREG(after_path.st_mode):
+                problems.append(f"managed file path changed inode or type: {relative_name}")
+        return (digest.hexdigest(), size), problems
+    finally:
+        os.close(file_fd)
+
+
+def _scan_directory(
+    directory_fd: int,
+    relative_directory: PurePosixPath,
+    files: dict[str, tuple[str, int]],
+    directories: set[str],
+    problems: list[str],
+) -> None:
+    """Traverse from directory descriptors; every child open refuses symlinks."""
+    try:
+        entries = sorted(os.scandir(directory_fd), key=lambda entry: entry.name)
+    except OSError as error:
+        label = relative_directory.as_posix()
+        problems.append(f"cannot traverse managed directory {label}: {error}")
+        return
+
+    for entry in entries:
+        relative_path = (
+            PurePosixPath(entry.name)
+            if relative_directory == PurePosixPath(".")
+            else relative_directory / entry.name
+        )
+        relative_name = relative_path.as_posix()
+        try:
+            entry_stat = os.stat(entry.name, dir_fd=directory_fd, follow_symlinks=False)
+        except OSError as error:
+            problems.append(f"cannot inspect managed path {relative_name}: {error}")
             continue
 
-        for entry in entries:
-            relative_path = (
-                PurePosixPath(entry.name)
-                if relative_directory == PurePosixPath(".")
-                else relative_directory / entry.name
+        if relative_directory == PurePosixPath(".") and entry.name == LOADER_OWNED_ROOT:
+            # Type is checked with lstat semantics. Loader-owned contents are never
+            # opened, traversed, hashed, sized, or otherwise read.
+            if not stat.S_ISDIR(entry_stat.st_mode):
+                problems.append(
+                    f"loader-owned {LOADER_OWNED_ROOT} must be a real directory; "
+                    "symlink is not allowed"
+                )
+            continue
+        if stat.S_ISLNK(entry_stat.st_mode):
+            problems.append(f"symlink is not allowed in managed payload: {relative_name}")
+            continue
+        if stat.S_ISREG(entry_stat.st_mode):
+            payload, file_problems = _read_regular_file_at(
+                directory_fd, entry.name, entry_stat, relative_name
             )
-            relative_name = relative_path.as_posix()
+            problems.extend(file_problems)
+            if payload is not None:
+                files[relative_name] = payload
+            continue
+        if not stat.S_ISDIR(entry_stat.st_mode):
+            problems.append(f"special file is not allowed in managed payload: {relative_name}")
+            continue
+
+        try:
+            child_fd = os.open(entry.name, DIRECTORY_OPEN_FLAGS, dir_fd=directory_fd)
+        except OSError as error:
+            problems.append(
+                f"cannot open managed directory {relative_name} without following links: {error}"
+            )
+            continue
+        try:
+            opened = os.fstat(child_fd)
+            if not stat.S_ISDIR(opened.st_mode) or not _same_object(entry_stat, opened):
+                problems.append(
+                    f"managed directory changed inode or type while opening: {relative_name}"
+                )
+                continue
+            directories.add(relative_name)
+            _scan_directory(child_fd, relative_path, files, directories, problems)
+            after_scan = os.fstat(child_fd)
+            if not _same_snapshot(opened, after_scan):
+                problems.append(f"managed directory changed while traversing: {relative_name}")
             try:
-                entry_stat = entry.stat(follow_symlinks=False)
+                after_path = os.stat(
+                    entry.name, dir_fd=directory_fd, follow_symlinks=False
+                )
             except OSError as error:
-                problems.append(f"cannot inspect managed path {relative_name}: {error}")
-                continue
-
-            if (
-                relative_directory == PurePosixPath(".")
-                and entry.name == LOADER_OWNED_ROOT
-                and stat.S_ISDIR(entry_stat.st_mode)
-            ):
-                continue
-            if stat.S_ISLNK(entry_stat.st_mode):
-                problems.append(f"symlink is not allowed in managed payload: {relative_name}")
-            elif stat.S_ISDIR(entry_stat.st_mode):
-                directories.add(relative_name)
-                stack.append((Path(entry.path), relative_path))
-            elif stat.S_ISREG(entry_stat.st_mode):
-                files[relative_name] = Path(entry.path)
+                problems.append(
+                    f"managed directory changed after traversal {relative_name}: {error}"
+                )
             else:
-                problems.append(f"special file is not allowed in managed payload: {relative_name}")
+                if not _same_object(opened, after_path) or not stat.S_ISDIR(after_path.st_mode):
+                    problems.append(
+                        f"managed directory path changed inode or type: {relative_name}"
+                    )
+        finally:
+            os.close(child_fd)
 
-    return files, directories, problems
+
+def _read_lock(lock_path: Path) -> tuple[Any | None, list[str]]:
+    try:
+        before = lock_path.lstat()
+    except OSError as error:
+        return None, [f"cannot inspect generated lock {lock_path}: {error}"]
+    if stat.S_ISLNK(before.st_mode) or not stat.S_ISREG(before.st_mode):
+        return None, [f"generated lock must be a real file, not a symlink: {lock_path}"]
+    try:
+        lock_fd = os.open(lock_path, FILE_OPEN_FLAGS)
+    except OSError as error:
+        return None, [f"cannot open generated lock without following links {lock_path}: {error}"]
+    try:
+        opened = os.fstat(lock_fd)
+        if not stat.S_ISREG(opened.st_mode) or not _same_object(before, opened):
+            return None, [f"generated lock changed inode or type while opening: {lock_path}"]
+        chunks: list[bytes] = []
+        while True:
+            chunk = os.read(lock_fd, 1 << 20)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        after_read = os.fstat(lock_fd)
+        if not _same_snapshot(opened, after_read):
+            return None, [f"generated lock changed while reading: {lock_path}"]
+        try:
+            after_path = lock_path.lstat()
+        except OSError as error:
+            return None, [f"generated lock changed after reading {lock_path}: {error}"]
+        if not _same_object(opened, after_path) or not stat.S_ISREG(after_path.st_mode):
+            return None, [f"generated lock path changed inode or type: {lock_path}"]
+        try:
+            return json.loads(b"".join(chunks).decode("utf-8")), []
+        except (UnicodeError, json.JSONDecodeError) as error:
+            return None, [f"cannot read generated lock {lock_path}: {error}"]
+    finally:
+        os.close(lock_fd)
+
+
+@dataclass
+class AttestedStore:
+    """An attested store whose root descriptor stays open through activation."""
+
+    path: Path
+    root_fd: int
+    root_stat: os.stat_result
+    expected_files: dict[str, tuple[str, int] | None]
+    expected_dirs: set[str]
+
+    def close(self) -> None:
+        if self.root_fd >= 0:
+            os.close(self.root_fd)
+            self.root_fd = -1
+
+    def __enter__(self) -> AttestedStore:
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.close()
+
+    @property
+    def identity(self) -> tuple[int, int, int]:
+        return _object_identity(self.root_stat)
+
+    def assert_path_identity(self) -> None:
+        """Reject replacement of the path that will be exposed to loaders."""
+        try:
+            current = self.path.lstat()
+        except OSError as error:
+            raise RuntimeError(f"attested store path changed: {self.path}: {error}") from error
+        if not stat.S_ISDIR(current.st_mode) or _object_identity(current) != self.identity:
+            raise RuntimeError(f"attested store path changed inode or type: {self.path}")
+
+    def check_payload(self) -> list[str]:
+        """Recheck exact managed contents through the held root descriptor."""
+        problems: list[str] = []
+        try:
+            scan_fd = os.open(".", DIRECTORY_OPEN_FLAGS, dir_fd=self.root_fd)
+        except OSError as error:
+            return [f"cannot reopen attested store descriptor: {error}"]
+        try:
+            opened = os.fstat(scan_fd)
+            if _object_identity(opened) != self.identity:
+                return ["attested store descriptor changed inode or type"]
+            actual_files: dict[str, tuple[str, int]] = {}
+            actual_dirs: set[str] = set()
+            _scan_directory(
+                scan_fd,
+                PurePosixPath("."),
+                actual_files,
+                actual_dirs,
+                problems,
+            )
+        finally:
+            os.close(scan_fd)
+
+        for relative_name in sorted(set(self.expected_files) - set(actual_files)):
+            problems.append(f"managed file is missing: {relative_name}")
+        for relative_name in sorted(set(actual_files) - set(self.expected_files)):
+            problems.append(f"unexpected managed file: {relative_name}")
+        for relative_name in sorted(self.expected_dirs - actual_dirs):
+            problems.append(f"managed directory is missing: {relative_name}")
+        for relative_name in sorted(actual_dirs - self.expected_dirs):
+            problems.append(f"unexpected managed directory: {relative_name}")
+
+        for relative_name in sorted(set(self.expected_files) & set(actual_files)):
+            expected = self.expected_files[relative_name]
+            if expected is None:
+                continue
+            expected_hash, expected_size = expected
+            actual_hash, actual_size = actual_files[relative_name]
+            if actual_size != expected_size:
+                problems.append(
+                    f"managed file size mismatch: {relative_name} ({actual_size} != {expected_size})"
+                )
+            if actual_hash != expected_hash:
+                problems.append(f"managed file sha256 mismatch: {relative_name}")
+
+        try:
+            self.assert_path_identity()
+        except RuntimeError as error:
+            problems.append(str(error))
+        return problems
+
+
+def attest_managed_payload(
+    store: Path, lock_path: Path
+) -> tuple[AttestedStore | None, list[str]]:
+    """Open and attest a store, returning a held root descriptor on success."""
+    lock, lock_problems = _read_lock(lock_path)
+    if lock_problems:
+        return None, lock_problems
+    expected_files, expected_dirs, problems = expected_payload(lock)
+    if problems:
+        return None, problems
+
+    try:
+        root_fd = os.open(store, DIRECTORY_OPEN_FLAGS)
+    except OSError as error:
+        return None, [f"store must be an openable real directory, not a symlink: {store}: {error}"]
+    root_stat = os.fstat(root_fd)
+    attestation = AttestedStore(
+        path=store,
+        root_fd=root_fd,
+        root_stat=root_stat,
+        expected_files=expected_files,
+        expected_dirs=expected_dirs,
+    )
+    problems = attestation.check_payload()
+    if problems:
+        attestation.close()
+        return None, problems
+    return attestation, []
 
 
 def verify_managed_payload(store: Path, lock_path: Path) -> list[str]:
     """Return attestation problems; an empty list means the managed payload matches."""
-    try:
-        lock_stat = lock_path.lstat()
-    except OSError as error:
-        return [f"cannot inspect generated lock {lock_path}: {error}"]
-    if stat.S_ISLNK(lock_stat.st_mode) or not stat.S_ISREG(lock_stat.st_mode):
-        return [f"generated lock must be a real file, not a symlink: {lock_path}"]
-    try:
-        lock: Any = json.loads(lock_path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as error:
-        return [f"cannot read generated lock {lock_path}: {error}"]
-
-    expected_files, expected_dirs, problems = expected_payload(lock)
-    actual_files, actual_dirs, actual_problems = actual_payload(store)
-    problems.extend(actual_problems)
-
-    for relative_name in sorted(set(expected_files) - set(actual_files)):
-        problems.append(f"managed file is missing: {relative_name}")
-    for relative_name in sorted(set(actual_files) - set(expected_files)):
-        problems.append(f"unexpected managed file: {relative_name}")
-    for relative_name in sorted(expected_dirs - actual_dirs):
-        problems.append(f"managed directory is missing: {relative_name}")
-    for relative_name in sorted(actual_dirs - expected_dirs):
-        problems.append(f"unexpected managed directory: {relative_name}")
-
-    for relative_name in sorted(set(expected_files) & set(actual_files)):
-        metadata = expected_files[relative_name]
-        if metadata is None:
-            continue
-        expected_hash, expected_size = metadata
-        path = actual_files[relative_name]
-        actual_size = path.stat().st_size
-        if actual_size != expected_size:
-            problems.append(
-                f"managed file size mismatch: {relative_name} ({actual_size} != {expected_size})"
-            )
-        actual_hash = sha256_of(path)
-        if actual_hash != expected_hash:
-            problems.append(f"managed file sha256 mismatch: {relative_name}")
-
+    attestation, problems = attest_managed_payload(store, lock_path)
+    if attestation is not None:
+        attestation.close()
     return problems
 
 

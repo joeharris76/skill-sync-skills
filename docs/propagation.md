@@ -46,7 +46,9 @@ The deployment lock records the exact resolved revisions. Activation changes
 only loader symlinks after the generated store contains
 `skill-sync/SKILL.md`. Attestation covers the exact lock-owned payload, not the
 whole loader root: the exact top-level `.system/` directory is loader-owned,
-excluded before traversal, and never modified or deleted by these scripts.
+excluded before traversal, and never modified or deleted by these scripts. Its
+entry may be checked without following it to confirm that it is a real
+directory; its contents are never traversed or read.
 
 ## Renamed shared skills
 
