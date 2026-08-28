@@ -1,9 +1,10 @@
 # External Harnesses
 
-Use these known-good direct fallback configurations only when native delegation
-is unavailable or cannot supply the required model, isolation, or read-only
-boundary. Select the documented command for the delegated role and use it
-directly. If the command fails, diagnose that failure then.
+Use these known-good direct configurations whenever an external harness is
+selected. Choose the documented command for the delegated role and use it
+directly. Only after an actual command failure may reactive diagnosis use
+`command -v` and the installed `--help` output to distinguish a missing binary
+from flag drift. Do not run those checks proactively.
 
 - Worker commands require already-authorized write scope bounded by a sandbox,
   workspace, or dedicated worktree.

@@ -49,8 +49,11 @@ settings.
 
 ## Dispatch Rules
 
-Use native host subagents by default. Assign an explicit role, bounded goal,
-path constraints, permission scope, success criteria, and output contract.
+Treat native subagents and external harnesses as peer dispatch choices. Select
+between them using the factors relevant to the assignment: task and model fit,
+provider usage or capacity, cost, isolation or read-only strength, and useful
+parallelism. Assign an explicit role, bounded goal, path constraints,
+permission scope, success criteria, and output contract.
 
 Choose the dispatch mode from the delegated role:
 
@@ -62,11 +65,9 @@ Choose the dispatch mode from the delegated role:
   requires explicit findings-only instructions that forbid edits, commits,
   pushes, and other mutations.
 
-Use an external or headless harness only when native delegation is unavailable
-or cannot supply the required model, isolation, or read-only boundary. Then read
-[references/external-harnesses.md](references/external-harnesses.md), select the
-documented command for the role, and use it directly. If that command fails,
-diagnose the actual failure then.
+When selecting an external or headless harness, read
+[references/external-harnesses.md](references/external-harnesses.md), choose the
+documented command for the role, and use it directly.
 
 Headless dispatch may suppress interactive approval prompts only when write
 scope is bounded by a sandbox, workspace flag, or dedicated worktree. Never add
