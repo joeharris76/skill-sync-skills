@@ -1,7 +1,3 @@
-depends:
-  - shared-agent-execution
-  - shared-change-framework
-  - shared-review-protocol
 tags:
   - orchestration
   - workflow
