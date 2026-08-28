@@ -7,11 +7,12 @@ directly. Only after an actual command failure may reactive diagnosis use
 from flag drift. Do not run those checks proactively.
 
 - Worker commands require already-authorized write scope bounded by a sandbox,
-  workspace, or dedicated worktree.
+  workspace, or dedicated worktree. Confirmation automation in a documented
+  Worker command is allowed only within that bounded scope.
 - Reviewer commands use the declared **Hard Read-Only** or **Soft Read-Only**
   classification. Reinforce Soft Read-Only with findings-only instructions that
   forbid edits, commits, pushes, and other mutations.
-- Do not add permission-bypass flags.
+- Do not add flags that remove workspace, sandbox, or tool boundaries.
 
 ## Frontier Lab Harnesses
 
@@ -63,4 +64,4 @@ from flag drift. Do not run those checks proactively.
   - Reviewer (Hard Read-Only): `(cd "$WORKSPACE" && hermes chat -q --tools read,search "$PROMPT")`
 - **aider**
   - Worker (Write): `(cd "$WORKSPACE" && aider --model "$MODEL" --message "$PROMPT" --yes-always --no-auto-commits)`
-  - Reviewer (Hard Read-Only): `(cd "$WORKSPACE" && aider --model "$MODEL" --message "$PROMPT" --chat-mode ask --yes-always)`
+  - Reviewer (Hard Read-Only): `(cd "$WORKSPACE" && aider --model "$MODEL" --message "$PROMPT" --chat-mode ask)`

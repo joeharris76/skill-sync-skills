@@ -15,8 +15,9 @@ acceptance criteria.
 Tiers describe operating roles, not absolute quality rankings. Match models to
 task complexity and risk.
 
-*Selection Rule*: Pick the tier here; take the exact identifier from the target
-harness row in
+*Selection Rule*: Pick the tier here. For native dispatch, choose the listed
+tier model directly. When an external harness is selected, take its exact
+harness-specific identifier from
 [references/external-harnesses.md](references/external-harnesses.md). Default
 reasoning effort to `medium`. Use maximum effort only for Tier 1 adversarial
 review; use `low` for mechanical bulk work.
@@ -69,11 +70,9 @@ When selecting an external or headless harness, read
 [references/external-harnesses.md](references/external-harnesses.md), choose the
 documented command for the role, and use it directly.
 
-Headless dispatch may suppress interactive approval prompts only when write
-scope is bounded by a sandbox, workspace flag, or dedicated worktree. Never add
-flags that remove path or permission limits, including
-`--permission-mode acceptEdits`, `--dangerously-skip-permissions`,
-`--always-approve`, or `--yolo`.
+Headless Worker dispatch may automate confirmations only when write scope is
+already bounded by a sandbox, workspace flag, or dedicated worktree. Never add
+flags that remove workspace, sandbox, or tool boundaries.
 
 The external harness reference contains the worker and reviewer commands, model
 identifiers, and hard-versus-soft read-only classifications.
