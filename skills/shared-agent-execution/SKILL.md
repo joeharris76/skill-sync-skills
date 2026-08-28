@@ -49,9 +49,8 @@ settings.
 
 ## Dispatch Rules
 
-Prefer native host subagents when the current environment provides them. Assign
-an explicit role, bounded goal, path constraints, permission scope, success
-criteria, and output contract.
+Use native host subagents by default. Assign an explicit role, bounded goal,
+path constraints, permission scope, success criteria, and output contract.
 
 Choose the dispatch mode from the delegated role:
 
@@ -63,11 +62,11 @@ Choose the dispatch mode from the delegated role:
   requires explicit findings-only instructions that forbid edits, commits,
   pushes, and other mutations.
 
-Before any external dispatch, verify the selected binary with `command -v` and
-inspect that installed binary's local `--help` output for every model, effort,
-workspace, tool, sandbox, and permission flag being used. Harness flags can
-drift; a documented command is not proof that the installed version accepts or
-enforces it.
+Use an external or headless harness only when native delegation is unavailable
+or cannot supply the required model, isolation, or read-only boundary. Then read
+[references/external-harnesses.md](references/external-harnesses.md), select the
+documented command for the role, and use it directly. If that command fails,
+diagnose the actual failure then.
 
 Headless dispatch may suppress interactive approval prompts only when write
 scope is bounded by a sandbox, workspace flag, or dedicated worktree. Never add
@@ -75,7 +74,5 @@ flags that remove path or permission limits, including
 `--permission-mode acceptEdits`, `--dangerously-skip-permissions`,
 `--always-approve`, or `--yolo`.
 
-Read [references/external-harnesses.md](references/external-harnesses.md) only
-when an external or headless harness will actually be used. It contains the
-worker and reviewer commands, model identifiers, and hard-versus-soft
-read-only classifications.
+The external harness reference contains the worker and reviewer commands, model
+identifiers, and hard-versus-soft read-only classifications.

@@ -1,19 +1,16 @@
 # External Harnesses
 
-These commands are known-good reference configurations, not a substitute for
-checking the installed harness. Before dispatch:
+Use these known-good direct fallback configurations only when native delegation
+is unavailable or cannot supply the required model, isolation, or read-only
+boundary. Select the documented command for the delegated role and use it
+directly. If the command fails, diagnose that failure then.
 
-1. Run `command -v <harness>` and stop if the selected binary is unavailable.
-2. Inspect the installed binary's local `--help` output and verify every model,
-   effort, workspace, tool, sandbox, and permission flag in the selected
-   command. Flags and enforcement can drift between versions.
-3. Use the Worker command only for authorized writes within a bounded sandbox,
-   workspace, or dedicated worktree.
-4. For independent review, prefer **Hard Read-Only**. **Soft Read-Only** relies
-   on plan-mode behavior and must be reinforced with findings-only instructions
-   that forbid edits, commits, pushes, and other mutations.
-5. Do not add permission-bypass flags. If the installed harness cannot provide
-   the required path or read-only boundary, use a different harness or stop.
+- Worker commands require already-authorized write scope bounded by a sandbox,
+  workspace, or dedicated worktree.
+- Reviewer commands use the declared **Hard Read-Only** or **Soft Read-Only**
+  classification. Reinforce Soft Read-Only with findings-only instructions that
+  forbid edits, commits, pushes, and other mutations.
+- Do not add permission-bypass flags.
 
 ## Frontier Lab Harnesses
 
