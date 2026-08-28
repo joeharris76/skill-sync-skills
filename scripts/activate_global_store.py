@@ -7,10 +7,13 @@ import argparse
 import os
 from pathlib import Path
 
+from verify_deployment_store import default_lock_path, verify_managed_payload
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("store", type=Path)
+    parser.add_argument("--lock", type=Path)
     parser.add_argument("--link", action="append", type=Path)
     parser.add_argument("--apply", action="store_true")
     return parser.parse_args()
@@ -27,7 +30,18 @@ def replace_link(link: Path, store: Path) -> None:
 
 def main() -> int:
     args = parse_args()
-    store = args.store.expanduser().resolve()
+    store_path = args.store.expanduser().absolute()
+    lock_path = (
+        args.lock.expanduser().absolute()
+        if args.lock is not None
+        else default_lock_path(store_path)
+    )
+    problems = verify_managed_payload(store_path, lock_path)
+    if problems:
+        details = "\n".join(f"  - {problem}" for problem in problems)
+        raise RuntimeError(f"managed payload attestation failed:\n{details}")
+
+    store = store_path.resolve()
     if not (store / "skill-sync" / "SKILL.md").is_file():
         raise RuntimeError(f"store lacks skill-sync/SKILL.md: {store}")
 

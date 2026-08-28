@@ -37,12 +37,16 @@ branch without changing global loaders or other sessions.
    `deployment/global/skill-sync.yaml` through review.
 2. Copy the approved manifest to `~/.skill-sync-deployment/`.
 3. Dry-run, sync, and validate that deployment project.
-4. Run `scripts/activate_global_store.py` with `--apply`.
-5. Sync downstream projects that need the new revision.
+4. Attest the generated store with `scripts/verify_deployment_store.py`.
+5. Run `scripts/activate_global_store.py` with `--apply`; it repeats the
+   attestation before changing either loader link.
+6. Sync downstream projects that need the new revision.
 
 The deployment lock records the exact resolved revisions. Activation changes
 only loader symlinks after the generated store contains
-`skill-sync/SKILL.md`.
+`skill-sync/SKILL.md`. Attestation covers the exact lock-owned payload, not the
+whole loader root: the exact top-level `.system/` directory is loader-owned,
+excluded before traversal, and never modified or deleted by these scripts.
 
 ## Renamed shared skills
 

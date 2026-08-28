@@ -20,12 +20,17 @@ cp deployment/global/skill-sync.yaml ~/.skill-sync-deployment/skill-sync.yaml
 node /Users/joe/Developer/skill-sync/dist/cli/index.js sync --dry-run --project ~/.skill-sync-deployment
 node /Users/joe/Developer/skill-sync/dist/cli/index.js sync --project ~/.skill-sync-deployment
 node /Users/joe/Developer/skill-sync/dist/cli/index.js validate --exit-code --project ~/.skill-sync-deployment
+python3 scripts/verify_deployment_store.py ~/.skill-sync-deployment/store/skills
 uv run scripts/activate_global_store.py ~/.skill-sync-deployment/store/skills --apply
 ```
 
-The activation script refuses to replace real directories and atomically
-updates only symlinks. Test feature branches through project-local targets; do
-not repoint this store to an authoring worktree.
+Activation rechecks every lock-owned file before changing a loader symlink. The
+exact top-level `.system/` directory is loader-owned and excluded from managed-
+payload attestation, so the loader root itself is not immutable. All other
+payload must match the generated lock exactly. The activation script refuses
+to replace real directories and atomically updates only symlinks. Test feature
+branches through project-local targets; do not repoint this store to an
+authoring worktree.
 
 ## Lock invariant
 
