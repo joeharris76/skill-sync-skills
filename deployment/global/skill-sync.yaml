@@ -3,12 +3,12 @@ sources:
   - name: product
     type: git
     url: https://github.com/joeharris76/skill-sync.git
-    ref: 286f3a736101e00af52e3d71427359bec09f94ab
+    ref: 0895dc2dbb92fa73c0d9d3efa7620769bcc8a8c4
     subdir: skills
   - name: catalog
     type: git
     url: https://github.com/joeharris76/skill-sync-skills.git
-    ref: f1db3a4c3c6af383c9b3e60fb685bc9d706d178b
+    ref: c7738d6edcf22d085cc8863c13cf29a5e529e950
     subdir: skills
 skills:
   - bossmode
