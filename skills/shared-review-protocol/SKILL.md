@@ -1,6 +1,6 @@
 ---
 name: review-protocol
-description: Shared protocol for review-shaped actions, authorization scope, defect routing, L1/L2/L3 planning-depth layers, local-only capture, and plan prior-decision reconciliation.
+description: Shared protocol for review-shaped actions, authorization scope, defect routing, solution-fit assessment, L1/L2/L3 planning-depth layers, local-only capture, and plan prior-decision reconciliation.
 ---
 
 # Review Protocol
@@ -127,7 +127,42 @@ For projects without their own binding:
 2. Add frontmatter: `id`, `date`, `status`, `finding_kind`, `review_context`, `related_paths`, `suggested_sweep`, and `todo_id`.
 3. Report the path. Promote through the tracker's deferral or finding flow when available.
 
-## 6. Semantic Parity [REVIEW-PARITY-001]
+## 6. Solution Fit [REVIEW-FIT-001]
+
+Before reporting findings for a change, feature, or plan, restate the requested
+outcome independently of the implementation and compare it against the smallest
+solution that would satisfy that outcome. When no requested outcome is on
+record, restate the outcome from the task or tracker, or note its absence.
+
+For the standard of proof, treat plans, acceptance criteria, tests, CI, and
+self-reports as claims per `references/adversarial-review.md` lines 21-22 and
+[REVIEW-DEPTH-001]. They do not establish that the chosen design is appropriate.
+
+Flag a mechanism whose purpose is not supported by a concrete requirement or
+failure case in the task, the repository, or the tracker, and for which a
+smaller solution meets the same requirement. Cite the evidence for each flag.
+Also flag a mechanism that:
+
+- freezes incidental wording or repository shape
+- duplicates enforcement that already exists
+- couples unrelated future changes
+- claims more assurance than it provides
+
+Name that smaller solution. Do not flag defensive practice the project already
+applies consistently, and match the evidence discipline of [REVIEW-DEFECT-001].
+
+Route a solution-fit finding that has no accompanying defect as an action item
+that names the smaller sufficient solution. Do not place it in the defect
+severity table. Issue the normal verdict regardless.
+
+For validators and policy gates specifically, also report:
+
+- the guaranteed invariant
+- likely false positives and negatives
+- maintenance triggers
+- the simpler alternatives the change did not take
+
+## 7. Semantic Parity [REVIEW-PARITY-001]
 
 This skill is the cross-project behavioral contract. A longer project protocol
 may add rationale and storage bindings, but it must preserve these policy IDs
@@ -138,6 +173,7 @@ and their semantics:
 - `REVIEW-DEPTH-001`
 - `REVIEW-L2-001`
 - `REVIEW-CAPTURE-001`
+- `REVIEW-FIT-001`
 - `REVIEW-PARITY-001`
 - `REVIEW-PLAN-RECON-001`
 
@@ -145,7 +181,7 @@ Wording and layout may differ. Missing IDs or contradictory semantics are
 drift. Until reconciled, this skill governs behavior and the project document
 governs only project-specific storage.
 
-## 7. Plan prior-decision reconciliation [REVIEW-PLAN-RECON-001]
+## 8. Plan prior-decision reconciliation [REVIEW-PLAN-RECON-001]
 
 Claim-against-code checking is necessary and not sufficient for plan reviews.
 Before judging a plan's steps, enumerate the recorded decision surfaces the
