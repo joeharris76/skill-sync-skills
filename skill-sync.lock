@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-08-29T12:42:34.697Z",
+  "lockedAt": "2026-08-29T12:43:51.432Z",
   "skills": {
     "blog": {
       "source": {
@@ -58,31 +58,31 @@
         "type": "git",
         "name": "bossmode",
         "url": "https://github.com/joeharris76/bossmode.git",
-        "ref": "37d2a4345201518eef418665eef2f7f38c1b8fd5",
+        "ref": "b0ed5f6b70b18d6bf4da0c34f6a478b6d34db3fe",
         "subdir": ".agents/skills",
-        "fetchedAt": "2026-08-28T21:19:23.000Z"
+        "fetchedAt": "2026-08-29T12:43:51.000Z"
       },
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "38f81c047f4efc3ad0e234682f54f23f85951e6d9a12dda9c429f29bf62c704c",
-          "size": 6364
+          "sha256": "1c116a3d9b334ea1dca13fbe21aaf2a0d04225f716bdf2ac84323d0a20437b1c",
+          "size": 10595
         },
         "references/agent-execution.md": {
-          "sha256": "b8979b1167902bbdaaa5ccdf11efbaa90558f189a82503156b4dfa11954cca98",
-          "size": 4123
+          "sha256": "6a01f7933566c4d5fdc7610e6c6cc3db447a5e0c4d81e2da4e697963a9d9a80f",
+          "size": 4358
         },
         "references/external-harnesses.md": {
           "sha256": "0b77d6a86381ade8648a0b59a57d47b62cac3fe589d1d7724e9db94fd349841d",
           "size": 4864
         },
         "references/manager.md": {
-          "sha256": "5dedb2710b61592690ee64b59954955a24d981aeef978176182463536211e0be",
-          "size": 4019
+          "sha256": "d5999b7a2f30527d7d514830a01af7d3cdfc5c926409e7fac9472399dda90dc1",
+          "size": 5555
         },
         "references/recovery.md": {
-          "sha256": "3f4374e30b9b0fa7e6cc7aaa71fc37cb1ceaa06189be1faf5b62ad36be73cbf6",
-          "size": 1602
+          "sha256": "5cd1d7c46e31418097b7f9d9ad8f65c4c89b9fe5faee5ffe1b964817cd681f79",
+          "size": 1780
         },
         "skill.yaml": {
           "sha256": "6ceb8ac77a646a81d17370124ddbce8b931b5784c97a81f0027ba26354307763",
