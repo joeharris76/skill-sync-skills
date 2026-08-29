@@ -127,7 +127,21 @@ For projects without their own binding:
 2. Add frontmatter: `id`, `date`, `status`, `finding_kind`, `review_context`, `related_paths`, `suggested_sweep`, and `todo_id`.
 3. Report the path. Promote through the tracker's deferral or finding flow when available.
 
-## 6. Semantic Parity [REVIEW-PARITY-001]
+## 6. Solution Fit [REVIEW-FIT-001]
+
+Before issuing a verdict, restate the requested outcome independently of the
+implementation and compare the change with the smallest sufficient solution.
+Treat plans, acceptance criteria, tests, CI, and self-reports as claims; they do
+not establish that the chosen design is appropriate.
+
+Flag as Required any mechanism that lacks a concrete requirement or failure
+case, freezes incidental wording or repository shape, duplicates enforcement,
+couples unrelated future changes, or claims more assurance than it provides.
+For validators and policy gates, report the guaranteed invariant, likely false
+positives and negatives, maintenance triggers, and the simpler alternatives
+considered.
+
+## 7. Semantic Parity [REVIEW-PARITY-001]
 
 This skill is the cross-project behavioral contract. A longer project protocol
 may add rationale and storage bindings, but it must preserve these policy IDs
@@ -138,6 +152,7 @@ and their semantics:
 - `REVIEW-DEPTH-001`
 - `REVIEW-L2-001`
 - `REVIEW-CAPTURE-001`
+- `REVIEW-FIT-001`
 - `REVIEW-PARITY-001`
 - `REVIEW-PLAN-RECON-001`
 
@@ -145,7 +160,7 @@ Wording and layout may differ. Missing IDs or contradictory semantics are
 drift. Until reconciled, this skill governs behavior and the project document
 governs only project-specific storage.
 
-## 7. Plan prior-decision reconciliation [REVIEW-PLAN-RECON-001]
+## 8. Plan prior-decision reconciliation [REVIEW-PLAN-RECON-001]
 
 Claim-against-code checking is necessary and not sufficient for plan reviews.
 Before judging a plan's steps, enumerate the recorded decision surfaces the
