@@ -8,7 +8,7 @@ sources:
   - name: catalog
     type: git
     url: https://github.com/joeharris76/skill-sync-skills.git
-    ref: c7738d6edcf22d085cc8863c13cf29a5e529e950
+    ref: 849f10eae89ad08662cfd372a80cea5dd2960564
     subdir: skills
 skills:
   - bossmode
