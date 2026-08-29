@@ -8,3 +8,8 @@ skills/.system/
 
 # Mirror output that can leak into the source tree; not a source file.
 skills/skill-sync.config.yaml
+
+# Python bytecode and caches
+__pycache__/
+*.pyc
+*.pyo
