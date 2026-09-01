@@ -143,10 +143,10 @@ capture remains local under `shared-review-protocol/SKILL.md`.
 - If a required push or PR is mechanically unavailable, keep the verified
   commit and report the blocker; do not describe the workflow as complete.
 - The workflow ends at a pushed branch and its created or updated draft PR.
-  Merging, marking a PR ready, writes to another repository, deployment, and
-  activation are separate actions needing explicit user authority. Repository
-  policy may choose how an already-authorized step is performed, such as commit
-  style, required checks, or PR template. It may not choose a higher terminal
-  state and never authorizes merge, auto-merge, marking a PR ready, a default-
-  or protected-branch write, deployment, or activation. Report the state reached
-  per surface; never describe local-only work as applied or shipped.
+  The authority boundary that ends it there, and the actions it does not
+  authorize (merge, auto-merge, ready, deployment, activation, writes to an
+  unnamed repository), is owned by `shared-review-protocol/SKILL.md` §1; do not
+  restate it here. Repository policy may choose how an already-authorized step
+  is performed, such as commit style, required checks, or PR template. Report
+  the state reached per surface; never describe local-only work as applied or
+  shipped.
