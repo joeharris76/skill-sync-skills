@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lockedAt": "2026-09-01T01:07:31.455Z",
+  "lockedAt": "2026-09-01T02:34:42.809Z",
   "skills": {
     "blog": {
       "source": {
@@ -65,28 +65,20 @@
       "installMode": "mirror",
       "files": {
         "SKILL.md": {
-          "sha256": "1c116a3d9b334ea1dca13fbe21aaf2a0d04225f716bdf2ac84323d0a20437b1c",
-          "size": 10595
-        },
-        "references/agent-execution.md": {
-          "sha256": "6a01f7933566c4d5fdc7610e6c6cc3db447a5e0c4d81e2da4e697963a9d9a80f",
-          "size": 4358
-        },
-        "references/external-harnesses.md": {
-          "sha256": "0b77d6a86381ade8648a0b59a57d47b62cac3fe589d1d7724e9db94fd349841d",
-          "size": 4864
+          "sha256": "af4acd4ef7970b19d7cebf0e594e935f3688bd82e57d57ac614a191dc1020bf7",
+          "size": 10611
         },
         "references/manager.md": {
-          "sha256": "d5999b7a2f30527d7d514830a01af7d3cdfc5c926409e7fac9472399dda90dc1",
-          "size": 5555
+          "sha256": "562e97335f44b8130b9cac6784bae1e9c4abfc295191f3dae0debf9b8ff6d1f4",
+          "size": 5557
         },
         "references/recovery.md": {
           "sha256": "5cd1d7c46e31418097b7f9d9ad8f65c4c89b9fe5faee5ffe1b964817cd681f79",
           "size": 1780
         },
         "skill.yaml": {
-          "sha256": "6ceb8ac77a646a81d17370124ddbce8b931b5784c97a81f0027ba26354307763",
-          "size": 94
+          "sha256": "99a892ec5b44f73a9fb9d02ae33d6e17f8a788b77baec6362f22187a281a63ac",
+          "size": 130
         }
       }
     },
