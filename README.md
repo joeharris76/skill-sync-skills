@@ -17,9 +17,9 @@ into one store. After the product ownership PR merges:
 ```bash
 mkdir -p ~/.skill-sync-deployment
 cp deployment/global/skill-sync.yaml ~/.skill-sync-deployment/skill-sync.yaml
-node /Users/joe/Developer/skill-sync/dist/cli/index.js sync --dry-run --project ~/.skill-sync-deployment
-node /Users/joe/Developer/skill-sync/dist/cli/index.js sync --project ~/.skill-sync-deployment
-node /Users/joe/Developer/skill-sync/dist/cli/index.js validate --exit-code --project ~/.skill-sync-deployment
+skill-sync sync --dry-run --project ~/.skill-sync-deployment
+skill-sync sync --project ~/.skill-sync-deployment
+skill-sync validate --exit-code --project ~/.skill-sync-deployment
 python3 scripts/verify_deployment_store.py ~/.skill-sync-deployment/store/skills
 uv run scripts/activate_global_store.py ~/.skill-sync-deployment/store/skills --apply
 ```

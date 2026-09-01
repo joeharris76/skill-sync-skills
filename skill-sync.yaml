@@ -21,21 +21,6 @@ targets:
   claude: ~/.claude/skills
   codex: ~/.codex/skills
 install_mode: mirror
-projects:
-  - ~/Developer/Oxbow
-  - ~/Developer/BenchBox
-  - ~/Developer/letterops-mcp
-  - ~/Developer/textcharts
-  - ~/Developer/skill-sync
-  - ~/Developer/BenchBox.pool-02
-  - ~/Developer/BenchBox.pool-06
-  - ~/Developer/BenchBox.pool-08
-  - ~/Developer/BenchBox.pool-01
-  - ~/Developer/BenchBox.pool-09
-  - /private/tmp/benchbox-review-wt/develop
-  - /private/tmp/benchbox-review-wt/pr222
-  - /private/tmp/benchbox-review-wt/pr223
-  - ~/Developer/BenchBox.pool-04
-  - ~/Developer/BenchBox.pool-05
 overrides:
   benchbox: {}
+
