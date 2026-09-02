@@ -176,6 +176,8 @@ and their semantics:
 - `REVIEW-FIT-001`
 - `REVIEW-PARITY-001`
 - `REVIEW-PLAN-RECON-001`
+- `REVIEW-NARROWING-001`
+- `REVIEW-UX-001`
 
 Wording and layout may differ. Missing IDs or contradictory semantics are
 drift. Until reconciled, this skill governs behavior and the project document
@@ -194,3 +196,15 @@ plan's scope touches:
 
 The plan must cite each one or explicitly supersede it. An unexplained
 demotion of recorded priority, or a dropped open gate, is a plan defect.
+
+## 9. Accepted narrowing must be re-homed [REVIEW-NARROWING-001]
+
+When a review finding that narrows an item's scope is accepted, the removed
+scope must be re-homed to a named item or killed with a recorded reason in
+the same disposition. "Removed from scope" alone is not a valid disposition.
+
+## 10. User-experience lens [REVIEW-UX-001]
+
+Apply a user-experience lens distinct from security and correctness: ask who
+performs each remaining manual step after the change lands and flag steps
+with no owner.
