@@ -135,13 +135,13 @@ solution that would satisfy that outcome. When no requested outcome is on
 record, restate the outcome from the task or tracker, or note its absence.
 
 For the standard of proof, treat plans, acceptance criteria, tests, CI, and
-self-reports as claims per `references/adversarial-review.md` lines 21-22 and
+self-reports as claims per `references/adversarial-review.md` (§ Review method — "Treat self-reports, commit messages, and PR descriptions as claims") and
 [REVIEW-DEPTH-001]. They do not establish that the chosen design is appropriate.
 
 Flag a mechanism whose purpose is not supported by a concrete requirement or
 failure case in the task, the repository, or the tracker, and for which a
 smaller solution meets the same requirement. Cite the evidence for each flag.
-Also flag a mechanism that:
+Also flag a mechanism (with file:line and cited requirement) that:
 
 - freezes incidental wording or repository shape
 - duplicates enforcement that already exists
