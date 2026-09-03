@@ -1,15 +1,18 @@
 """R3 — parity list / section order guard for shared-review-protocol.
 
 Validates that ``skills/shared-review-protocol/SKILL.md`` preserves its
-8-section contract. Read-only; fails with the offending ID named.
+10-section contract. Read-only; fails with the offending ID named.
 
-Two invariants (against origin/main 099ed49 and later polish branches that
-do not renumber sections):
+Sections 9 and 10 (``REVIEW-NARROWING-001``, ``REVIEW-UX-001``) were added in
+``e410878``; keep EXPECTED_IDS and the §7 parity list in that commit's SKILL.md
+in sync with this list.
 
-  a) Section headers ``## N. ... [REVIEW-XXX-001]`` appear numbered 1-8 in
+Two invariants:
+
+  a) Section headers ``## N. ... [REVIEW-XXX-001]`` appear numbered 1-10 in
      document order matching EXPECTED_IDS.
   b) The bullet list under §7 (Semantic Parity, ``[REVIEW-PARITY-001]``)
-     contains exactly those 8 IDs. This test enforces **document order**
+     contains exactly those IDs. This test enforces **document order**
      (not just set equality) so drift in ordering is also caught.
 """
 
@@ -26,6 +29,8 @@ EXPECTED_IDS = [
     "REVIEW-FIT-001",
     "REVIEW-PARITY-001",
     "REVIEW-PLAN-RECON-001",
+    "REVIEW-NARROWING-001",
+    "REVIEW-UX-001",
 ]
 
 # ``## 1. Scope [REVIEW-AUTH-001]`` — capture number and ID.
@@ -56,25 +61,27 @@ def _read_skill() -> str:
 
 
 class ReviewProtocolParityTests(unittest.TestCase):
-    def test_section_headers_numbered_1_to_8_with_expected_ids_in_order(self):
-        """Sections 1-8 must appear in order with the canonical REVIEW-* IDs."""
+    def test_section_headers_numbered_1_to_10_with_expected_ids_in_order(self):
+        """Sections 1-10 must appear in order with the canonical REVIEW-* IDs."""
         text = _read_skill()
         matches = list(HEADER_RE.finditer(text))
 
         found_nums = [int(m.group("num")) for m in matches]
         found_ids = [m.group("id") for m in matches]
 
-        # Must be exactly 8 headers numbered 1-8.
+        expected_count = len(EXPECTED_IDS)
+
+        # Must be exactly ``expected_count`` headers numbered 1-N.
         self.assertEqual(
             found_nums,
-            list(range(1, 9)),
-            f"Section numbers misordered or missing: expected {list(range(1, 9))}, got {found_nums} "
+            list(range(1, expected_count + 1)),
+            f"Section numbers misordered or missing: expected {list(range(1, expected_count + 1))}, got {found_nums} "
             f"(ids in document order: {found_ids})",
         )
         self.assertEqual(
             len(found_ids),
-            8,
-            f"Expected 8 REVIEW-* section headers, got {len(found_ids)}: {found_ids}",
+            expected_count,
+            f"Expected {expected_count} REVIEW-* section headers, got {len(found_ids)}: {found_ids}",
         )
         # Order-sensitive comparison with per-ID diagnostics.
         for idx, (expected, actual) in enumerate(zip(EXPECTED_IDS, found_ids), start=1):
@@ -91,7 +98,7 @@ class ReviewProtocolParityTests(unittest.TestCase):
         self.assertEqual(extra, set(), f"Unexpected REVIEW-* section header IDs: {sorted(extra)}")
 
     def test_parity_list_under_section_7_contains_exactly_expected_ids_in_document_order(self):
-        """§7 bullet list must contain exactly the 8 canonical IDs in document order.
+        """§7 bullet list must contain exactly the canonical IDs in document order.
 
         Policy: document order is enforced (not just set equality). If a future
         change intentionally reorders the parity list, update EXPECTED_IDS and
@@ -112,8 +119,8 @@ class ReviewProtocolParityTests(unittest.TestCase):
 
         self.assertEqual(
             len(bullet_ids),
-            8,
-            f"Parity list under §7 should contain exactly 8 bullets, got {len(bullet_ids)}: {bullet_ids}",
+            len(EXPECTED_IDS),
+            f"Parity list under §7 should contain exactly {len(EXPECTED_IDS)} bullets, got {len(bullet_ids)}: {bullet_ids}",
         )
         # Document-order check (names the first divergence).
         self.assertEqual(
@@ -125,7 +132,9 @@ class ReviewProtocolParityTests(unittest.TestCase):
         )
         # Redundant set check with a clear message if duplicates/missing slipped through.
         self.assertEqual(set(bullet_ids), set(EXPECTED_IDS), f"Parity list set mismatch: got {sorted(set(bullet_ids))}")
-        self.assertEqual(len(set(bullet_ids)), 8, f"Parity list has duplicate IDs: {bullet_ids}")
+        self.assertEqual(
+            len(set(bullet_ids)), len(EXPECTED_IDS), f"Parity list has duplicate IDs: {bullet_ids}"
+        )
 
 
 if __name__ == "__main__":
