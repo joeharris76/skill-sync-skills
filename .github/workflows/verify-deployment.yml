@@ -1,0 +1,31 @@
+name: Verify deployment template
+
+# The catalog ships no lockfile anymore: deployment/global/skill-sync.conf pins
+# exact commits, and the per-target receipt/manifest pair records what apply
+# wrote. Run on every PR to main so a template or wrapper change cannot ship
+# without proving the full preview/apply/check/verify cycle, including the
+# mutation cases `verify` must reject.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  verify-deployment:
+    name: Template gate and wrapper cycle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # The gate asserts the pinned catalog rev resolves in this history.
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run the suite
+        run: python3 -m unittest discover -s tests -v
