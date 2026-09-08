@@ -11,45 +11,77 @@ Canonical source for personal and shared workflow skills. The public
 
 ## Stable global store
 
-`deployment/global/skill-sync.yaml` composes exact product and catalog commits
-into one store. After the product ownership PR merges:
+`deployment/global/skill-sync.conf` composes exact product and catalog commits
+into one store. The wrapper is vendored at `tools/skill-sync` (pinned product
+revision; the header records the source commit), so routines need no network,
+no Node, and no bootstrap. skill-sync never fetches: each `source` must be a
+local checkout, and each `rev` must be present there.
 
 ```bash
 mkdir -p ~/.skill-sync-deployment
-cp deployment/global/skill-sync.yaml ~/.skill-sync-deployment/skill-sync.yaml
-skill-sync sync --dry-run --project ~/.skill-sync-deployment
-skill-sync sync --project ~/.skill-sync-deployment
-skill-sync validate --exit-code --project ~/.skill-sync-deployment
-python3 scripts/verify_deployment_store.py ~/.skill-sync-deployment/store/skills
-uv run scripts/activate_global_store.py ~/.skill-sync-deployment/store/skills --apply
+cp deployment/global/skill-sync.conf ~/.skill-sync-deployment/skill-sync.conf
+# Point each `source` at a local checkout, then:
+tools/skill-sync preview -C ~/.skill-sync-deployment
+tools/skill-sync apply   -C ~/.skill-sync-deployment
+tools/skill-sync verify  -C ~/.skill-sync-deployment
 ```
 
-Activation rechecks every lock-owned file before changing a loader symlink. The
-exact top-level `.system/` directory is loader-owned and excluded from managed-
-payload attestation, so the loader root itself is not immutable. Attestation
-may check that entry's type without following it, but it never traverses or
-reads `.system/` contents. All other payload must match the generated lock
-exactly. The activation script refuses to replace real directories and
-atomically updates only symlinks. Test feature branches through project-local
-targets; do not repoint this store to an authoring worktree.
+The config targets the plain directory `store/skills` inside the deployment
+project — never `$HOME`, never the live loader symlinks (the wrapper refuses
+to write through symlinks by design). `verify` checks the materialized payload
+offline against `store/skills/skill-sync.manifest`: every recorded file present
+with matching bytes and mode, nothing extra inside a managed skill, no
+symlinks. It does not prove the payload matches the configured revision —
+that is what `check` is for, and `check` needs the source checkouts.
 
-## Lock invariant
+To ship a catalog or operator update, commit it in the owning repository and
+bump `rev` in the template through review, then re-apply. The per-target
+`skill-sync.receipt` records which commit each payload came from.
 
-`skill-sync.lock` must describe the skill tree in the same commit.
-`scripts/verify_lock.py` checks declarations, files, hashes, sizes, and untracked
-skill files. Regenerate and verify the lock after each skill change:
+## Activation (documented follow-up, needs approval)
+
+Global loader directories (`~/.claude/skills`, `~/.codex/skills`) are symlinks
+into an immutable snapshot under `~/.skill-sync-deployment/releases/`. The
+current release keeps serving until its replacement is validated: promoting a
+new store means snapshotting it and repointing the two symlinks, as an exact,
+reviewable change. Do not run the repointing without explicit approval.
 
 ```bash
-uv run --with pyyaml scripts/verify_lock.py --write
-uv run --with pyyaml scripts/verify_lock.py
+NEW=~/.skill-sync-deployment/releases/<validated-sha>
+mkdir -p "$NEW/store"
+cp -a ~/.skill-sync-deployment/store/skills "$NEW/store/skills"
+ln -sfn "$NEW/store/skills" ~/.claude/skills
+ln -sfn "$NEW/store/skills" ~/.codex/skills
 ```
 
-The writer refreshes only file metadata and `lockedAt`; it preserves source,
-install-mode, and other provenance fields. It refuses manifest/lock skill-set
-changes, which require the provenance-aware catalog workflow.
+Test feature branches through project-local targets; do not repoint the
+deployment store at an authoring worktree, and never record uncommitted bytes
+under a clean SHA.
 
-The pre-commit hook and `.github/workflows/verify-lock.yml` run the same gate.
-This source check differs from `skill-sync verify`, which checks tracked
-consumer targets against a consumer lock.
+## Template gate
+
+`tests/test_skill_sync_conf.py` validates the deployment template statically
+(pins are full SHAs resolvable in this history, only tracked catalog skills
+are selected, targets stay inside the project) and runs a real
+preview/apply/check/verify cycle with the vendored wrapper, including the
+mutation cases `verify` must reject. Standard library only. The pre-commit
+hook and `.github/workflows/verify-deployment.yml` run the same suite:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+## Retired TypeScript-transport files (historical)
+
+The rsync wrapper replaced the TypeScript CLI. The files below were removed
+in that migration; this mapping is archaeology only, not an active fallback:
+
+| Removed | Replacement |
+|---|---|
+| `skill-sync.yaml` / `skill-sync.lock` | `deployment/global/skill-sync.conf` plus the per-target `skill-sync.receipt` / `skill-sync.manifest` pair |
+| `scripts/verify_lock.py` | `skill-sync verify`, plus the template gate above |
+| `scripts/verify_deployment_store.py` | `skill-sync verify` against `skill-sync.manifest` |
+| `scripts/activate_global_store.py` | The documented manual activation above |
+| `skill-sync sync [--dry-run]`, `validate`, `doctor` | `skill-sync apply`, `preview`, `check` (see the product `MIGRATION.md`) |
 
 Stage explicit paths only; never use `git add -A`.

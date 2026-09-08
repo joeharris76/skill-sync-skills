@@ -1,21 +1,19 @@
-# The lock is only meaningful when it is committed alongside the skill files it
-# describes. .github/workflows/verify-lock.yml enforces that on PRs to main.
+# The deployment template is the only skill-sync configuration left in this
+# repository. tests/test_skill_sync_conf.py validates it statically and runs a
+# real preview/apply/check/verify cycle with the vendored wrapper, including
+# the mutation cases `verify` must reject. .github/workflows/verify-deployment.yml
+# enforces the same suite on PRs to main.
 #
-# This hook moves the gate to the commit itself, which is also where the remedy
-# lives: regenerate the lock and include it in the same commit.
+# This hook moves that gate to the commit itself. It takes no filenames; `files`
+# only decides *when* it is worth running.
 #
 # Install once per checkout:  pre-commit install
 repos:
   - repo: local
     hooks:
-      - id: verify-lock
-        name: skill-sync lock matches the tree
-        entry: python scripts/verify_lock.py
-        language: python
-        additional_dependencies: [pyyaml]
-        # The checker validates the whole tree against the lock, so it takes no
-        # filenames. `files` only decides *when* it is worth running: a commit
-        # touching neither the skills tree nor the lock/manifest cannot break
-        # the invariant.
+      - id: skill-sync-conf
+        name: skill-sync deployment template matches the wrapper contract
+        entry: python3 -m unittest tests.test_skill_sync_conf
+        language: system
         pass_filenames: false
-        files: ^(skills/.*|skill-sync\.lock|skill-sync\.yaml)$
+        files: ^(deployment/global/skill-sync\.conf|tools/skill-sync|tests/test_skill_sync_conf\.py)$
