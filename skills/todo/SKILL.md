@@ -28,11 +28,10 @@ If one request combines review or validation with close-out, perform the read-on
 - **Progress units:** After implementing changes for a work unit in the repository, call `progress(id="...", wid="...", evidence="...", claim_token="...")`.
 - **Scope & Review:** Call `check_scope(id="...", files=[...])` and `lint(id="...")` before finishing.
 - **Deferrals:** Handle scope exceptions immediately with `defer(id="...", summary="...", reason="...")`. Resolve deferrals before finish with `dismiss_deferral(deferral_id=..., reason="...")` or `promote_deferral(deferral_id=...)`.
-- **Human Verification Gate (`E_VERIFY_GATE`):**
+- **Verification Gate (`E_VERIFY_GATE`):**
   - Call `finish(id="...", claim_token="...")`.
-  - If `finish` returns `E_VERIFY_GATE`, workspace commands must be attested by a human operator.
-  - Extract the exact command from `recovery[0]` (e.g. `todo-db --actor <principal> verify-run <id> --claim-token <token>`).
-  - **Do NOT execute `verify-run` via `Bash`.** Present the exact command to the user and pause until the user confirms execution. Once confirmed, retry `finish`.
+  - If `finish` returns `E_VERIFY_GATE`, read `recovery[0]`: on a local database it directs you to review the stored commands and retry `finish` with `run_verifications=true`; on a hosted database it carries the human `todo-db verify-run` command (e.g. `todo-db --actor <principal> verify-run <id> --claim-token <token>`).
+  - **Do NOT execute a hosted `verify-run` via `Bash`.** Present the exact command to the user and pause until the user confirms execution. Once confirmed, retry `finish`.
 - **Multiple claims recovery:** If an operation returns `E_MULTIPLE_CLAIMS`, call `claims` to inspect active leases and `release(id="...", claim_token="...")` unneeded items.
 
 ### Floor CLI Boundary
@@ -40,7 +39,7 @@ If one request combines review or validation with close-out, perform the read-on
 The floor CLI (`todo-db`) is reserved strictly for non-agent operations:
 - Setup & migration: `todo-db init-project`, `todo-db migrate`
 - Diagnostics: `todo-db doctor`
-- Human attestation & gates: `todo-db verify-run`, `todo-db rebaseline`, `todo-db complete`
+- Human attestation & gates (hosted databases): `todo-db verify-run`, plus `todo-db rebaseline`, `todo-db complete`
 - Integrity & audit: `todo-db audit verify`, `todo-db finding sync`
 
 ## Actions

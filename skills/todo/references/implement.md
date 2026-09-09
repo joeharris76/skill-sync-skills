@@ -24,14 +24,14 @@
    - Review quality and rules: `lint(id="<id>")`.
 6. **Finish and Verification Gate (`E_VERIFY_GATE`):**
    - Call `finish(id="<id>", claim_token="<claim_token>")`.
-   - If `finish` returns `E_VERIFY_GATE`:
-     1. Stored verification commands require human attestation.
-     2. Extract the exact command from the error `recovery[0]` field:
+   - If `finish` returns `E_VERIFY_GATE`, read the error `recovery[0]` field:
+     - On a local database it directs you to review the stored verification commands, then call `finish` again with `run_verifications=true`.
+     - On a hosted database it carries the exact human command:
         ```sh
         todo-db --actor <principal> verify-run <id> --claim-token <claim_token>
         ```
-     3. **Do NOT run `verify-run` via `Bash`.** Present the command to the human operator and halt until they confirm execution.
-     4. Once attested, call `finish` again.
+       **Do NOT run a hosted `verify-run` via `Bash`.** Present the command to the human operator and halt until they confirm execution.
+     - Once attested, call `finish` again.
 
 ## Findings
 
