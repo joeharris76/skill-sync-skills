@@ -1,27 +1,39 @@
-# TODO Queries and Updates
+# TODO queries and item management
 
-## Create and update (requires `--profile full`)
+Inspect, filter, and read tracker items with bounded output. Filtering,
+sorting, readiness, and unlock counts run inside the program — never scan
+history yourself.
 
-- **Create item:** Call `create_item(id="...", title="...", priority="...", worktree="...", description="...", scope=[...], verifications=[...], work=[...])`.
-- **Update item:** Call `update_item(id="...", ...)`. It accepts `title`, `description`, `priority`, `worktree`, `add_work`, `edit_work`, `add_verify`, `drop_verify`, and `reason`.
-- Edit work units only while pending; completed units carry evidence and are immutable.
-- Always provide a `reason` when editing done or dropped items.
+## Query patterns
 
-## Inspect (available in all profiles)
+| Goal | Tool call | Notes |
+|---|---|---|
+| Ready work | `list_items(ready_only=true)` | `open`, unclaimed, dependencies all `done`. |
+| List or search | `list_items(status=..., priority=..., text=...)` | Brief rows; default 5 per page. |
+| Inspect one task | `show_item(id=...)` | Needs, unmet needs, unlock count, sections. |
+| Next page | `list_items(cursor=<next_cursor>)` | Cursors bind to a state revision. |
 
-- `doctor` — check database connection, schema version, and project identity
-- `list_items(fields=[...], limit=..., cursor=...)` — list items with paging fallback
-- `show_item(id="...", fields=[...])` — inspect details of a specific item
-- `ready` — view items ready to be worked on
-- `stats` — summary counts by state, priority, worktree, and deferral
-- `deps(id="...")` — inspect upstream and downstream dependencies
-- `claims` — inspect active claims held by your principal
-- `export` — generate deterministic JSON export
+## Create and amend
 
-## Block, release, and drop
+- `create_item(id=..., title=..., priority=..., description=..., needs=[...], acceptance=..., links=..., context=...)`
+  — `priority` defaults to `medium`; IDs use `a-z0-9-`; titles are 1–200
+  characters. Creation rejects a dependency cycle.
+- `update_item(id=..., ...)` — amends `title` / `priority` / `description` /
+  `needs` / sections, or moves `status` between `open` and `blocked`. Give a
+  `reason` when the change is not self-evident.
+- Closing goes through `finish`. Dropping is a human decision reported to the
+  user (`drop` needs the `generation` if the task is claimed).
 
-- `release(id="...", claim_token="...")` — release an active claim without finishing
-- `block(id="...", reason="...")` — mark an item blocked (`--profile full`)
-- `unblock(id="...")` — unblock an item (`--profile full`)
-- `drop(id="...", reason="...")` — drop an item (`--profile full`)
-- Stale claims held by disconnected sessions can be cleared by an operator using the floor command `todo-db sweep-stale`.
+## Managing output limits
+
+Responses are capped at 16 KiB at their final serialization.
+
+- Page with `limit` + `cursor`. Every page with items remaining carries
+  `next_cursor`; an empty page means you are done.
+- `E_CURSOR_STALE` means the branch moved under you. Restart without a cursor;
+  never skip ahead.
+- Large fields arrive as section reads:
+  `show_item(id=..., field="description", offset=0, budget=6000)`. Follow
+  `continuation` until it disappears; each step is guaranteed to make progress.
+- There is no full-dump tool. If the nine tools omit data you need, report the
+  gap instead of probing for an export.

@@ -1,61 +1,55 @@
 # Prioritize TODOs
 
 Rank open items by topic without changing tracker state. There is no
-`prioritize` MCP tool; this is a skill-only action driven by the inspect tools.
+`prioritize` tool; this is a skill-only workflow driven by the read tools.
 
 ## Before you start
 
-1. Call the `doctor` tool. The MCP server owns the database connection,
-   credentials, and project identity.
-2. If `doctor` reports a schema, authentication, or identity problem, stop.
-   Do not build the backlog from `_project/TODO`, `_project/todo-db-export/`,
-   or chat history, and do not analyse a non-production database unless the
-   user explicitly asks for that file.
+1. Call `get_instructions` to confirm the protocol and your identity.
+2. If the tracker is unreachable or reports a schema problem, stop. Do not
+   reconstruct the backlog from files or chat history — the state branch is the
+   only source.
 
 ## Inputs
 
 | Input | Default | Notes |
 |---|---|---|
 | `N` | 25 | Max items to show |
-| Scope | all open (`planning` + `active`) | Can limit to a worktree, category, or ready-only |
+| Scope | all `open` | Can also include `blocked`, or limit to `ready_only` |
 | Write-back | off | Only rewrite priorities when the user explicitly asks |
 
 ## Workflow
 
 Start with the live picture:
 
-- `doctor` — confirm readiness and identity.
-- `stats` — open counts by state, priority, worktree, and deferral.
-- `ready` — items with no open blockers or dependencies.
-- `list_items(fields=[...], limit=..., cursor=...)` — page through all open
-  items, following `cursor` until exhausted. `list_items` has no priority or
-  state filter, so request the fields you need (`id`, `title`, `priority`,
-  `state`, `worktree`, `category`, `blocked_reason`) and filter by priority
-  and state in-session.
+- `list_items(ready_only=true, limit=50)` — claimable items; page with `cursor`
+  until exhausted.
+- `list_items(status="open", limit=50)` — every open item; page fully. Brief
+  rows carry `id`, `title`, `priority`, `status`.
+- `list_items(status="blocked", limit=50)` — only if blocked work affects the
+  ranking.
 
-Report any warning from `ready` or `stats`; warnings are not ranked items.
-
-Use `show_item(id="...")` and `deps(id="...")` when list output is
-insufficient.
+Derive the counts you need (open per priority, ready vs. blocked) from the
+pages themselves; there is no `stats` tool. Use `show_item(id=...)` for a
+candidate's `needs`, `unmet_needs`, and `unlocks` (the count of open tasks
+waiting on it).
 
 For about 15 or fewer open items, rank up to `N` directly by severity,
-readiness, unlock value, and keyword risk. Group by category or worktree.
+readiness, unlock value, and keyword risk.
 
 ### When you need a structured ranking
 
-For more than about 15 high-priority items or requested topic groups, take a
-bulk view with the `export` tool (deterministic JSON, available in all
-profiles). Inspect `items`, `item_deps`, and any `findings` before ranking.
-
-For each open candidate, compute:
+For more than about 15 candidates or requested topic groups, page every open
+item first, then `show_item` each candidate once for its edges. For each
+candidate, compute:
 
 | Signal | How to get it |
 |---|---|
 | Severity | `critical` > `high` > `medium-high` > `medium` > `low` |
-| Ready | unblocked (`blocked_reason` empty) and no open dependency edges |
-| Unlock value | count of open items that depend on this id |
-| In-flight | `active` or currently claimed — small boost only |
-| Risk keywords | Title/category terms suggesting privacy, security, or correctness risk, such as leak, secret, credential, egress, provenance, or silent |
+| Ready | `status` is `open`, unclaimed, and `unmet_needs` is empty |
+| Unlock value | `show_item` → `unlocks` |
+| In-flight | open but absent from `ready_only` with no unmet needs — a live claim; small boost only |
+| Risk keywords | Title/description terms suggesting privacy, security, or correctness risk, such as leak, secret, credential, egress, provenance, or silent |
 | Human-only | Maintainer/admin work; demote from the agent-actionable top N but note critical items |
 
 Default order:
@@ -64,7 +58,7 @@ Default order:
 2. ready before blocked or dependent
 3. risk keyword boost within the band
 4. unlock value
-5. active or claimed
+5. claimed
 6. stable tie-break on `id`
 
 A claim gives only a small boost; it never outranks a higher-severity ready item.
@@ -73,38 +67,34 @@ A claim gives only a small boost; it never outranks a higher-severity ready item
 
 Give each ranked item exactly one topic.
 
-1. Prefer a stable, meaningful `category`.
-2. Otherwise use a worktree that names a real program, not `main` or another
-   catch-all.
-3. Otherwise reuse keyword buckets from titles or descriptions. For a top 25,
-   keep four to eight groups and merge singletons into the nearest group or
-   "Other high-priority."
+1. Prefer a keyword or theme bucket drawn from titles and descriptions.
+2. A shared `id` prefix or a common path in `links` is a good secondary signal.
+3. For a top 25, keep four to eight groups; merge singletons into the nearest
+   group or "Other high-priority."
 
 ### Report
 
 Include:
 
-1. Method: database identity, open counts by priority, `N`, and write-back off.
-2. Topic tables: rank, id, priority, state, readiness, unlocks, and one-line
+1. Method: tracker identity, open counts by priority, `N`, and write-back off.
+2. Topic tables: rank, id, priority, status, readiness, unlocks, and a one-line
    reason.
 3. Suggested dependency-aware order across groups, with privacy, security, and
    tracker reliability before product work.
 4. High or critical demotions and their reasons.
-5. Findings warnings and user-owned blocked criticals.
+5. User-owned blocked criticals.
 
-Ranks are session recommendations and do not change the database.
+Ranks are session recommendations and do not change tracker state.
 
 ### Write-back — only when the user asks
 
 Only when the user asks to apply the ranking:
 
-1. Confirm the `update_item` tool is available (it requires `--profile full`).
-   If it is missing, report that; do not drop and recreate items.
-2. Update only items whose stored priority differs from the recommended band,
-   with `update_item(id="...", priority="...", reason="...")`.
-3. Give a one-line reason per update. Prefer band moves (`medium` → `high`)
+1. Update only items whose stored priority differs from the recommended band,
+   with `update_item(id=..., priority=..., reason=...)`.
+2. Give a one-line reason per update. Prefer band moves (`medium` → `high`)
    over invented ranks the schema cannot store.
-4. Re-run `stats` and show before/after counts.
+3. Re-page `list_items` and show before/after counts.
 
 Never change priorities, block, or claim during read-only ranking. Respect `N`
 and requested grouping; do not dump all medium items, create one topic per item,
