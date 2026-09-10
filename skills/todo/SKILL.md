@@ -35,9 +35,12 @@ files; every change goes through a tool so publication stays atomic.
   image holding the old generation goes stale).
 - **Skill-only actions** — `ideate`, `spec`, `prioritize`, `batch`, `handoff`,
   `closeout` — are workflows, not tools. Follow their reference guides.
-- **Review combined with close-out:** perform the read-only review and stop at
-  findings under `shared-review-protocol/SKILL.md`. A later user message may
-  authorize `closeout`.
+- **Close-out authorization.** `closeout` is write-shaped under
+  `shared-review-protocol/SKILL.md` §1 (`[REVIEW-AUTH-001]`). A message that
+  explicitly invokes `closeout` — alone or paired with review or validation —
+  authorizes it that turn. A message asking only to review or validate stays
+  review-only: report findings and stop until a later message authorizes
+  `closeout`.
 
 ## The loop
 

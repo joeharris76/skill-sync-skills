@@ -1,9 +1,14 @@
 # Batch close-out
 
-Use `closeout` only after a review has reported findings and a later user
-message authorizes remediation and tracker closure. Name the batch, the review
-report, and the exact revisions reviewed. If those inputs are missing, collect
-them without editing and ask for the required authorization.
+Use `closeout` when the user's message explicitly invokes it for a named batch;
+the authorization rule is `shared-review-protocol/SKILL.md` §1
+(`[REVIEW-AUTH-001]`). A request asking only for review or validation stays
+review-only: report findings and stop, and `closeout` then requires a later
+user message authorizing remediation and tracker closure. Name the batch, the
+review report, and the exact revisions reviewed. When `closeout` is authorized
+but no review report exists yet, produce the review phase in-turn as a stage of
+the authorized work, then proceed. When `closeout` is not authorized, collect
+those inputs without editing and ask for the required authorization.
 
 One authorized `closeout` call covers fixes for the reported findings,
 follow-up PRs and follow-up items, and tracker closure for the named batch. It
