@@ -1,4 +1,4 @@
-# Batch Close-out
+# Batch close-out
 
 Use `closeout` only after a review has reported findings and a later user
 message authorizes remediation and tracker closure. Name the batch, the review
@@ -6,7 +6,7 @@ report, and the exact revisions reviewed. If those inputs are missing, collect
 them without editing and ask for the required authorization.
 
 One authorized `closeout` call covers fixes for the reported findings,
-follow-up PRs, deferral decisions, and tracker closure for the named batch. It
+follow-up PRs and follow-up items, and tracker closure for the named batch. It
 does not authorize unrelated work or a new review scope.
 
 ## Phase 1 — refresh evidence
@@ -17,7 +17,7 @@ match the report:
 - the commit and PR exist and target the expected branch;
 - the merge and required checks have the reported state;
 - the reviewed findings still apply to the current code;
-- `show_item(id="<id>")` matches the expected tracker state.
+- `show_item(id=...)` matches the expected tracker state and active claim.
 
 Record changed or superseded findings. Do not silently apply a stale review.
 
@@ -29,15 +29,17 @@ Record changed or superseded findings. Do not silently apply a stale review.
    commits, and PRs.
 3. Re-run the checks that prove each fix. This is implementation verification,
    not a new review scope.
-4. Turn unfixed Nit or Consider items into deferrals or documented skips.
+4. Turn unfixed Nit or Consider items into documented skips, or into follow-up
+   items with `create_item(needs=[<batch item>])` rather than widening scope.
 
 ## Phase 3 — close tracker state
 
-1. Resolve open deferrals with `promote_deferral` or `dismiss_deferral`.
-2. Close completed items using MCP `finish` (or human floor CLI `todo-db complete`).
-3. Use `drop(id="...", reason="...")` under `--profile full` when the work proved
-   unnecessary. "Already fixed" is valid only when the fixing revision is identified.
-4. Leave blocked items open and record the exact unblock condition.
+1. If you hold the claim, call `finish(id=..., generation=...)`.
+2. To close externally merged work without a live claim, `take` the item first,
+   then `finish`. If someone else holds the claim, tell the human to close it.
+3. Leave blocked items `open`/`blocked` and record the exact unblock condition.
+4. Dropping an item as unnecessary is a human decision — report it with the
+   fixing revision identified, do not `drop` it yourself.
 
 ## Report
 

@@ -1,45 +1,55 @@
-# Bootstrap the Tracker
+# Bootstrap the tracker
 
-Initialization requires a project ID and repository URL; neither has a default.
+Set up tracker state for a repository. State lives on a dedicated Git branch,
+outside the code worktree.
 
-## 1. Scaffold with `init-project`
+## Create the state branch
 
-Run from the repository root:
+A human runs, from anywhere with Git access to the remote:
 
 ```sh
-todo-db init-project \
-  --project-id <project-id> \
-  --repository <repository-url>
+todo-db bootstrap --state-remote <git-url-or-path> [--state-branch todo-state] --write-config
 ```
 
-This command sets identity and creates:
+`--write-config` writes `.todo-db/config.json` (state remote + branch) in the
+repo root for server discovery. Bootstrap refuses to overwrite an existing
+state branch.
 
-- `.todo-db/config.json`, which is committed. Tools find it through
-  `TODO_DB_CONFIG` or by walking up from the working directory.
-- `.todo-db/.gitignore`, which ignores database files but tracks `config.json`.
-  Do not add `.todo-db/` to the repository `.gitignore`; that would hide the
-  committed configuration.
+## Migrate from a 0.6.x export
 
-`--db` stores a local path, defaulting to `.todo-db/standalone.sqlite`. Existing
-scaffolding requires `--force` to overwrite. Commit `config.json` and
-`.todo-db/.gitignore`.
+To carry an existing SQLite-era tracker onto the new state branch:
 
-Run the preflight check to verify setup:
-- Inside an MCP session: call the MCP `doctor` tool.
-- From the floor CLI: run `todo-db doctor`.
+1. With the old `todo-db`, write a lossless export:
+   `todo-db --db <old>.sqlite export --output <export>.json` (the envelope must
+   be `format_version` 2).
+2. `todo-db bootstrap ...` to create the empty state branch.
+3. `todo-db migrate --from-export <export>.json --dry-run` and read the mapping
+   report: item count, status breakdown, dropped-claim warnings, and preserved
+   row counts.
+4. `todo-db migrate --from-export <export>.json --backup-dir <dir> --actor <name>`
+   for the real run. `--backup-dir` is required — the export is the only
+   archive of events, findings, and audit history, none of which migrate.
+5. `todo-db validate`, then spot-check a few items with `todo-db show <id>`.
 
-## 2. Register the MCP Server
+The migration refuses a non-empty state branch and refuses cutover while any
+claim lease is still live. To roll back before any consumer adopts the new
+tracker, delete the state branch and re-bootstrap; the old database is
+untouched.
 
-Ensure `todo-db-mcp` (installed via `todo-db[mcp]`) is registered in your agent client:
-- **Claude Code:** `.mcp.json` at project root with command `todo-db-mcp`.
-- **Codex:** `~/.codex/config.toml` with command `todo-db-mcp`.
-- **Cursor / Windsurf / Zed:** Add `todo-db-mcp` with `--actor <client>:${USER}@${HOSTNAME}`.
+## Point the agent at it
 
-## 3. Hosted backend (Turso/libSQL) — when you use `TODO_DB_URL`
+- MCP server: `--state-remote` / `--state-branch` / `--cache-dir` flags,
+  `TODO_DB_STATE_REMOTE` / `TODO_DB_STATE_BRANCH` / `TODO_DB_CACHE_DIR` env, or
+  the discovered `.todo-db/config.json` — in that order.
+- One server instance is one worker identity (`--actor`, else `TODO_DB_ACTOR`,
+  else the client name from the MCP handshake).
+- Per-client registration (Claude Code, Codex, Cursor, Windsurf, Zed) lives in
+  the todo-db repository's `docs/operations/mcp-clients.md`.
 
-The `todo-db-mcp` server is local-SQLite-first. Connecting to a hosted Turso
-target requires passing `--allow-hosted` to the server or floor CLI. Authentication
-tokens are provided via `TODO_DB_AUTH_TOKEN` (read-write) and `TODO_DB_RO_AUTH_TOKEN`
-(read-only). If the server returns `E_AUTH_REJECTED`, provision or rotate credentials
-via `TODO_DB_CREDENTIAL_COMMAND`.
+## Preflight verification
 
+1. Run `todo-db validate` (human/CI) or `list_items` (agent).
+2. A missing branch means bootstrap has not run yet — say so, do not improvise
+   state.
+3. The state branch shares its repository's access and visibility. Never
+   publish credentials to it and never assume it is private.
