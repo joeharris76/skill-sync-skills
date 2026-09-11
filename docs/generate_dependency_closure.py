@@ -12,7 +12,7 @@ Usage:
   python3 docs/generate_dependency_closure.py --check   # fail if stale
 
 Re-run whenever any skills/*/skill.yaml `depends:` list changes.
-Requires pyyaml (e.g. `uv run --with pyyaml docs/generate_dependency_closure.py`).
+Runs with standard library python3 (no external dependencies required) or with pyyaml.
 """
 
 from __future__ import annotations
@@ -40,32 +40,40 @@ def tracked_skills(root: Path) -> list[str]:
     return sorted(line.split("/")[1] for line in out.splitlines() if line)
 
 
+def parse_deps_from_yaml(text: str) -> list[str]:
+    """Extract depends list from YAML text with or without PyYAML."""
+    if yaml is not None:
+        doc = yaml.safe_load(text) or {}
+        return sorted(doc.get("depends") or [])
+
+    deps: list[str] = []
+    in_depends = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("depends:"):
+            in_depends = True
+            after = stripped[len("depends:"):].strip()
+            if after.startswith("[") and after.endswith("]"):
+                raw_items = [x.strip() for x in after[1:-1].split(",") if x.strip()]
+                deps = [x.split("#", 1)[0].strip().strip("\"'") for x in raw_items if x.strip()]
+                break
+            continue
+        if in_depends:
+            if stripped.startswith("- ") or stripped == "-":
+                item = stripped[2:].strip().split("#", 1)[0].strip().strip("\"'")
+                if item:
+                    deps.append(item)
+            elif stripped and not stripped.startswith("#"):
+                break
+    return sorted(deps)
+
+
 def load_direct_deps(root: Path) -> tuple[list[str], dict[str, list[str]]]:
     skills = tracked_skills(root)
     direct: dict[str, list[str]] = {}
     for name in skills:
         text = (root / "skills" / name / "skill.yaml").read_text(encoding="utf-8")
-        if yaml is not None:
-            doc = yaml.safe_load(text) or {}
-            deps = doc.get("depends") or []
-        else:
-            deps = []
-            in_depends = False
-            for line in text.splitlines():
-                stripped = line.strip()
-                if stripped.startswith("depends:"):
-                    in_depends = True
-                    after = stripped[len("depends:"):].strip()
-                    if after.startswith("[") and after.endswith("]"):
-                        deps = [x.strip() for x in after[1:-1].split(",") if x.strip()]
-                        break
-                    continue
-                if in_depends:
-                    if line.startswith("  - ") or line.startswith(" - "):
-                        deps.append(line.split("-", 1)[1].strip())
-                    elif stripped and not stripped.startswith("#"):
-                        break
-        direct[name] = sorted(deps)
+        direct[name] = parse_deps_from_yaml(text)
     return skills, direct
 
 
@@ -133,13 +141,13 @@ def render(skills: list[str], direct: dict[str, list[str]]) -> str:
         "table by hand. After changing any `depends:` list, regenerate:",
         "",
         "```bash",
-        "uv run --with pyyaml docs/generate_dependency_closure.py --write",
+        "python3 docs/generate_dependency_closure.py --write",
         "```",
         "",
         "Verify freshness without writing:",
         "",
         "```bash",
-        "uv run --with pyyaml docs/generate_dependency_closure.py --check",
+        "python3 docs/generate_dependency_closure.py --check",
         "```",
         "",
     ]

@@ -1,7 +1,7 @@
 ---
 name: memex-search
 description: Search prior agent-session history with memex when a request depends on earlier work, decisions, investigations, fixes, commands, errors, or project context, including details lost or summarized across context-compaction boundaries. Invoke proactively to recover exact evidence, resume prior work, avoid repeating work, or find an analogous solution.
-allowed-tools: Bash(memex:*)
+allowed-tools: Bash(memex:*), Read, Glob
 ---
 
 # Memex Search
@@ -435,8 +435,8 @@ cat ~/.gemini/antigravity-cli/brain/<uuid>/.system_generated/logs/transcript.jso
 ls ~/.gemini/antigravity-cli/conversations/<uuid>.db
 ```
 
-`session-takeover/references/session-sources.md` lists the store layout for
-each harness, indexed or not.
+`session-takeover/references/session-sources.md` (when the `session-takeover`
+skill is installed) lists the store layout for each harness, indexed or not.
 
 ### Session navigation
 

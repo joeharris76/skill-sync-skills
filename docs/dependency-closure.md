@@ -56,11 +56,11 @@ This file is generated from the `skill.yaml` files. Do not edit the
 table by hand. After changing any `depends:` list, regenerate:
 
 ```bash
-uv run --with pyyaml docs/generate_dependency_closure.py --write
+python3 docs/generate_dependency_closure.py --write
 ```
 
 Verify freshness without writing:
 
 ```bash
-uv run --with pyyaml docs/generate_dependency_closure.py --check
+python3 docs/generate_dependency_closure.py --check
 ```
