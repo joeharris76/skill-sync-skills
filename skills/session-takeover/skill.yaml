@@ -1,0 +1,24 @@
+depends:
+  - shared-change-framework
+  - shared-investigation-framework
+  - shared-review-protocol
+tags:
+  - workflow
+  - recovery
+  - sessions
+category: workflow
+targets:
+  claude: true
+  codex: true
+  gemini: true
+# Documentary session-store locations, not runtime dependencies. Other ~/ leaks
+# on the same line still fail a portability check.
+portability_allow:
+  - "~/.gemini/antigravity-cli/*"
+  - "~/.claude/projects/*"
+  - "~/.codex/sessions/*"
+  - "~/.local/share/muse/sessions/*"
+  - "~/.grok/sessions/*"
+  - "~/.jcode/sessions/*"
+  - "~/.pi/agent/sessions/*"
+  - "~/.local/share/opencode/opencode.db"

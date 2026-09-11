@@ -39,6 +39,8 @@ receipt while stale copies linger.
 | bossmode | `shared-agent-execution` | `shared-agent-execution` | `bossmode`, `shared-agent-execution` |
 | code | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `code`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
 | docs | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `docs`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
+| memex-search | (none) | (none) | `memex-search` |
+| session-takeover | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `session-takeover`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
 | shared-agent-execution | (none) | (none) | `shared-agent-execution` |
 | shared-change-framework | (none) | (none) | `shared-change-framework` |
 | shared-investigation-framework | `shared-review-protocol` | `shared-review-protocol` | `shared-investigation-framework`, `shared-review-protocol` |
