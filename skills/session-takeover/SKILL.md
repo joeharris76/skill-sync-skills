@@ -60,8 +60,8 @@ file.
 2. Check for a second successor. A user may dispatch a takeover before an
    earlier one has stopped, and two successors on one branch corrupt each
    other's work.
-3. Inspect Git state: `index.lock`, other worktrees, the branch's upstream,
-   and unstaged or uncommitted changes.
+3. Inspect Git state: `index.lock` (resolved via `git rev-parse --git-path index.lock`),
+   other worktrees, the branch's upstream, and unstaged or uncommitted changes.
 4. Contain a live writer before replacing it: stop or pause it, then verify it
    stopped. Never delete, reset, or clean state you cannot attribute.
 
@@ -105,9 +105,11 @@ point is measured rather than assumed:
    to report, not a regression to hide.
 4. For each "complete" claim that a check can settle, settle it.
 
-When a claim fails verification, treat the work as not started and say so in
-the report. Do not silently repair a predecessor's broken claim and report the
-batch as having arrived complete.
+When a claim fails verification, reclassify it as unverified work in progress.
+Never overwrite, reset, or discard partial edits blindly; preserve the existing
+diff, report the discrepancy, and continue from measured reality. Do not
+silently adopt a predecessor's broken claim and report the batch as having
+arrived complete.
 
 ### 5. Finish the remaining work
 

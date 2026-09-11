@@ -14,6 +14,8 @@ When PyYAML is available, cross-checks standard-library parsing against yaml.saf
 from __future__ import annotations
 
 import re
+import subprocess
+import sys
 import unittest
 from pathlib import Path
 
@@ -45,6 +47,11 @@ def parse_val(val: str):
         return {}
     if val == "[]":
         return []
+    if val.startswith("[") and val.endswith("]"):
+        inner = val[1:-1].strip()
+        if not inner:
+            return []
+        return [parse_val(item.strip()) for item in inner.split(",") if item.strip()]
     if val.isdigit():
         return int(val)
     if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
@@ -274,10 +281,43 @@ class SkillMetadataTests(unittest.TestCase):
                 for item in inputs:
                     self.assertIsInstance(item, dict, f"{skill_yaml}: config input must be dict")
                     item_keys = set(item.keys())
-                    self.assertTrue(
-                        ALLOWED_CONFIG_INPUT_KEYS.issubset(item_keys),
-                        f"{skill_yaml}: config input missing required keys: {ALLOWED_CONFIG_INPUT_KEYS - item_keys}",
+                    extra_keys = item_keys - ALLOWED_CONFIG_INPUT_KEYS
+                    self.assertEqual(
+                        extra_keys,
+                        set(),
+                        f"{skill_yaml}: config input contains unexpected keys: {extra_keys}",
                     )
+                    missing_keys = ALLOWED_CONFIG_INPUT_KEYS - item_keys
+                    self.assertEqual(
+                        missing_keys,
+                        set(),
+                        f"{skill_yaml}: config input missing required keys: {missing_keys}",
+                    )
+                    self.assertIsInstance(item["key"], str, f"{skill_yaml}: config input 'key' must be str")
+                    self.assertTrue(item["key"], f"{skill_yaml}: config input 'key' cannot be empty")
+                    self.assertIn(
+                        item["type"],
+                        {"string", "number", "boolean"},
+                        f"{skill_yaml}: config input 'type' must be string/number/boolean, got {item['type']!r}",
+                    )
+                    self.assertIsInstance(item["description"], str, f"{skill_yaml}: config input 'description' must be str")
+                    self.assertTrue(item["description"], f"{skill_yaml}: config input 'description' cannot be empty")
+
+    def test_dependency_closure_document_is_synchronized(self):
+        """docs/dependency-closure.md must match generate_dependency_closure.py output."""
+        gen_script = ROOT / "docs" / "generate_dependency_closure.py"
+        res = subprocess.run(
+            [sys.executable, str(gen_script), "--check"],
+            capture_output=True,
+            text=True,
+            cwd=str(ROOT),
+        )
+        self.assertEqual(
+            res.returncode,
+            0,
+            f"docs/dependency-closure.md is stale or out of sync with skill.yaml:\n{res.stdout}\n{res.stderr}\n"
+            "Run: python3 docs/generate_dependency_closure.py --write",
+        )
 
     def test_skill_dependency_graph_has_no_cycles(self):
         """The catalog dependency graph must be a directed acyclic graph (DAG)."""
@@ -323,6 +363,22 @@ class SkillMetadataTests(unittest.TestCase):
                 y_fm = yaml.safe_load(parts[1])
                 s_fm = parse_simple_yaml(parts[1])
                 self.assertEqual(y_fm, s_fm, f"Frontmatter parse mismatch in {s_dir / 'SKILL.md'}")
+
+    def test_parse_simple_yaml_inline_list_and_edge_cases(self):
+        """Test parser handles inline lists, empty lists, numbers, and boolean literals."""
+        sample = (
+            "depends: [shared-change-framework, shared-review-protocol]\n"
+            "tags: []\n"
+            "targets:\n"
+            "  claude: true\n"
+            "  codex: false\n"
+        )
+        parsed = parse_simple_yaml(sample)
+        self.assertEqual(
+            parsed["depends"], ["shared-change-framework", "shared-review-protocol"]
+        )
+        self.assertEqual(parsed["tags"], [])
+        self.assertEqual(parsed["targets"], {"claude": True, "codex": False})
 
 
 if __name__ == "__main__":

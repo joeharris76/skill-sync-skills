@@ -62,6 +62,7 @@ labels as its GitHub-thread binding:
 | Disposition | Shared disposition | Meaning |
 |---|---|---|
 | `fix` | `ACCEPT` | The finding is correct and fits the authorized sweep |
+| `narrow` | `NARROW` | The concern is valid; apply the narrower remedy and re-home removed scope |
 | `already-fixed` | `ALREADY_FIXED` | The integration branch contains a verified fix |
 | `defer` | `DEFER` | The finding is correct but too large, blocked, or outside scope |
 | `reject` | `REBUT` | The finding is wrong, stale, or outside the repository contract |
@@ -69,15 +70,13 @@ labels as its GitHub-thread binding:
 Record evidence for every disposition:
 - For `already-fixed`, cite the specific commit SHA merged on the integration
   branch that resolved the defect.
+- For `narrow`, cite the narrower remedy applied and the tracking item for
+  re-homed scope per `shared-review-protocol/SKILL.md` §9 `[REVIEW-NARROWING-001]`.
 - For `defer` on external/upstream dependencies, cite the upstream tracking
   issue or repository reference.
 - For `reject`, cite the requirement, source, or reproduction that refutes the
   finding. Disagreement is not a refutation.
 - Uncertainty is not evidence; investigate or defer it.
-
-A finding that is correct but whose proposed remedy is larger than the
-requirement needs is `fix` at the narrower scope, with the removed scope
-re-homed per `shared-review-protocol/SKILL.md` §9 `[REVIEW-NARROWING-001]`.
 
 ### 4. Act and verify
 

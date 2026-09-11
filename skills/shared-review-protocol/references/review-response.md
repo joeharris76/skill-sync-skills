@@ -30,7 +30,7 @@ requires; uncertainty is not evidence.
 | `ACCEPT` | The finding is correct and in scope. | A remediation item naming the target file or artifact, and the check that will prove the fix. |
 | `NARROW` | The concern is valid but the proposed remedy exceeds what the requirement needs. | The smaller remedy actually applied, plus re-homing of the removed scope per `[REVIEW-NARROWING-001]`. |
 | `ALREADY_FIXED` | The current revision already enforces the behavior. | `file:line`, or the commit SHA merged on the integration branch, that demonstrates it. |
-| `DEFER` | The finding is correct but blocked, too large, or outside this change. | A tracker item or captured finding per `[REVIEW-CAPTURE-001]`, or the upstream reference that owns it. |
+| `DEFER` | The finding is correct but blocked, too large, outside this change, or an unverified concern needing investigation. | A tracker item or captured finding per `[REVIEW-CAPTURE-001]`, an upstream reference, or a verification action item per `[REVIEW-DEFECT-001]`. |
 | `REBUT` | The finding is factually wrong, refuted by a requirement, or rests on a false premise. | Concrete counter-evidence: the requirement, source, test, or a reproduction that does not fail. |
 
 Rules that apply across the table:
@@ -44,8 +44,11 @@ Rules that apply across the table:
   (`[REVIEW-NARROWING-001]`).
 - `ALREADY_FIXED` requires the proof to be in the revision under review. A fix
   on an unmerged branch is `DEFER` with that branch named.
-- A finding you cannot classify is not `REBUT`. Mark it as needing verification
-  and make the verification itself the action item, per `[REVIEW-DEFECT-001]`.
+- A finding you cannot confirm or refute immediately is not `REBUT`. An
+  unverified finding must never be dismissed without evidence. If investigation
+  cannot settle it during the current turn, record it as `DEFER` with the
+  concrete verification probe, test, or question as its tracking action item
+  under `[REVIEW-DEFECT-001]`.
 - Do not let a disposition erase a disagreement. When two reviewers contradict
   each other, keep both positions and report the contradiction for the user to
   resolve.

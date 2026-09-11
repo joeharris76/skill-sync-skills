@@ -77,16 +77,31 @@ other agent-authored file.
 Run these before binding to a branch or worktree.
 
 ```bash
-pgrep -fl "<harness>"                       # is the prior process alive?
-git -C "$WORKSPACE" worktree list           # who else holds this repository?
-ls "$WORKSPACE/.git/index.lock" 2>/dev/null # is a write in flight?
-git -C "$WORKSPACE" status --porcelain      # uncommitted work to preserve
+pgrep -fl "<harness>"                               # is the prior process alive?
+git -C "$WORKSPACE" worktree list                   # who else holds this repository?
+LOCK_PATH=$(git -C "$WORKSPACE" rev-parse --git-path index.lock)
+test -f "$LOCK_PATH" && echo "Index lock in flight: $LOCK_PATH"
+git -C "$WORKSPACE" status --porcelain              # uncommitted work to preserve
 git -C "$WORKSPACE" log --oneline -5 "$BRANCH"
 ```
 
-A worktree directory named `.wt-*`, `*-wt-*`, or `.pool-*` beside the
-repository is usually another agent's isolated workspace. Treat it as owned
-until proven otherwise.
+In linked worktrees, `.git` is a file pointing to the main checkout's
+`.git/worktrees/<name>/` directory; querying `rev-parse --git-path index.lock`
+resolves the actual lock path rather than assuming a naive `$WORKSPACE/.git/` layout.
+
+### Writer admission and concurrency control
+
+When taking over an interrupted session, ensure another successor has not
+already claimed the target branch or worktree:
+
+1. **Check for concurrent successors:** Inspect running agent processes (`pgrep -fl "codex|claude|agy|muse|grok|jcode"`)
+   and recent commits or branch updates made after the interruption timestamp.
+2. **Worktree leases:** Treat worktree directories named `.wt-*`, `*-wt-*`,
+   or `.pool-*` beside the repository as actively owned until confirmed dead.
+3. **Durable admission record:** Bind this takeover to a dedicated branch
+   or local lease before modifying files (e.g. `feat/takeover-<session-id>`).
+   If a conflicting live writer or active lock is detected, halt and report
+   the conflicting PID and path before proceeding.
 
 `jcode` background tasks report through its own task list rather than `pgrep`
 alone; check both when the predecessor was a `jcode` session that detached

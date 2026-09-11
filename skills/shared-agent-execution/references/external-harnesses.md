@@ -51,7 +51,7 @@ from flag drift. Do not run those checks proactively.
   - Known-good models: `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna`, `claude-fable-5`, `claude-opus-5`, `claude-sonnet-5`, `gemini-3.7-flash-tiered`, `muse-spark-1.2-contributor`
 - **goose**
   - Worker (Write): `(cd "$WORKSPACE" && goose run --text "$PROMPT" --no-session --provider "$PROVIDER" --model "$MODEL")`
-  - Reviewer (Hard Read-Only): `(cd "$WORKSPACE" && goose review --prompt "$CRITERIA_FILE" --model "$MODEL")`
+  - Reviewer (Soft Read-Only): `(cd "$WORKSPACE" && goose review --prompt "$CRITERIA_FILE" --model "$MODEL")`
 - **prime-agent**
   - Worker (Write): `prime-agent -p --cwd "$WORKSPACE" --provider "$PROVIDER" --model "$MODEL" --thinking "$EFFORT" "$PROMPT"`
   - Reviewer (Hard Read-Only): `prime-agent -p --tools read,grep,find,ls --cwd "$WORKSPACE" --provider "$PROVIDER" --model "$MODEL" --thinking "$EFFORT" "$PROMPT"`
@@ -64,7 +64,7 @@ from flag drift. Do not run those checks proactively.
   - Reviewer (Hard Read-Only): `(cd "$WORKSPACE" && hermes chat -q --tools read,search "$PROMPT")`
 - **aider**
   - Worker (Write): `(cd "$WORKSPACE" && aider --model "$MODEL" --message "$PROMPT" --yes-always --no-auto-commits)`
-  - Reviewer (Hard Read-Only): `(cd "$WORKSPACE" && aider --model "$MODEL" --message "$PROMPT" --chat-mode ask)`
+  - Reviewer (Soft Read-Only): `(cd "$WORKSPACE" && aider --model "$MODEL" --message "$PROMPT" --chat-mode ask)`
 
 ## Reviewer panels
 
@@ -79,8 +79,8 @@ Classify each member before dispatch:
 
 | Classification | Harnesses | Workspace |
 |---|---|---|
-| Hard Read-Only | `codex --sandbox read-only`, `claude --tools Read,Grep,Glob`, `muse --disable-write --disable-shell`, `pi --tools read,...`, `jcode --tools read`, `goose review`, `prime-agent --tools read,...`, `hermes --tools read,search`, `aider --chat-mode ask` | The reviewed worktree is acceptable. |
-| Soft Read-Only | `agy --mode plan`, `grok --permission-mode plan`, `opencode --agent plan` | A dedicated detached worktree at the reviewed revision. |
+| Hard Read-Only | `codex --sandbox read-only`, `claude --tools Read,Grep,Glob`, `muse --disable-write --disable-shell`, `pi --tools read,...`, `jcode --tools read`, `prime-agent --tools read,...`, `hermes --tools read,search` | The reviewed worktree is acceptable. |
+| Soft Read-Only | `agy --mode plan`, `grok --permission-mode plan`, `opencode --agent plan`, `goose review`, `aider --chat-mode ask` | A dedicated detached worktree at the reviewed revision. |
 
 A Soft Read-Only mode is an instruction, not an enforced sandbox. Never run
 two Soft Read-Only members, or a Soft Read-Only member and any writer, in the
@@ -90,7 +90,20 @@ revision under review and remove it after the panel reports:
 ```bash
 REVIEW_WT="$WORKSPACE/.wt-review-$(date +%s)"
 git -C "$WORKSPACE" worktree add --detach "$REVIEW_WT" "$REVISION"
-# dispatch each Soft Read-Only member with WORKSPACE="$REVIEW_WT"
+
+# Dispatch Soft Read-Only member in background and capture PID:
+# (cd "$REVIEW_WT" && ...) &
+# REVIEW_PID=$!
+# wait "$REVIEW_PID" || true
+
+# Terminate process before worktree removal to prevent file descriptor races:
+if [ -n "$REVIEW_PID" ] && kill -0 "$REVIEW_PID" 2>/dev/null; then
+    kill -TERM "$REVIEW_PID" 2>/dev/null
+    sleep 1
+    kill -0 "$REVIEW_PID" 2>/dev/null && kill -KILL "$REVIEW_PID" 2>/dev/null
+    wait "$REVIEW_PID" 2>/dev/null || true
+fi
+
 git -C "$WORKSPACE" worktree remove --force "$REVIEW_WT"
 ```
 
@@ -109,10 +122,16 @@ user-set effort overrides this default.
 ### Brief delivery
 
 An external harness cannot read the dispatching agent's memory or an unsaved
-chat plan. Serialize what the member must judge to a file and pass the path:
+chat plan. Serialize what the member must judge to an atomically created,
+private file and pass the path:
 
 ```bash
-BRIEF="/tmp/review-brief-$(date +%s).md"
+BRIEF=$(mktemp /tmp/review-brief.XXXXXX.md)
+chmod 0600 "$BRIEF"
+# write brief content to "$BRIEF"
+# pass "$BRIEF" to reviewer commands
+# clean up when panel concludes:
+rm -f "$BRIEF"
 ```
 
 The brief states the requested outcome, the exact revisions or paths under
