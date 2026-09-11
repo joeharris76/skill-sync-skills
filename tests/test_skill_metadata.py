@@ -22,6 +22,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS_DIR = ROOT / "skills"
 
+sys.path.insert(0, str(ROOT))
+from docs.generate_dependency_closure import parse_deps_from_yaml
+
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 
 ALLOWED_SKILL_YAML_KEYS = {
@@ -64,6 +67,7 @@ def parse_simple_yaml(text: str) -> dict:
 
     Supports top-level key-values, lists of scalars, mappings of scalar booleans,
     and lists of small dictionaries (e.g. config_inputs).
+    Rejects malformed lines, unquoted colons in scalars, and invalid list items.
     """
     lines = text.splitlines()
     root: dict = {}
@@ -83,19 +87,28 @@ def parse_simple_yaml(text: str) -> dict:
 
         # List item under current_key
         if line.lstrip().startswith("- "):
-            val = line.lstrip()[2:].strip()
+            raw_val = line.lstrip()[2:].strip()
             if current_list is None:
                 current_list = []
                 root[current_key] = current_list
 
-            if ":" in val:
-                # Dict item in list (e.g. config_inputs)
-                k, _, v = val.partition(":")
-                item_dict = {k.strip(): parse_val(v.strip())}
+            is_quoted = (raw_val.startswith('"') and raw_val.endswith('"')) or (
+                raw_val.startswith("'") and raw_val.endswith("'")
+            )
+            # Quoted items are scalar strings; unquoted items with ": " or ending with ":" are dicts
+            if not is_quoted and (": " in raw_val or raw_val.endswith(":")):
+                k, _, v = raw_val.partition(":")
+                val_to_parse = v.strip()
+                if not (val_to_parse.startswith('"') or val_to_parse.startswith("'")):
+                    val_to_parse = val_to_parse.split("#", 1)[0].strip()
+                item_dict = {k.strip(): parse_val(val_to_parse)}
                 current_list.append(item_dict)
                 current_dict_in_list = item_dict
             else:
-                current_list.append(parse_val(val))
+                val_to_parse = raw_val
+                if not is_quoted:
+                    val_to_parse = val_to_parse.split("#", 1)[0].strip()
+                current_list.append(parse_val(val_to_parse))
                 current_dict_in_list = None
             i += 1
             continue
@@ -103,14 +116,30 @@ def parse_simple_yaml(text: str) -> dict:
         # Nested keys inside a dict inside a list (e.g. config_inputs item properties)
         if indent >= 4 and current_dict_in_list is not None and ":" in stripped:
             k, _, v = stripped.partition(":")
-            current_dict_in_list[k.strip()] = parse_val(v.strip())
+            k = k.strip()
+            v = v.strip()
+            if " " in k:
+                raise ValueError(f"Invalid key containing space on line {i+1}: {k!r}")
+            if not (v.startswith('"') or v.startswith("'")):
+                if ": " in v:
+                    raise ValueError(f"Unquoted ': ' in scalar value on line {i+1}: {v!r}")
+                v = v.split("#", 1)[0].strip()
+            current_dict_in_list[k] = parse_val(v)
             i += 1
             continue
 
         # Nested mapping under current_key (e.g. targets: claude: true)
         if indent >= 2 and current_key is not None and isinstance(root.get(current_key), dict) and ":" in stripped:
             k, _, v = stripped.partition(":")
-            root[current_key][k.strip()] = parse_val(v.strip())
+            k = k.strip()
+            v = v.strip()
+            if " " in k:
+                raise ValueError(f"Invalid key containing space on line {i+1}: {k!r}")
+            if not (v.startswith('"') or v.startswith("'")):
+                if ": " in v:
+                    raise ValueError(f"Unquoted ': ' in scalar value on line {i+1}: {v!r}")
+                v = v.split("#", 1)[0].strip()
+            root[current_key][k] = parse_val(v)
             i += 1
             continue
 
@@ -119,6 +148,8 @@ def parse_simple_yaml(text: str) -> dict:
             k, _, v = stripped.partition(":")
             k = k.strip()
             v = v.strip()
+            if " " in k or k.startswith("-"):
+                raise ValueError(f"Invalid key on line {i+1}: {k!r}")
             current_key = k
             current_list = None
             current_dict_in_list = None
@@ -135,10 +166,15 @@ def parse_simple_yaml(text: str) -> dict:
                 else:
                     root[k] = {}
             else:
+                if not (v.startswith('"') or v.startswith("'")):
+                    if ": " in v:
+                        raise ValueError(f"Unquoted ': ' in scalar value on line {i+1}: {v!r}")
+                    v = v.split("#", 1)[0].strip()
                 root[k] = parse_val(v)
             i += 1
             continue
-        i += 1
+
+        raise ValueError(f"Malformed or unrecognized YAML syntax on line {i+1}: {line!r}")
     return root
 
 
@@ -167,10 +203,18 @@ class SkillMetadataTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.skill_dirs = sorted(
-            [d for d in SKILLS_DIR.iterdir() if d.is_dir() and not d.name.startswith(".")]
-        )
-        cls.skill_names = {d.name for d in cls.skill_dirs}
+        try:
+            res = subprocess.run(
+                ["git", "ls-files", "skills/*/skill.yaml"],
+                cwd=ROOT, capture_output=True, text=True, check=True,
+            )
+            cls.skill_names = {line.split("/")[1] for line in res.stdout.splitlines() if line}
+            cls.skill_dirs = sorted([SKILLS_DIR / name for name in cls.skill_names])
+        except Exception:
+            cls.skill_dirs = sorted(
+                [d for d in SKILLS_DIR.iterdir() if d.is_dir() and not d.name.startswith(".")]
+            )
+            cls.skill_names = {d.name for d in cls.skill_dirs}
 
     def test_all_skill_dirs_contain_skill_md_and_skill_yaml(self):
         """Every skill directory must contain both SKILL.md and skill.yaml."""
@@ -380,6 +424,44 @@ class SkillMetadataTests(unittest.TestCase):
         self.assertEqual(parsed["tags"], [])
         self.assertEqual(parsed["targets"], {"claude": True, "codex": False})
 
+    def test_generator_parser_matches_metadata_parser(self):
+        """The fallback parser in docs/generate_dependency_closure.py must agree with test parser."""
+        for s_dir in self.skill_dirs:
+            sy_text = (s_dir / "skill.yaml").read_text(encoding="utf-8")
+            from_gen = parse_deps_from_yaml(sy_text)
+            from_test = sorted(parse_simple_yaml(sy_text).get("depends") or [])
+            self.assertEqual(
+                from_gen,
+                from_test,
+                f"Dependency parser mismatch in {s_dir / 'skill.yaml'}: {from_gen} vs {from_test}",
+            )
+
+        # Test various YAML edge-case formats
+        fixture_4space = (
+            "depends:\n"
+            "    - first\n"
+            "    - 'second' # inline comment\n"
+            "    - \"third\"\n"
+        )
+        self.assertEqual(parse_deps_from_yaml(fixture_4space), ["first", "second", "third"])
+
+    def test_parse_simple_yaml_rejects_malformed_syntax(self):
+        """YAML parser must reject malformed lines and unquoted colons in values."""
+        with self.assertRaises(ValueError):
+            parse_simple_yaml("malformed line without colon")
+
+        with self.assertRaises(ValueError):
+            parse_simple_yaml("name: invalid\ndescription: unquoted: colon in value")
+
+        with self.assertRaises(ValueError):
+            parse_simple_yaml("invalid key with space: true")
+
+        # Quoted strings containing colons in list items must remain scalar strings
+        sample_quoted = "items:\n  - \"foo: bar\"\n  - 'another: item'\n"
+        parsed = parse_simple_yaml(sample_quoted)
+        self.assertEqual(parsed["items"], ["foo: bar", "another: item"])
+
 
 if __name__ == "__main__":
     unittest.main()
+

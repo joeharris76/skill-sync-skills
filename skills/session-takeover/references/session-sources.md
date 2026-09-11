@@ -48,9 +48,12 @@ Indexed sources: `claude`, `codex`, `cursor`, `opencode`, `pi`, `omp`,
 | `jcode` | `jcode resume <id>` | `~/.jcode/sessions/session_*.json` with a paired `.journal.jsonl` |
 | `pi` | `pi --resume <uuid>` | `~/.pi/agent/sessions/<flattened-cwd>/<ts>_<uuid>.jsonl` |
 | `opencode` | `opencode -s <id>` | `~/.local/share/opencode/opencode.db` (SQLite `session`, `message`, `part` tables) |
+| `goose` | `goose session <id>` | `~/.local/share/goose/sessions/` |
+| `aider` | `aider --restore-chat-history` | `.aider.chat.history.md` and `.aider.input.history` in the repo root |
+| `hermes` | `hermes session <id>` | `~/.hermes/` (mostly usage and interaction telemetry) |
 
 Flattened-cwd directories replace `/` and `.` with `-`, so
-`/Users/joe/Developer/todo-db` becomes `-Users-joe-Developer-todo-db`.
+`/Users/username/Developer/my-repo` becomes `-Users-username-Developer-my-repo`.
 URL-encoded-cwd directories percent-encode the same path.
 
 ### agy specifics
@@ -77,31 +80,39 @@ other agent-authored file.
 Run these before binding to a branch or worktree.
 
 ```bash
-pgrep -fl "<harness>"                               # is the prior process alive?
+# Check if a process currently holds open files or locks in the workspace:
+lsof +D "$WORKSPACE" 2>/dev/null
 git -C "$WORKSPACE" worktree list                   # who else holds this repository?
-LOCK_PATH=$(git -C "$WORKSPACE" rev-parse --git-path index.lock)
+LOCK_PATH=$(git -C "$WORKSPACE" rev-parse --path-format=absolute --git-path index.lock 2>/dev/null || echo "$WORKSPACE/$(git -C "$WORKSPACE" rev-parse --git-path index.lock)")
 test -f "$LOCK_PATH" && echo "Index lock in flight: $LOCK_PATH"
 git -C "$WORKSPACE" status --porcelain              # uncommitted work to preserve
 git -C "$WORKSPACE" log --oneline -5 "$BRANCH"
 ```
 
 In linked worktrees, `.git` is a file pointing to the main checkout's
-`.git/worktrees/<name>/` directory; querying `rev-parse --git-path index.lock`
-resolves the actual lock path rather than assuming a naive `$WORKSPACE/.git/` layout.
+`.git/worktrees/<name>/` directory; querying `rev-parse --path-format=absolute --git-path index.lock`
+(or falling back to prefixing with `$WORKSPACE/`) resolves the actual absolute lock path
+rather than testing a relative path against the caller's current working directory.
 
 ### Writer admission and concurrency control
 
 When taking over an interrupted session, ensure another successor has not
 already claimed the target branch or worktree:
 
-1. **Check for concurrent successors:** Inspect running agent processes (`pgrep -fl "codex|claude|agy|muse|grok|jcode"`)
-   and recent commits or branch updates made after the interruption timestamp.
+1. **Check for concurrent writers:** Inspect whether a live process holds open
+   write descriptors or locks in `$WORKSPACE` (`lsof +D "$WORKSPACE"`). If a live
+   conflicting writer is detected, do NOT kill it; halt and report the conflicting
+   PID and process command line to the user.
 2. **Worktree leases:** Treat worktree directories named `.wt-*`, `*-wt-*`,
    or `.pool-*` beside the repository as actively owned until confirmed dead.
-3. **Durable admission record:** Bind this takeover to a dedicated branch
-   or local lease before modifying files (e.g. `feat/takeover-<session-id>`).
-   If a conflicting live writer or active lock is detected, halt and report
-   the conflicting PID and path before proceeding.
+3. **Atomic admission test:** Exclusive creation of the dedicated takeover
+   branch and worktree acts as the mutual exclusion gate:
+   ```bash
+   git worktree add -b "feat/takeover-${SESSION_ID}" "$TAKEOVER_WT" "$BASE_REVISION"
+   ```
+   If this fails because the branch or worktree directory already exists, halt
+   immediately: another successor or previous run has already claimed this session.
+   Report the existing branch/worktree to the user rather than overwriting it.
 
 `jcode` background tasks report through its own task list rather than `pgrep`
 alone; check both when the predecessor was a `jcode` session that detached
