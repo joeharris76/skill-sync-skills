@@ -1,0 +1,13 @@
+tags:
+  - search
+  - history
+  - sessions
+category: workflow
+targets:
+  claude: true
+  codex: true
+  gemini: true
+# Documentary fallback for a harness memex does not index; not a runtime
+# dependency. Other ~/ leaks on the same line still fail a portability check.
+portability_allow:
+  - "~/.gemini/antigravity-cli/*"

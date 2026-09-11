@@ -38,7 +38,7 @@ SKILL_RE = re.compile(r"[A-Za-z0-9._-]+")
 
 # Untracked authoring work. It must never be selected for distribution, and
 # no clean-SHA pin may ever be asked to vouch for its uncommitted bytes.
-UNTRACKED_WORK = {"memex-search"}
+UNTRACKED_WORK: set[str] = set()
 
 
 def parse_conf(text: str):
