@@ -38,10 +38,19 @@ the product repository.
   the `generation` returned by `take`; after a restart, `take` the same item
   again to re-adopt it (fresh generation, refreshed lease — any earlier process
   image holding the old generation goes stale).
-- **Prepared work is not completion.** In an explicitly declared feature
-  batch, `prepare` records the owner generation, clean exact source checkout
-  and revision, and passed bounded-suite evidence, then releases the claim
-  while leaving the item `open`. Ordinary dependencies remain done-only;
+- **Prepared work is not completion.** The prepared lifecycle is fail-closed
+  and capability-versioned: `register_batch` must first persist one project /
+  repository identity, owner generation, integration branch/worktree and
+  immutable start head, ordered members, frozen scope, delivery boundary,
+  terminal outcome, and (later) one final PR identity. Register each member's
+  explicit implementation edge, then `take` and `prepare` it with a clean exact
+  checkout, actual member base, accepted head, current integration head, scope hash,
+  and passed bounded-suite evidence. `prepare` releases the claim while
+  leaving the item `open`; it does not mark work done. The integrator verifies
+  the cumulative current tree and binds the final PR before re-taking and
+  `finish`ing members. If the server does not advertise the registered-batch
+  contract and compatible schema version, stop and use serial mode; never treat
+  legacy per-item receipts as valid. Ordinary dependencies remain done-only;
   prepared receipts never unlock review, approval, merge, deployment, or soak
   gates.
 - **Skill-only actions** — `ideate`, `spec`, `prioritize`, `batch`, `handoff`,
@@ -61,8 +70,9 @@ the product repository.
 | 2 | `take` | Claim a task. Returns the claim `generation` plus enough context to begin work. |
 | 3 | `show_item` | One task with needs, readiness, and sections. Large fields spill to `field`/`offset`/`budget` reads. |
 | 4 | `renew` | Extend a long-running claim. Same generation; no progress milestones required. |
-| 5 | `finish` | Close the task with the `generation` from `take`. No work breakdown or attestation required. |
-| — | `prepare` | Persist verified member work and hand back the claim without marking the member done. Requires an explicit same-batch edge and exact clean source checkout. |
+| 5 | `finish` | Close the task with the `generation` from `take`. Every member of an active registered batch must already have a valid prepared receipt and bound final-tree evidence; ordinary tasks use the serial finish path. |
+| — | `register_batch` / `bind_batch_pr` / `abort_batch` | Register the immutable batch contract, bind exactly one final PR identity, or owner-abort after claims are released. Reject duplicates, foreign owners, late membership, and incompatible capability/schema versions. |
+| — | `prepare` | Persist verified member work and hand back the claim without marking the member done. Requires the registered batch, explicit same-batch edge, exact clean source checkout, original base, accepted/current heads, and frozen scope. |
 | — | `release` | Hand the claim back without finishing (needs the `generation`). |
 | — | `drop` | Abandon a task as dropped. Unclaimed tasks drop freely; a live claim needs its `generation`. |
 
@@ -73,7 +83,7 @@ the product repository.
 {"ok": false, "code": "E_...", "error": "...", "recovery": [...], "kind": "gate|error"}
 ```
 
-`get_instructions` returns markdown text directly; the nine task tools return
+`get_instructions` returns markdown text directly; the task tools return
 the `{ok, ...}` JSON envelope.
 
 `kind: "gate"` is an expected result you should act on. `kind: "error"` is an
@@ -106,7 +116,8 @@ Conflicts, lost claims, and offline handling in full: `references/recovery.md`.
 
 ## Planning
 
-`create_item` takes `id`, `title`, and optionally `priority` (default
+`register_batch` takes the immutable repository and integration contract before
+member enrollment. `create_item` takes `id`, `title`, and optionally `priority` (default
 `medium`), `description`, `needs` (IDs this task waits on), `acceptance`,
 `links`, `context`, and explicit batch metadata. Batch metadata names a
 `batch_id`, `member_id`, and `implementation_dependencies`; it is never
@@ -120,8 +131,12 @@ a human decision reported to the user.
 
 `list_items(ready_only=true)` returns only claimable tasks: `open`, unclaimed,
 dependencies all `done`, except that an explicitly registered same-batch
-implementation edge may consume a valid prepared receipt. Readiness and
-unlock counts are computed by the program — never scan history yourself.
+implementation edge may consume a valid prepared receipt whose accepted head is
+present at the registered integration head and whose base, scope, owner
+generation, repository, and member identity all match. Readiness and unlock
+counts are computed by the program — never scan history yourself. Any member,
+scope, dependency, conflict, or late-enrollment change invalidates affected
+prepared evidence transitively.
 
 ## Finding the right tool
 
