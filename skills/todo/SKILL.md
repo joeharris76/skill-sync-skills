@@ -100,6 +100,7 @@ first page, never skip ahead.
 | `E_UNKNOWN` | Outcome undetermined. | Reconcile with the operation ID in `recovery`; do not re-apply blindly. |
 | `E_STATE` | Malformed state or rejected request. | Read the message; report it if you cannot fix the request. |
 | `E_SCHEMA` | State format newer than this package. | Stop; a human upgrades the package. |
+| `E_FINAL_EVIDENCE` | Prepared member lacks current final-tree proof. | Re-take the member, attach exact clean combined-tree evidence, then retry `finish`. |
 
 Conflicts, lost claims, and offline handling in full: `references/recovery.md`.
 
