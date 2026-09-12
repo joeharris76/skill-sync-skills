@@ -38,6 +38,12 @@ the product repository.
   the `generation` returned by `take`; after a restart, `take` the same item
   again to re-adopt it (fresh generation, refreshed lease — any earlier process
   image holding the old generation goes stale).
+- **Prepared work is not completion.** In an explicitly declared feature
+  batch, `prepare` records the owner generation, clean exact source checkout
+  and revision, and passed bounded-suite evidence, then releases the claim
+  while leaving the item `open`. Ordinary dependencies remain done-only;
+  prepared receipts never unlock review, approval, merge, deployment, or soak
+  gates.
 - **Skill-only actions** — `ideate`, `spec`, `prioritize`, `batch`, `handoff`,
   `closeout` — are workflows, not tools. Follow their reference guides.
 - **Close-out authorization.** `closeout` is write-shaped under
@@ -56,6 +62,7 @@ the product repository.
 | 3 | `show_item` | One task with needs, readiness, and sections. Large fields spill to `field`/`offset`/`budget` reads. |
 | 4 | `renew` | Extend a long-running claim. Same generation; no progress milestones required. |
 | 5 | `finish` | Close the task with the `generation` from `take`. No work breakdown or attestation required. |
+| — | `prepare` | Persist verified member work and hand back the claim without marking the member done. Requires an explicit same-batch edge and exact clean source checkout. |
 | — | `release` | Hand the claim back without finishing (needs the `generation`). |
 | — | `drop` | Abandon a task as dropped. Unclaimed tasks drop freely; a live claim needs its `generation`. |
 
@@ -100,7 +107,9 @@ Conflicts, lost claims, and offline handling in full: `references/recovery.md`.
 
 `create_item` takes `id`, `title`, and optionally `priority` (default
 `medium`), `description`, `needs` (IDs this task waits on), `acceptance`,
-`links`, and `context`. IDs use `a-z0-9-` (start/end alphanumeric). Titles are
+`links`, `context`, and explicit batch metadata. Batch metadata names a
+`batch_id`, `member_id`, and `implementation_dependencies`; it is never
+inferred from `needs`. IDs use `a-z0-9-` (start/end alphanumeric). Titles are
 1–200 characters. There is no work breakdown, scope gate, or verification
 ladder: an ordinary task closes with `take` + `finish`.
 
@@ -109,8 +118,9 @@ between `open` and `blocked`. Closing goes through `finish`; dropping a task is
 a human decision reported to the user.
 
 `list_items(ready_only=true)` returns only claimable tasks: `open`, unclaimed,
-dependencies all `done`. Readiness and unlock counts are computed by the
-program — never scan history yourself.
+dependencies all `done`, except that an explicitly registered same-batch
+implementation edge may consume a valid prepared receipt. Readiness and
+unlock counts are computed by the program — never scan history yourself.
 
 ## Finding the right tool
 

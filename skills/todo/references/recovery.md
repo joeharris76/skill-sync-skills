@@ -38,3 +38,14 @@ the newer state.
 upgrades. `E_STATE` explains itself in the message — a malformed request, an
 unknown task, or a rejected transition. `E_CURSOR_STALE` means restart listing
 from the first page.
+
+## Prepared receipt recovery
+
+If `prepare` rejects the source checkout, inspect the exact recorded revision
+and clean the isolated worktree before retrying with the current claim
+generation. A moved HEAD, dirty checkout, changed member scope, conflict
+resolution, or late member invalidates the receipt; do not reset the baseline
+or mark the member done. Re-take the member and prepare again after the
+integrator records the new exact range. If closeout is interrupted, re-read the
+member and final integration evidence before retrying `finish`; stale
+generations fail closed.

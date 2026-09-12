@@ -140,3 +140,22 @@ TODO | tracker state | PR/state | head | verification | blocker | next action
 Include the ledger path and distinguish open, merged, tracker-complete, waiting,
 and blocked work. If anything remains non-terminal, provide the exact resume
 action rather than waiting in the current context.
+
+## Prepared feature delivery
+
+Prepared mode is opt-in and requires one declared repository, batch identity,
+integration owner, and final PR. Register each member's batch metadata and
+implementation edges before claiming it. A member worker takes one member,
+implements in an isolated worktree, runs the bounded upstream suite in that
+clean exact checkout, then calls `prepare` with the exact `source_worktree`,
+`source_revision`, and passed verification evidence. `prepare` releases the
+claim and leaves the member `open`; it never marks the member done.
+
+Only a same-batch implementation edge may consume a valid prepared receipt.
+Review, external dependencies, approvals, merge, deployment, and soak gates
+still require ordinary `done` state. The integrator owns branch assembly and
+one final PR, and must verify each member range, cumulative current tree, and
+exact integration head. A clean tree or caller-supplied success is not proof.
+Invalidate affected receipts after checkout drift, scope edits, conflicts, or
+late members. Serial mode remains the default for unrelated, cross-repo, or
+approval-separated work.
