@@ -80,9 +80,7 @@ file.
    cannot attribute.
 
 Preserve ambiguous or unverified work. Report what you contained and what you
-left untouched. `bossmode/references/recovery.md` (when the `bossmode` skill is
-installed) owns the same contain-then-replace sequence inside a Bossmode
-topology; follow it there instead when the lost session was a Bossmode Manager.
+left untouched.
 
 ### 3. Reconstruct verified state
 

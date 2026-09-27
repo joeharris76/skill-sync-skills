@@ -13,11 +13,11 @@ each consumer's config must name every skill explicitly. A skill that
 is not named is not installed, appears in no receipt, and is left
 behind as stale unmanaged content.
 
-Motivating case (consumer side, September 2026): BenchBox's config
-names top-level skills but receives `shared-agent-execution` only
-transitively, through `bossmode`'s `depends:`. Under explicit
+Motivating case: a consumer config that names `test` but not
+`shared-review-protocol` receives that skill only transitively,
+through `shared-investigation-framework`'s `depends:`. Under explicit
 selection that transitive link installs nothing, so
-`shared-agent-execution` would be missing from the install and its
+`shared-review-protocol` would be missing from the install and its
 receipt while stale copies linger.
 
 ## How to read this table
@@ -35,20 +35,19 @@ receipt while stale copies linger.
 | Skill | Direct `depends:` | Transitive closure | Explicit set to list |
 |---|---|---|---|
 | benchbox | `shared-change-framework` | `shared-change-framework` | `benchbox`, `shared-change-framework` |
-| blog | `shared-change-framework`, `shared-review-protocol` | `shared-change-framework`, `shared-review-protocol` | `blog`, `shared-change-framework`, `shared-review-protocol` |
-| bossmode | `shared-agent-execution` | `shared-agent-execution` | `bossmode`, `shared-agent-execution` |
-| code | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `code`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
-| docs | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `docs`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
+| blog | `shared-change-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-review-protocol` | `blog`, `shared-agent-execution`, `shared-change-framework`, `shared-review-protocol` |
+| code | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `code`, `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
+| docs | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `docs`, `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
 | memex-search | (none) | (none) | `memex-search` |
-| session-takeover | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `session-takeover`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
+| session-takeover | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `session-takeover`, `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
 | shared-agent-execution | (none) | (none) | `shared-agent-execution` |
 | shared-change-framework | (none) | (none) | `shared-change-framework` |
-| shared-investigation-framework | `shared-review-protocol` | `shared-review-protocol` | `shared-investigation-framework`, `shared-review-protocol` |
-| shared-review-protocol | (none) | (none) | `shared-review-protocol` |
+| shared-investigation-framework | `shared-review-protocol` | `shared-agent-execution`, `shared-review-protocol` | `shared-agent-execution`, `shared-investigation-framework`, `shared-review-protocol` |
+| shared-review-protocol | `shared-agent-execution` | `shared-agent-execution` | `shared-agent-execution`, `shared-review-protocol` |
 | substack | `shared-change-framework` | `shared-change-framework` | `shared-change-framework`, `substack` |
-| test | `shared-change-framework`, `shared-investigation-framework` | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `test` |
+| test | `shared-change-framework`, `shared-investigation-framework` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `test` |
 | tidy-perms | (none) | (none) | `tidy-perms` |
-| todo | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `todo` |
+| todo | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `todo` |
 
 ## Staying current
 
