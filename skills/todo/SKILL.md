@@ -1,6 +1,6 @@
 ---
 name: todo
-description: Use when the user asks to "ideate on an idea", "refine an idea", "brainstorm", "write a spec", "create a specification", "create a TODO", "show TODO items", "manage TODOs", "prioritize TODOs", "top N most important todos", "rank the backlog", "what should we work on", "what should I work on", "implement a TODO", "implement a batch of TODOs", "complete a TODO", "finish an item", "release my claim", "why did finish fail", "cleanup TODOs", "review TODO quality", "claim a TODO", "what's ready" / "ready queue", "block"/"unblock a TODO", "create TODOs from a spec", "create a batch handoff", or "close out a reviewed batch". Covers the lifecycle from idea to specification, implementation, and completion.
+description: Use when the user asks to "ideate on an idea", "refine an idea", "brainstorm", "write a spec", "create a specification", "create a TODO", "show TODO items", "manage TODOs", "prioritize TODOs", "top N most important todos", "rank the backlog", "what should we work on", "what should I work on", "implement a TODO", "implement a batch of TODOs", "complete a TODO", "finish an item", "release my claim", "why did finish fail", "cleanup TODOs", "review TODO quality", "claim a TODO", "what's ready" / "ready queue", "block"/"unblock a TODO", "create TODOs from a spec", "checkpoint" or "create a handoff" for another session, or "close out a reviewed batch". Covers the lifecycle from idea to specification, implementation, and completion.
 version: 3.0.0
 tools: Bash, Read, Edit, Write, Task
 ---
@@ -61,7 +61,7 @@ the product repository.
   legacy per-item receipts as valid. Ordinary dependencies remain done-only;
   prepared receipts never unlock review, approval, merge, deployment, or soak
   gates.
-- **Skill-only actions** — `ideate`, `spec`, `prioritize`, `batch`, `handoff`,
+- **Skill-only actions** — `ideate`, `spec`, `prioritize`, `batch`, `checkpoint`,
   `closeout` — are workflows, not tools. Follow their reference guides.
 - **Close-out authorization.** `closeout` is write-shaped under
   `shared-review-protocol/SKILL.md` §1 (`[REVIEW-AUTH-001]`). A message that
@@ -181,7 +181,7 @@ For multi-step workflows, follow the dedicated reference guide. None is a tool.
 | `queries` | Search, filter, and read items with bounded output | `references/queries.md` |
 | `prioritize` | Rank open items by topic, severity, readiness, and unlock value | `references/prioritize.md` |
 | `batch` | Implement a set of items in dependency order across bounded contexts | `references/batch.md` |
-| `handoff` | Create a self-contained handoff prompt for another agent session | `references/handoff.md` |
+| `checkpoint` | Record resumable state in tracker items for another session; also handles handoff requests | `references/checkpoint.md` |
 | `closeout` | Remediate reviewed findings and close batch items | `references/closeout.md` |
 | `bootstrap` | Initialize state-branch config for a repository | `references/bootstrap.md` |
 | `recovery` | Resolve error codes, conflicts, and offline states | `references/recovery.md` |
