@@ -115,8 +115,10 @@ sleep or poll in an implementation context.
 ## Context rotation and resume
 
 At every substantial-item boundary, persist the envelope and discard the worker
-transcript. Rotate or compact the controller too; its handoff preserves the
-exact TODO set and ledger path, not logs, readiness output, or discussion.
+transcript. Rotate or compact the controller too; its checkpoint
+(`references/checkpoint.md`) preserves the exact TODO set and ledger path,
+not logs, readiness output, or discussion. The ledger is local, so the batch
+resumes only on the machine that holds it.
 
 If fresh contexts are unavailable, checkpoint and compact at a safe item
 boundary. Do not measure occupancy or compact uncheckpointed work. If neither
