@@ -46,9 +46,9 @@ catalogs; do not infer that stripping a provider prefix makes a valid ID.
 ### Effort translation
 
 Do not assume a non-OMP external CLI implements adaptive effort. Use the
-concrete effort named by the selected role: `low` for simple work, `medium`
-for common work, and `high` for planning, review, research, or vision. This
-is a fixed approximation, not adaptive reasoning. Explicit user effort
+concrete effort named by the selected role: `medium` for simple and common
+work, and `high` for planning, review, research, or vision. This is a fixed
+approximation, not adaptive reasoning. Explicit user effort
 overrides win. External `omp` uses the same concrete `--thinking` value
 unless the user explicitly requests adaptive effort.
 
