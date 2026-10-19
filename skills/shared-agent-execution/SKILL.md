@@ -26,18 +26,20 @@ Roles describe workload fit, not a quality hierarchy. A role never
 auto-classifies a prompt, grants permissions, enters plan mode, enables an
 advisor, or guarantees independent review on its own.
 
-| Role | Portable default | Use for |
-| :--- | :--- | :--- |
-| `default` | `anthropic/claude-sonnet-5-5:medium` | Common implementation and management. |
-| `smol` | `anthropic/claude-haiku-5-5:low` | Simple, mechanical, and scouting work. |
-| `slow` | `anthropic/claude-fable-5:high` | Maximum complexity and special cases. |
-| `plan` | `anthropic/claude-opus-5-5:high` | Planning and high-capability analysis. |
-| `review` | `openai-codex/gpt-6.1-sol:high` | Independent review; filter the author family. |
-| `research` | `anthropic/claude-opus-5-5:high` | High-capability research and synthesis. |
-| `task` | `anthropic/claude-sonnet-5-5:medium` | Common delegated implementation. |
-| `commit` | `anthropic/claude-haiku-5-5:low` | Commit-message and changelog generation. |
-| `vision` | `google-antigravity/gemini-3.8-flash:high` | Image-question helpers; not image generation. |
-| `advisor` | `anthropic/claude-fable-5:high` | Advisory second opinions when enabled. |
+<!-- routing:begin -->
+| Role | Primary | Fallbacks, in order | Use for |
+| :--- | :--- | :--- | :--- |
+| `default` | `anthropic/claude-sonnet-5-5:medium` | `openai-codex/gpt-6.1-sol:medium` → `muse-code/muse-spark-1.3-contributor:high` → `google-antigravity/gemini-3.8-flash:high` | Common implementation and management. |
+| `smol` | `anthropic/claude-haiku-5-5:medium` | `openai-codex/gpt-6-luna:medium` → `muse-code/muse-spark-1.3-contributor:medium` → `google-antigravity/gemini-3.8-flash:medium` | Simple, mechanical, and scouting work. |
+| `slow` | `anthropic/claude-fable-5:high` | `openai-codex/gpt-6-astra:high` → `muse-code/muse-wonder-1.0-contributor:xhigh` → `google-antigravity/gemini-4-argon:xhigh` | Maximum complexity and special cases. |
+| `plan` | `anthropic/claude-opus-5-5:high` | `openai-codex/gpt-6.1-sol:high` → `muse-code/muse-wonder-1.0-contributor:medium` → `google-antigravity/gemini-4-argon:medium` | Planning and high-capability analysis. |
+| `review` | `anthropic/claude-opus-5-5:high` | `openai-codex/gpt-6.1-sol:high` → `muse-code/muse-wonder-1.0-contributor:medium` → `google-antigravity/gemini-4-argon:medium` | Independent review; filter the author family. |
+| `research` | `anthropic/claude-opus-5-5:high` | `openai-codex/gpt-6.1-sol:high` → `muse-code/muse-wonder-1.0-contributor:medium` → `google-antigravity/gemini-4-argon:medium` | High-capability research and synthesis. |
+| `task` | `anthropic/claude-sonnet-5-5:medium` | `openai-codex/gpt-6.1-sol:medium` → `muse-code/muse-spark-1.3-contributor:high` → `google-antigravity/gemini-3.8-flash:high` | Common delegated implementation. |
+| `commit` | `anthropic/claude-haiku-5-5:medium` | `openai-codex/gpt-6-luna:medium` → `muse-code/muse-spark-1.3-contributor:medium` → `google-antigravity/gemini-3.8-flash:medium` | Commit-message and changelog generation. |
+| `vision` | `google-antigravity/gemini-3.8-flash:high` | `openai-codex/gpt-6.1-sol:medium` → `google-antigravity/gemini-3.8-flash:high` → `muse-code/muse-spark-1.3-contributor:medium` | Image-question helpers; not image generation. |
+| `advisor` | `anthropic/claude-fable-5:high` | `openai-codex/gpt-6-astra:high` → `muse-code/muse-wonder-1.0-contributor:xhigh` → `google-antigravity/gemini-4-argon:xhigh` | Advisory second opinions when enabled. |
+<!-- routing:end -->
 
 Every Muse model MUST be the contributor variant. Never copy an OMP effort
 suffix into a non-OMP external CLI model ID; resolve each role or fallback
@@ -59,25 +61,19 @@ workers use `@task`.
 
 ## Role-Local Fallbacks
 
-These are portable fallback defaults, not overrides of a live OMP chain.
-Keep fallback configuration role-local; model-wide chains can shadow it.
-Resolve each model name to the documented harness identifier.
+The table above is generated from the live OMP config by
+`scripts/routing_sync.py`; do not edit it by hand. These are portable
+defaults, not overrides of a live OMP chain. Keep fallback configuration
+role-local; model-wide chains can shadow it. Resolve each model name to the
+documented harness identifier.
 
-- Simple (`smol`, `commit`): Haiku `low` → Luna `low` → Flash `medium`.
-- Common (`default`, `task`): Sonnet `medium` → Sol `medium` → Spark
-  contributor `medium` → Flash `high`.
-- Planning (`plan`, `research`): Opus `high` → Sol `high` → Wonder
-  contributor `medium` → Argon `medium`.
-- Maximum (`slow`, `advisor`): Fable `high` → Astra `high` → Wonder
-  contributor `xhigh` → Argon `xhigh`.
-- `review`: Sol `high` → Wonder contributor `medium` → Argon `medium`.
-  Exclude the author's family from every candidate; fail closed if none qualifies.
-- `vision`: Flash `high` → Argon `medium` → Spark contributor `medium`.
+For `review`, exclude the author's family from every candidate and fail
+closed if none qualifies. A Claude author makes a Claude primary ineligible.
 
 ## Effort Translation
 
 Use the effort named by the selected role. Do not put every role on `auto`:
-simple work stays `low`, common work stays `medium`, and planning or review
+simple work uses `medium`, common work uses `medium`, and planning or review
 uses `high` unless the assignment is routine. Maximum effort is only for an
 explicit final adversarial review. External harnesses without `auto` use the
 same concrete effort; that is a fixed approximation, not adaptive reasoning.
