@@ -70,6 +70,16 @@ documented harness identifier.
 For `review`, exclude the author's family from every candidate and fail
 closed if none qualifies. A Claude author makes a Claude primary ineligible.
 
+## Judgment Role
+
+`judge` is a model-kind role, not a workload role: it selects a judgment
+runner (System One API), never a chat model. It takes no effort suffix, does
+not appear in the routing table above, and is excluded from
+`scripts/routing_sync.py` by design. The portable default is
+`typesafe/jev-1.14.0`, with an OpenRouter Jev ID as the fallback route.
+Never place a judgment ID in a chat role or fallback chain, and never use
+the judge as a reviewer-panel member: it classifies, it does not review.
+
 ## Effort Translation
 
 Use the effort named by the selected role. Do not put every role on `auto`:
