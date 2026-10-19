@@ -25,6 +25,7 @@ INSTALLED = (
     Path.home() / "Developer/BenchBox/.claude/skills/shared-agent-execution/SKILL.md",
 )
 ROLE_ORDER = ("default", "smol", "slow", "plan", "review", "research", "task", "commit", "vision", "advisor")
+NON_CHAT_ROLES = frozenset({"judge", "image", "web", "speech", "dictation"})
 USE = {
     "default": "Common implementation and management.",
     "smol": "Simple, mechanical, and scouting work.",
@@ -41,7 +42,9 @@ BLOCK = re.compile(r"(<!-- routing:begin -->\n).*?(<!-- routing:end -->)", re.DO
 
 
 def render(roles: dict[str, str], chains: dict[str, list[str]]) -> str:
-    names = [name for name in ROLE_ORDER if name in roles] + sorted(set(roles) - set(ROLE_ORDER))
+    names = [name for name in ROLE_ORDER if name in roles] + sorted(
+        set(roles) - set(ROLE_ORDER) - NON_CHAT_ROLES
+    )
     rows = ["| Role | Primary | Fallbacks, in order | Use for |", "| :--- | :--- | :--- | :--- |"]
     for name in names:
         fallbacks = " → ".join(f"`{item}`" for item in chains.get(name, [])) or "none"

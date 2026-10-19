@@ -25,6 +25,11 @@ class RoutingSyncTests(unittest.TestCase):
         self.assertIn("`b/luna:medium` → `c/flash:medium`", rows[1])
         self.assertIn("| none |", rows[0])
 
+    def test_model_kind_roles_are_excluded_from_the_chat_table(self):
+        roles = {**ROLES, "judge": "typesafe/jev-1.14.0", "image": "openai/gpt-image-1"}
+        rows = routing_sync.render(roles, CHAINS).splitlines()[2:]
+        self.assertEqual([row.split("`")[1] for row in rows], ["default", "smol", "custom"])
+
     def test_a_changed_role_is_detected_as_drift(self):
         synced = routing_sync.splice(TEXT, routing_sync.render(ROLES, CHAINS))
         changed = {**ROLES, "smol": "a/haiku:low"}
