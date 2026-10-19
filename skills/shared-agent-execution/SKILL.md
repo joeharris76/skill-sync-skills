@@ -31,7 +31,7 @@ advisor, or guarantees independent review on its own.
 | `plan` | `anthropic/claude-fable-5:auto` | Planning, decomposition, architecture. |
 | `review` | `openai-codex/gpt-6-astra:auto` | Independent review and adversarial gates. |
 | `research` | `google-antigravity/gemini-4-argon:auto` | Complex research and synthesis; use `task` for bounded collection. |
-| `task` | `muse-code/muse-spark-1.3-contributor:auto` | Bounded implementation and delegated workers, including mechanical `sonic` work. |
+| `task` | `muse-code/muse-spark-1.3-contributor:auto` | Bounded implementation and delegated workers. |
 | `commit` | `muse-code/muse-spark-1.3-contributor:auto` | Commit-message and changelog generation, not Git authorization. |
 | `vision` | `google-antigravity/gemini-4-argon:auto` | Image-question helpers; not image generation or every attached image. |
 | `advisor` | `anthropic/claude-fable-5:auto` | Advisory second opinions. |
@@ -45,6 +45,10 @@ External processes do not inherit OMP retry or quota settings.
 Native `task` agent model precedence matters: agent settings can shadow
 frontmatter. For a task-specific choice, use eval invocation-local selection
 or an explicit external command rather than relying on frontmatter alone.
+OMP's `task` and `sonic` are agent names, distinct from the `task` model role.
+`sonic` is the mechanical worker; routing it to `@task` changes only its model,
+not its instructions or limits. `smol` can serve lightweight helpers without
+replacing a write-capable worker's agent definition.
 
 ## Role-Local Fallbacks
 

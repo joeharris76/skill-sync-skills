@@ -113,9 +113,15 @@ Those capabilities require the command boundaries and dispatch modes below.
 - **pi**
   - Worker (Write): `(cd "$WORKSPACE" && pi --print --model "$MODEL" --thinking "$EFFORT" "$PROMPT")`
   - Reviewer (Hard Read-Only): `(cd "$WORKSPACE" && pi --print --tools read,grep,find,ls --model "$MODEL" --thinking "$EFFORT" "$PROMPT")`
-  - Known-good models: `openai-codex/gpt-6-astra`, `openai-codex/gpt-6-sol`, `openai-codex/gpt-6-luna`, `anthropic/claude-fable-5`, `anthropic/claude-opus-5-5`, `anthropic/claude-sonnet-5`, `xai/grok-4.6`, `xai/grok-4.5`, `muse-spark/muse-spark-1.2-contributor`
-  - Note: pi's catalog lags the native CLIs. Use only IDs that
-    `pi --list-models` reports.
+  - Catalog-listed role models: `anthropic/claude-fable-5`,
+    `meta/muse-spark-1.3-contributor`. Model listing is not completion or
+    authentication proof; use only identifiers reported by the installed
+    `pi --list-models`.
+  - Do not infer an OMP provider prefix. A catalog that lists GPT models under
+    `openai` does not establish a subscription-backed `openai-codex` route.
+    If the required coding-plan model is absent, use its native harness
+    rather than silently switching to a billable API provider. Do not replace
+    an unavailable Wonder contributor with the non-contributor Wonder entry.
 - **jcode**
   - Worker (Write): `jcode run -C "$WORKSPACE" --model "$MODEL" "$PROMPT"`
   - Reviewer (Hard Read-Only): `jcode run -C "$WORKSPACE" --disable-base-tools --tools read --model "$MODEL" "$PROMPT"`
