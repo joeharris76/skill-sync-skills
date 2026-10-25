@@ -105,22 +105,22 @@ class DeploymentConfTests(unittest.TestCase):
         self.assertFalse(seen & UNTRACKED_WORK,
                          f"untracked authoring work must not be selected: {seen & UNTRACKED_WORK}")
 
-    def test_catalog_group_selects_only_tracked_skills(self):
+    def test_catalog_groups_select_only_tracked_skills(self):
         catalog = [g for g in self.groups if Path(g["source"]).name == "skill-sync-skills"]
-        self.assertEqual(len(catalog), 1, "expected exactly one catalog source group")
-        group = catalog[0]
-        for skill in group["skills"]:
-            payload = ROOT / group["dir"] / skill
-            self.assertTrue(payload.is_dir(), f"selected catalog skill is missing: {payload}")
-        # The pin must resolve inside this repository's own history, so the
-        # recorded SHA can only vouch for committed bytes.
-        resolved = subprocess.run(
-            ["git", "cat-file", "-e", f"{group['rev']}^{{commit}}"],
-            cwd=ROOT, capture_output=True, text=True,
-        )
-        self.assertEqual(resolved.returncode, 0,
-                         f"catalog rev {group['rev']} is not present in this checkout; "
-                         "fetch it or re-pin through review")
+        self.assertTrue(catalog, "no catalog source group")
+        for group in catalog:
+            for skill in group["skills"]:
+                payload = ROOT / group["dir"] / skill
+                self.assertTrue(payload.is_dir(), f"selected catalog skill is missing: {payload}")
+            # The pin must resolve inside this repository's own history, so the
+            # recorded SHA can only vouch for committed bytes.
+            resolved = subprocess.run(
+                ["git", "cat-file", "-e", f"{group['rev']}^{{commit}}"],
+                cwd=ROOT, capture_output=True, text=True,
+            )
+            self.assertEqual(resolved.returncode, 0,
+                             f"catalog rev {group['rev']} is not present in this checkout; "
+                             "fetch it or re-pin through review")
 
     def test_product_group_owns_only_the_operator_skill(self):
         product = [g for g in self.groups
