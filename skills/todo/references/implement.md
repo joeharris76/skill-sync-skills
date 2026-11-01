@@ -22,15 +22,29 @@ your judgment define the work.
 If the claim may outlast its lease (default 24h), call
 `renew(id=..., generation=...)`. Same generation, no milestones needed.
 
-For a declared feature batch, a completed member uses `prepare`, not `finish`:
-the call includes the member's batch metadata, clean exact source checkout and
-revision, and passed bounded-suite evidence. `prepare` releases the claim and
-preserves the receipt; it does not mark the member done. Do not use it for
-ordinary work or to bypass external, review, or approval dependencies.
+The work ends in one of two ways; pick by whether the item belongs to an active
+registered batch (`show_item` batch metadata, or the task you were dispatched
+with).
+
+- **Batch member (prepared delivery).** A member worker does not claim, prepare,
+  or finish: the leader is the only tracker writer, and the tracker refuses
+  everyone else's claim on an active batch (`E_BATCH_OWNER`). The member commits
+  and checks its change in its own worktree, merges in the current integration
+  head, and hands a landing request to the leader (see `references/batch.md`). No
+  PR. The leader later `take`s the member and calls `prepare`, which records the
+  receipt and releases the claim without marking the item done; `finish` comes
+  only after the final tree is verified. Do not use `prepare` for ordinary work
+  or to bypass external, review, or approval dependencies.
+- **Standalone item.** Deliver through the change framework's branch, commit,
+  push, and PR workflow, then `finish` as below.
 
 ### 3. Finish or hand back
 
-1. Call `finish(id=..., generation=...)` to close the item.
+For a standalone item:
+
+1. Call `finish(id=..., generation=...)` to close the item once its delivery is
+   complete. For a batch member, never call `finish` after the member work or
+   after `prepare`; the leader finishes members at batch closeout.
 2. If you must abandon work, call `release(id=..., generation=...)` so the task
    returns to the ready queue.
 
