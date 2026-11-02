@@ -156,7 +156,7 @@ action rather than waiting in the current context.
 
 ## Prepared feature delivery
 
-Prepared mode is opt-in. It requires todo-db 0.13.0 or later (advertises the
+Prepared mode is opt-in. It requires todo-db 0.14.0 or later (advertises the
 `todo_db_batch` version 2 capability): read the capability from the server and
 key on it, not on a package version string. If it is absent, or the store is
 not yet on the matching schema, stop and use serial mode. Never reinterpret a

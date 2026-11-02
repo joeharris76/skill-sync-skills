@@ -61,7 +61,7 @@ the product repository.
   (`E_BATCH_OWNER`); a dead leader is handled by `recover_batch_owner`, not by
   taking over a member.
 - **Prepared work is not completion.** The prepared lifecycle is fail-closed
-  and capability-versioned. It requires todo-db 0.13.0 or later (advertises the
+  and capability-versioned. It requires todo-db 0.14.0 or later (advertises the
   `todo_db_batch` version 2 capability); if the server does not advertise it, or
   the store is not on the matching schema, stop and use serial mode, and never
   treat legacy per-item receipts as valid. The first `register_batch` on an older
@@ -185,7 +185,7 @@ edit (including `context_append`); any other field change (`description`,
 a mix with `context`) invalidates it and its dependents, and the member is
 prepared again afterwards (re-prepare). Registered batch metadata cannot be
 edited (abort the batch to reassign), and once any member is `done` every
-invalidating edit on the batch is refused (todo-db 0.13.0 or later).
+invalidating edit on the batch is refused (todo-db 0.14.0 or later).
 
 Use `not_before` rather than `blocked` when a task is waiting for a known time,
 such as the end of a measurement window. It takes a future RFC 3339 time with
@@ -216,7 +216,7 @@ the evidence it binds, invalidates affected prepared evidence transitively.
 | Create or amend work | `create_item`, `update_item` |
 | Claim, extend, close, hand back, drop | `take`, `renew`, `finish`, `release`, `drop` (`drop` needs `reason`, 0.12.0+) |
 | Take over a dead session's live claim | `takeover` (0.8.1+) |
-| Read a batch, record a head change, recover a dead leader | `show_batch`, `advance_batch_head`, `recover_batch_owner` (0.13.0+, `todo_db_batch` version 2) |
+| Read a batch, record a head change, recover a dead leader | `show_batch`, `advance_batch_head`, `recover_batch_owner` (0.14.0+, `todo_db_batch` version 2) |
 
 ## Process guides
 
@@ -245,6 +245,6 @@ human the exact command:
 - `todo-db validate` — check the accepted tip and report counts.
 - `todo-db migrate --from-export <file> --backup-dir <dir> [--dry-run]` — migrate a legacy v2 export onto a freshly bootstrapped branch. Dry-run first; a real run requires `--backup-dir`.
 - `todo-db recover --op-id <id>` / `--restore-rev <sha>` / `--limit N` — reconcile, restore, or show history.
-- `todo-db list` / `todo-db show <id>` / `todo-db batch show <batch_id>` — read-only inspection for humans and CI (`batch show` needs 0.13.0 or later).
+- `todo-db list` / `todo-db show <id>` / `todo-db batch show <batch_id>` — read-only inspection for humans and CI (`batch show` needs 0.14.0 or later).
 
 Details: `references/recovery.md` and `references/bootstrap.md`.

@@ -44,7 +44,7 @@ from the first page.
 
 ## Batch recovery
 
-Prepared batches need todo-db 0.13.0 or later (advertises the `todo_db_batch`
+Prepared batches need todo-db 0.14.0 or later (advertises the `todo_db_batch`
 version 2 capability). Read the live state first with `show_batch` and
 `show_item`; the leader's ledger is only a cache.
 
