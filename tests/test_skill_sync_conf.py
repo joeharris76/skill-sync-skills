@@ -2,16 +2,17 @@
 
 This replaces the retired same-commit lock invariant (``skill-sync.yaml`` /
 ``skill-sync.lock`` + ``scripts/verify_lock.py``) and the generated-store
-attesters (``scripts/verify_deployment_store.py``,
-``scripts/activate_global_store.py``). Two halves:
+attesters and activation scripts that went with it. Two halves:
 
 1. Static: ``deployment/global/skill-sync.conf`` is well-formed, pins full
    commit SHAs that resolve in this repository's history, selects only
-   tracked catalog skills, and cannot express a global/home or
-   symlink-traversing target.
+   tracked catalog skills, and targets exactly the three loader folders
+   relative to the home project root (no absolute, ``~`` or ``..`` paths).
 2. Behavioral: the vendored wrapper (``tools/skill-sync``) runs a real
-   preview/apply/check/verify cycle, and ``verify`` fails nonzero when a
-   managed file is modified, added, removed, mode-changed, or symlinked.
+   preview/apply/check/verify cycle over the three targets, leaves
+   loader-owned content (Claude Code ``synced/``, Codex ``.system/``) alone,
+   and ``verify`` fails nonzero when a managed file is modified, added,
+   removed, mode-changed, or symlinked.
 
 Standard library only, so CI needs no dependency install.
 """
@@ -39,6 +40,9 @@ SKILL_RE = re.compile(r"[A-Za-z0-9._-]+")
 # Untracked authoring work. It must never be selected for distribution, and
 # no clean-SHA pin may ever be asked to vouch for its uncommitted bytes.
 UNTRACKED_WORK: set[str] = set()
+
+# Loader folders, relative to the home directory used as the project root.
+LOADER_TARGETS = [".claude/skills", ".codex/skills", ".agents/skills"]
 
 
 def parse_conf(text: str):
@@ -86,9 +90,8 @@ class DeploymentConfTests(unittest.TestCase):
             self.assertFalse(target.startswith("~"), f"target must not use $HOME: {target}")
             parts = target.split("/")
             self.assertNotIn("..", parts, f"target must not contain `..`: {target}")
-            self.assertNotIn(".claude", parts[:1], f"must not target a loader dir: {target}")
-            self.assertFalse(target.startswith("store/.system"),
-                             "must not target loader-owned `.system`")
+        self.assertEqual(self.targets, LOADER_TARGETS,
+                         "targets must be exactly the three loader folders")
 
     def test_every_group_pins_a_full_sha_with_dir_and_skills(self):
         self.assertTrue(self.groups, "no `source` groups in skill-sync.conf")
@@ -136,13 +139,15 @@ class WrapperCycleTests(unittest.TestCase):
 
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
-        self.project = Path(self.temporary.name) / "deployment"
+        self.project = Path(self.temporary.name) / "home"
         self.project.mkdir()
         # The catalog checkout itself is the source: `git archive` of HEAD
         # exports committed bytes only, so untracked authoring work can never
         # leak into the payload.
         (self.project / "skill-sync.conf").write_text(
-            "target = store/skills\n"
+            "target = .claude/skills\n"
+            "target = .codex/skills\n"
+            "target = .agents/skills\n"
             "\n"
             f"source = {ROOT}\n"
             "rev = HEAD\n"
@@ -150,7 +155,7 @@ class WrapperCycleTests(unittest.TestCase):
             "skill = blog\n",
             encoding="utf-8",
         )
-        self.target = self.project / "store" / "skills"
+        self.target = self.project / ".claude" / "skills"
         self.manifest = self.target / "skill-sync.manifest"
 
     def tearDown(self):
@@ -165,12 +170,15 @@ class WrapperCycleTests(unittest.TestCase):
     def test_preview_apply_check_verify(self):
         preview = self.run_wrapper("preview")
         self.assertEqual(preview.returncode, 0, preview.stderr)
-        self.assertIn("A store/skills/blog/SKILL.md", preview.stdout)
+        self.assertIn("A .claude/skills/blog/SKILL.md", preview.stdout)
+        for loader in LOADER_TARGETS:
+            self.assertIn(f"A {loader}/blog/SKILL.md", preview.stdout)
         self.assertFalse(self.target.exists(), "preview must not modify the project")
 
         apply = self.run_wrapper("apply")
         self.assertEqual(apply.returncode, 0, apply.stderr)
-        self.assertTrue((self.target / "blog" / "SKILL.md").is_file())
+        for loader in LOADER_TARGETS:
+            self.assertTrue((self.project / loader / "blog" / "SKILL.md").is_file())
 
         check = self.run_wrapper("check")
         self.assertEqual(check.returncode, 0, check.stderr + check.stdout)
@@ -181,6 +189,31 @@ class WrapperCycleTests(unittest.TestCase):
         # A second check after the apply is committed must still be clean.
         second = self.run_wrapper("check")
         self.assertEqual(second.returncode, 0, second.stderr + second.stdout)
+
+    def seed_loader_content(self) -> list[Path]:
+        owned = [
+            self.project / ".claude/skills/synced/abc123/x/SKILL.md",
+            self.project / ".claude/skills/synced/.bucket-abc123",
+            self.project / ".codex/skills/.system/openai/SKILL.md",
+        ]
+        for path in owned:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(f"loader-owned {path.name}\n", encoding="utf-8")
+        return owned
+
+    def test_apply_preserves_loader_owned_content(self):
+        owned = self.seed_loader_content()
+        before = {p: p.read_text(encoding="utf-8") for p in owned}
+        for verb in ("apply", "verify", "check"):
+            result = self.run_wrapper(verb)
+            self.assertEqual(result.returncode, 0, verb + result.stderr + result.stdout)
+            for path, text in before.items():
+                self.assertEqual(path.read_text(encoding="utf-8"), text,
+                                 f"{verb} touched loader-owned {path}")
+        # A second apply (an update cycle) must also leave them alone.
+        self.assertEqual(self.run_wrapper("apply").returncode, 0)
+        for path, text in before.items():
+            self.assertEqual(path.read_text(encoding="utf-8"), text)
 
     def mutate_and_reverify(self, mutate) -> str:
         self.assertEqual(self.run_wrapper("apply").returncode, 0)
@@ -234,7 +267,7 @@ class WrapperCycleTests(unittest.TestCase):
         conf.write_text(conf.read_text(encoding="utf-8") + "skill = docs\n", encoding="utf-8")
         pending = self.run_wrapper("check")
         self.assertEqual(pending.returncode, 3, pending.stdout + pending.stderr)
-        self.assertIn("store/skills/docs/SKILL.md", pending.stdout)
+        self.assertIn(".agents/skills/docs/SKILL.md", pending.stdout)
 
 
 if __name__ == "__main__":
