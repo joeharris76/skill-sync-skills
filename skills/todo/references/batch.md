@@ -209,8 +209,10 @@ concrete commands; this guide names only the tracker calls and the contract.
 2. After `register_batch` (which performs the schema-4 cutover on an older
    store), attach batch metadata to each member:
    `update_item(id, batch={batch_id, member_id, implementation_dependencies},
-   needs=[...])` for an existing item, or `create_item(..., batch=...)` for a
-   new one. Every `implementation_dependencies` entry must also be in `needs`.
+   needs=[<current needs plus every implementation dependency>])` for an
+   existing item (`needs` is replaced wholesale), or
+   `create_item(..., batch=...)` for a new one. Every
+   `implementation_dependencies` entry must also be in `needs`.
    Batch metadata is never inferred from `needs`. Never attach metadata before
    registration: below schema 4 it is refused `E_SCHEMA`.
 3. Create each member worktree **at the current integration head** (the start
