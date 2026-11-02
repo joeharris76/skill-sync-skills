@@ -9,62 +9,119 @@ Canonical source for personal and shared workflow skills. The public
 - Edit the operator in `skill-sync/skills/skill-sync` with its CLI contract.
 - Treat agent and project targets as generated copies.
 
-## Stable global store
+## Global loader folders
 
 `deployment/global/skill-sync.conf` composes exact product and catalog commits
-into one store. The wrapper is vendored at `tools/skill-sync` (pinned product
-revision; the header records the source commit), so routines need no network,
-no Node, and no bootstrap. skill-sync never fetches: each `source` must be a
-local checkout, and each `rev` must be present there.
+and writes them straight into the three global loader folders:
+`~/.claude/skills`, `~/.codex/skills` and `~/.agents/skills`. The home
+directory is the skill-sync project root (`-C ~`; it need not be a Git
+repository) and the live config is kept at
+`~/.skill-sync-deployment/skill-sync.conf`. The wrapper is vendored at
+`tools/skill-sync` (pinned product revision; the header records the source
+commit), so routines need no network, no Node, and no bootstrap. skill-sync
+never fetches: each `source` must be a local checkout, and each `rev` must be
+present there.
 
 ```bash
-mkdir -p ~/.skill-sync-deployment
-cp deployment/global/skill-sync.conf ~/.skill-sync-deployment/skill-sync.conf
-# Point each `source` at a local checkout, then:
-tools/skill-sync preview -C ~/.skill-sync-deployment
-tools/skill-sync apply   -C ~/.skill-sync-deployment
-tools/skill-sync verify  -C ~/.skill-sync-deployment
+CONF=~/.skill-sync-deployment/skill-sync.conf
+tools/skill-sync preview -C ~ -f "$CONF"
+tools/skill-sync apply   -C ~ -f "$CONF"
+tools/skill-sync verify  -C ~ -f "$CONF"
+tools/skill-sync check   -C ~ -f "$CONF"
 ```
 
-The config targets the plain directory `store/skills` inside the deployment
-project — never `$HOME`, never the live loader symlinks (the wrapper refuses
-to write through symlinks by design). `verify` checks the materialized payload
-offline against `store/skills/skill-sync.manifest`: every recorded file present
-with matching bytes and mode, nothing extra inside a managed skill, no
-symlinks. It does not prove the payload matches the configured revision —
-that is what `check` is for, and `check` needs the source checkouts.
+`apply` writes only the selected skills plus each target's
+`skill-sync.manifest` and `skill-sync.receipt`. It never removes loader-owned
+content: Claude Code's cloud-synced `synced/` (an id directory plus a
+`.bucket-<id>` marker) belongs only in `~/.claude/skills`, and Codex may keep
+`.system/` in `~/.codex/skills`. `verify` checks each materialized payload
+offline against its manifest: every recorded file present with matching bytes
+and mode, nothing extra inside a managed skill, no symlinks. It does not prove
+the payload matches the configured revision — that is what `check` is for, and
+`check` needs the source checkouts.
 
-To ship a catalog or operator update, commit it in the owning repository and
-bump `rev` in the template through review, then re-apply. The per-target
-`skill-sync.receipt` records which commit each payload came from.
+### Shipping an update
 
-## Activation (documented follow-up, needs approval)
+1. Commit the change in the owning repository and bump `rev` in the template
+   through review.
+2. Copy the new `rev` into `~/.skill-sync-deployment/skill-sync.conf`.
+3. Run `preview`, then `apply`, then `verify` and `check` with the commands
+   above.
 
-Global loader directories (`~/.claude/skills`, `~/.codex/skills`) are symlinks
-into an immutable snapshot under `~/.skill-sync-deployment/releases/`. The
-current release keeps serving until its replacement is validated: promoting a
-new store means snapshotting it and repointing the two symlinks, as an exact,
-reviewable change. Do not run the repointing without explicit approval.
+The per-target `skill-sync.receipt` records which commit each payload came
+from. Test feature branches through project-local targets; do not point the
+deployment config at an authoring worktree, and never record uncommitted
+bytes under a clean SHA.
+
+### One-time migration from the symlink model
+
+Older machines have the three loader folders as symlinks into an immutable
+snapshot at `~/.skill-sync-deployment/releases/<sha>/store/skills`, and
+skill-sync refuses to write through symlinks. Migrate once: build the result in
+a staging project root, prove it there, then swap each folder into place by
+renaming. Renames within one filesystem are cheap and reversible, so no
+folder is ever deleted until the end. This changes live loader folders, so run
+it only with owner approval.
 
 ```bash
-NEW=~/.skill-sync-deployment/releases/<validated-sha>
-mkdir -p "$NEW/store"
-cp -a ~/.skill-sync-deployment/store/skills "$NEW/store/skills"
-ln -sfn "$NEW/store/skills" ~/.claude/skills
-ln -sfn "$NEW/store/skills" ~/.codex/skills
+CONF=~/.skill-sync-deployment/skill-sync.conf
+STAGE=~/.skill-sync-deployment/staging
+
+# 1. Build and prove the result in the staging project root.
+mkdir -p "$STAGE"
+tools/skill-sync apply  -C "$STAGE" -f "$CONF"
+tools/skill-sync verify -C "$STAGE" -f "$CONF"
+tools/skill-sync check  -C "$STAGE" -f "$CONF"
+
+# 2. Claude Code's synced/ belongs only in ~/.claude/skills; copy it in.
+cp -a ~/.claude/skills/synced "$STAGE/.claude/skills/synced"
+# Codex's loader-owned .system/, if present, is kept the same way.
+[ -d ~/.codex/skills/.system ] && cp -a ~/.codex/skills/.system "$STAGE/.codex/skills/.system"
+
+# 3. For each loader: rename the symlink aside, then rename the staged folder in.
+for loader in claude codex agents; do
+  mv ~/.$loader/skills ~/.$loader/skills.symlink    # renames the link itself
+  mv "$STAGE/.$loader/skills" ~/.$loader/skills
+  ls ~/.$loader/skills > /dev/null                    # loader folder is live
+done
+
+# 4. Check and verify at the live paths.
+tools/skill-sync check  -C ~ -f "$CONF"
+tools/skill-sync verify -C ~ -f "$CONF"
+
+# 5. Remove the renamed symlinks (the snapshots under releases/ stay).
+for loader in claude codex agents; do rm ~/.$loader/skills.symlink; done
 ```
 
-Test feature branches through project-local targets; do not repoint the
-deployment store at an authoring worktree, and never record uncommitted bytes
-under a clean SHA.
+Between the two `mv` calls of step 3 the loader folder is absent for an
+instant; do it while no agent session is starting. Release snapshots stay on
+disk as rollback targets.
+
+### Rollback
+
+Rename the live folder aside and restore the symlink to the last release (the
+snapshots under `~/.skill-sync-deployment/releases/` stay on disk):
+
+```bash
+REL=~/.skill-sync-deployment/releases/<last-release-sha>
+for loader in claude codex agents; do
+  mv ~/.$loader/skills ~/.$loader/skills.managed
+  ln -s "$REL/store/skills" ~/.$loader/skills
+  ls ~/.$loader/skills > /dev/null
+done
+```
+
+`~/.claude/skills.managed/synced` holds Claude Code's current cloud-synced
+skills; copy it back if you return to the managed folders later.
 
 ## Template gate
 
 `tests/test_skill_sync_conf.py` validates the deployment template statically
 (pins are full SHAs resolvable in this history, only tracked catalog skills
-are selected, targets stay inside the project) and runs a real
-preview/apply/check/verify cycle with the vendored wrapper, including the
-mutation cases `verify` must reject. Standard library only. The pre-commit
+are selected, targets are exactly the three relative loader paths) and runs a
+real preview/apply/check/verify cycle over those targets with the vendored
+wrapper, proving loader-owned content (`synced/`, `.system/`) survives apply
+and covering the mutation cases `verify` must reject. Standard library only. The pre-commit
 hook and `.github/workflows/verify-deployment.yml` run the same suite:
 
 ```bash
