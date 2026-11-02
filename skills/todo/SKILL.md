@@ -62,8 +62,10 @@ the product repository.
   taking over a member.
 - **Prepared work is not completion.** The prepared lifecycle is fail-closed
   and capability-versioned. It requires todo-db 0.14.0 or later (advertises the
-  `todo_db_batch` version 2 capability); if the server does not advertise it, or
-  the store is not on the matching schema, stop and use serial mode, and never
+  `todo_db_batch` version 2 capability); if the capability is absent, or the
+  store schema is outside the advertised `supported_schema_versions`, stop and
+  use serial mode. A store below schema 4 is cut over by the first
+  `register_batch` with `confirm_schema3_cutover=true`. Never
   treat legacy per-item receipts as valid. The first `register_batch` on an older
   store needs `confirm_schema3_cutover=true` (it confirms the one-step cutover to
   store schema 4, which older clients then refuse) and only when every process
@@ -88,7 +90,9 @@ the product repository.
   leader is the only tracker and ledger writer. Member workers implement in their
   own worktrees and stop at a committed, checked change handed to the leader as
   a landing request; they make no tracker calls and open no PR. The leader claims
-  a member only to prepare or finish it. Procedure: `references/batch.md`.
+  a member only to prepare or finish it. The refusal holds only for a distinct
+  identity: a member must not use the leader's server instance or actor
+  (`--actor`/`TODO_DB_ACTOR`). Procedure: `references/batch.md`.
 - **Skill-only actions** — `ideate`, `spec`, `prioritize`, `batch`, `handoff`,
   `closeout` — are workflows, not tools. Follow their reference guides.
 - **Close-out authorization.** `closeout` is write-shaped under
@@ -149,7 +153,7 @@ first page, never skip ahead.
 | `E_OFFLINE` | Remote unreachable. | Reads may be cached and marked stale; mutations fail — retry when reachable. |
 | `E_UNKNOWN` | Outcome undetermined. | Reconcile with the operation ID in `recovery`; do not re-apply blindly. |
 | `E_STATE` | Malformed state or rejected request. As a `gate` from `get_instructions`, the server is bound to another project's store. | Read the message; report it if you cannot fix the request. For the `expect_store` gate, stop and write nothing. |
-| `E_SCHEMA` | State format newer than this package. | Stop; a human upgrades the package. |
+| `E_SCHEMA` | State format newer than this package. On a batch call: store below schema 4 (register with the cutover first) or a legacy receipt; see `references/recovery.md`. | Stop; a human upgrades the package. For a batch call, follow `references/recovery.md`. |
 | `E_FINAL_EVIDENCE` | Prepared member lacks current final-tree proof, including a current-acceptance rerun it is named for. | Re-take the member, rerun the named acceptance on the final tree, attach exact clean combined-tree evidence, then retry `finish`. |
 | `E_BATCH_OWNER` | You are not the owner of this active batch (`gate`). | Ask the owner named in the message; members hand work to the leader and never claim. A dead owner: `recover_batch_owner`. |
 | `E_BATCH_HEAD` | A head is not recorded, does not descend from the required head, or has unrecorded commits (`gate`). | `show_batch`; record the missing fix or merge with `advance_batch_head`, or re-base the member on a recorded head. |
@@ -167,7 +171,7 @@ inferred from `needs`. IDs use `a-z0-9-` (start/end alphanumeric). Titles are
 1–200 characters. There is no work breakdown, scope gate, or verification
 ladder: an ordinary task closes with `take` + `finish`.
 
-`update_item` amends title/priority/description/needs/sections/`not_before`,
+`update_item` amends title/priority/description/needs/sections/`not_before`/`batch`,
 or moves status between `open` and `blocked`. Text and list fields are
 replaced whole; an empty value clears one. To add a progress note without
 resending the context, pass `context_append` (todo-db 0.11.0 or later): the
@@ -183,8 +187,9 @@ On a prepared member, `update_item` keeps the receipt only for a `context`
 edit (including `context_append`); any other field change (`description`,
 `acceptance`, `links`, `needs`, `title`, `priority`, `status`, `not_before`, or
 a mix with `context`) invalidates it and its dependents, and the member is
-prepared again afterwards (re-prepare). Registered batch metadata cannot be
-edited (abort the batch to reassign), and once any member is `done` every
+prepared again afterwards (re-prepare). Batch metadata already on a registered
+member cannot be changed (abort to reassign); attaching it to a member that has
+none is allowed. Once any member is `done` every
 invalidating edit on the batch is refused (todo-db 0.14.0 or later).
 
 Use `not_before` rather than `blocked` when a task is waiting for a known time,

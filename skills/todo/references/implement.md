@@ -6,6 +6,8 @@ Drive a claimed tracker item from start to completion using MCP tools.
 
 ### 1. Claim the work
 
+A batch member skips this section and makes no tracker call (see §2).
+
 1. Call `list_items(ready_only=true)` to find claimable work.
 2. Call `take(id=...)` to claim the item. Store the returned `generation`. The
    response already carries the context to begin: title, priority, needs, unmet
@@ -49,4 +51,5 @@ For a standalone item:
    returns to the ready queue.
 
 If you find necessary work outside the task, `create_item` a follow-up with
-`needs` pointing at the current item rather than widening scope silently.
+`needs` pointing at the current item rather than widening scope silently (a
+batch member reports the follow-up to the leader instead).

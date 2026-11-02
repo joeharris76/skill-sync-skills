@@ -38,7 +38,9 @@ the newer state.
 ## Schema and state errors
 
 `E_SCHEMA` means the state format is newer than the installed package; a human
-upgrades. `E_STATE` explains itself in the message — a malformed request, an
+upgrades. On a batch call it also means the store is below schema 4 (register
+with `confirm_schema3_cutover=true` first) or a legacy receipt sits under a v2
+batch. `E_STATE` explains itself in the message — a malformed request, an
 unknown task, or a rejected transition. `E_CURSOR_STALE` means restart listing
 from the first page.
 
@@ -76,7 +78,7 @@ version 2 capability). Read the live state first with `show_batch` and
   head, `take` the member and run `prepare` for it (the unrecorded-commit check
   passes when the merge changed only that member's files). If the worktree is
   dirty or the merge is unfinished, finish or abort the merge in Git first. A
-  later `prepare` for an earlier member cannot be accepted until this one is
+  later `prepare` for any other member cannot be accepted until this one is
   recorded or the commit is reverted before anything else lands.
 - **Dead leader**: a new session generates a fresh 32-hex
   `new_owner_generation`, **writes it to its own ledger first**, then calls
@@ -113,8 +115,10 @@ version 2 capability). Read the live state first with `show_batch` and
 
 ## Prepared receipt recovery
 
-Prepared mode is unavailable on an older server or schema (no `todo_db_batch`
-version 2 capability): stop and use the serial claim/finish loop. Do not migrate a legacy per-item receipt into a
+Prepared mode is unavailable when the `todo_db_batch` version 2 capability is
+absent or the store schema is outside the advertised `supported_schema_versions`:
+stop and use the serial claim/finish loop. A store below schema 4 is cut over by
+the first `register_batch` with `confirm_schema3_cutover=true`. Do not migrate a legacy per-item receipt into a
 registered batch by assertion.
 
 If a prepared batch is abandoned, release every live member claim and have the

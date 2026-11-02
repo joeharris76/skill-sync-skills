@@ -115,7 +115,9 @@ batch leader as a landing request. It does not push for publication and does
 not create or update a PR; the leader lands the member and publishes the one
 final PR. This narrows steps 6-7 only for that delegation; the steps above 6,
 the Section 3 gate rules (including the delegated gate-runner rules), and every
-other rule here still apply to the member, and the leader follows steps 6-7 for
+other rule here still apply to the member, except that its terminal state is the
+landing request, not the repository's terminal state or a pushed branch and PR;
+the leader follows steps 6-7 for
 the final branch.
 
 ### Rules

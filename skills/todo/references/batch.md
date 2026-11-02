@@ -66,7 +66,8 @@ change framework, and repository policy.
 
 ## Schedule bounded work
 
-Run serially. A substantial TODO needs its own implementation, verification,
+In serial mode, run serially; prepared delivery runs members in parallel (see
+Prepared feature delivery). A substantial TODO needs its own implementation, verification,
 and review cycle; give it a fresh worker context when supported. Tightly coupled
 trivial items may share a context while their combined history remains small.
 
@@ -156,10 +157,14 @@ action rather than waiting in the current context.
 
 ## Prepared feature delivery
 
-Prepared mode is opt-in. It requires todo-db 0.14.0 or later (advertises the
-`todo_db_batch` version 2 capability): read the capability from the server and
-key on it, not on a package version string. If it is absent, or the store is
-not yet on the matching schema, stop and use serial mode. Never reinterpret a
+Prepared mode is opt-in. It requires todo-db 0.14.0 or later. Confirm
+`show_batch`, `advance_batch_head` and `recover_batch_owner` are in the tool
+registry, and after registration that `show_batch` `capability.version >= 2`;
+key on the capability, not on a package version string. If the capability is
+absent, or the store schema is outside the advertised
+`supported_schema_versions`, stop and use serial mode. A store below schema 4 is
+cut over by the first `register_batch` with `confirm_schema3_cutover=true`.
+Never reinterpret a
 legacy receipt under the new rules.
 
 The loop has two layers. The **leader** registers the batch, owns the one
@@ -173,7 +178,9 @@ concrete commands; this guide names only the tracker calls and the contract.
 - The leader is the only tracker writer and the only ledger writer. Members
   never call `take`, `prepare`, `finish`, `release`, or any other tracker write
   for batch items; while the batch is active the tracker refuses a claim from
-  anyone but the owner (`E_BATCH_OWNER`). A member that needs a tracker fact asks
+  anyone but the owner (`E_BATCH_OWNER`). The refusal holds only for a distinct
+  identity: a member must not use the leader's server instance or actor
+  (`--actor`/`TODO_DB_ACTOR`). A member that needs a tracker fact asks
   the leader or reads it (`show_item`, `show_batch`).
 - The leader claims a member (`take`) only at the moment it prepares or finishes
   that member, and releases or prepares it immediately. Do not hold member
@@ -199,12 +206,17 @@ concrete commands; this guide names only the tracker calls and the contract.
    older clients, so confirm it only when every process with state-branch
    access is stopped or upgraded. Write the owner generation to the ledger
    before registering; it is a credential and no tool serves it back.
-2. Create each member with matching batch metadata and an explicit
-   implementation edge before dispatch. Batch metadata is never inferred from
-   `needs`.
+2. After `register_batch` (which performs the schema-4 cutover on an older
+   store), attach batch metadata to each member:
+   `update_item(id, batch={batch_id, member_id, implementation_dependencies},
+   needs=[...])` for an existing item, or `create_item(..., batch=...)` for a
+   new one. Every `implementation_dependencies` entry must also be in `needs`.
+   Batch metadata is never inferred from `needs`. Never attach metadata before
+   registration: below schema 4 it is refused `E_SCHEMA`.
 3. Create each member worktree **at the current integration head** (the start
    head for the first dispatch; any head recorded since is also a valid base).
-   Record the dispatch base in the ledger. Dispatch the member with its item,
+   Record the dispatch base in the ledger and update it each time the member
+   merges a newer integration head. Dispatch the member with its item,
    frozen scope, base, and the repository's member-closeout rules.
 
 ### Same-file overlap
@@ -213,8 +225,9 @@ Two members may legitimately change the same file. Declare that in the frozen
 scope when registering; do not rely on a later surprise. Byte-equality of an
 earlier member's files is not required. Instead, `prepare` records each overlap
 in the receipt (against earlier members, and against leader fix commits made
-after the member's base), and every earlier member named in an overlap, or
-touched by a leader fix, must re-prove its own acceptance on the **final tree**:
+after the member's base), and every earlier member named in an overlap, every
+member touched by a leader fix, and every member whose own receipt records a
+fix overlap must re-prove its own acceptance on the **final tree**:
 rerun that member's own recorded verification (same suite and command) in the
 integration worktree at the final integration head. `finish` refuses without
 that current-acceptance evidence (`E_FINAL_EVIDENCE` names the member and the
@@ -228,7 +241,7 @@ tracker checks shape and binding, not execution.
 A member's closeout ends in a **landing request**, not a PR: the member merges
 the current integration head into its branch, resolves conflicts, runs its
 scoped checks and the local review required by `shared-review-protocol`, commits,
-and reports the branch, accepted head, base, changed files, and verification to
+and reports the branch, accepted head, base (the latest recorded integration head merged into the branch), changed files, and verification to
 the leader. The member does not push for publication, open a PR, or touch the
 tracker. Its final report is the landing request.
 
@@ -244,8 +257,10 @@ For each landing request, one member at a time, in dependency order:
    integration head; anything else means the integration head moved: send the
    member back to merge it again).
 3. `take` the member, then `prepare` with the integration worktree, the
-   member's actual source base (a recorded head), accepted head, new
-   integration head, frozen scope hash, implementation edges, changed files, and
+   source base (the latest recorded integration head merged into the member
+   branch, which is also the base its review is bound to), accepted head, new
+   integration head, frozen scope hash, implementation edges (the changed files
+   are computed by the tracker), and
    passed bounded-suite evidence. `prepare` records the receipt, releases the
    claim, and leaves the member `open`.
 4. Record `LANDED: yes` and `INTEGRATION_HEAD` in the ledger.
