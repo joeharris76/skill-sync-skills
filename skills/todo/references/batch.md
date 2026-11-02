@@ -56,7 +56,8 @@ NEXT_ACTION: <exact action>
 
 In prepared delivery a member's envelope has no PR of its own: record `PR: none`
 and use `LANDED` and `INTEGRATION_HEAD`; the final PR and its bound head belong
-to the batch header. The ledger also holds the batch owner generation. Standalone
+to the batch header. The ledger also holds the batch owner generation, which
+`show_batch` never serves. Standalone
 (serial) items keep `PR` and `PR_STATE`.
 
 These are cached observations, not authority for a mutation. Before acting,
@@ -185,11 +186,19 @@ concrete commands; this guide names only the tracker calls and the contract.
 
 1. Call `get_instructions` with `expect_store`, then `register_batch` once:
    one repository identity, owner generation, integration branch/worktree,
-   immutable start head, ordered member IDs, frozen per-member scope and its
-   hash, delivery boundary, and intended terminal outcome. Registration refuses
-   a member that another worker holds a claim on, duplicate IDs, foreign
-   members, and late enrollment. Store the owner generation in the ledger; it is
-   a credential and no tool serves it back.
+   immutable start head, an optional immutable `develop_ref` (a
+   `refs/remotes/...` ref such as `refs/remotes/origin/develop`; set it
+   whenever the integration base may be merged in later, because every
+   `develop-merge` advance is refused without it), ordered member IDs, frozen
+   per-member scope and its hash, delivery boundary, and intended terminal
+   outcome. Registration refuses a member that another worker holds a live
+   claim on, duplicate IDs, foreign members, and late enrollment. The first
+   registration on a store below schema 4 also needs
+   `confirm_schema3_cutover=true`: it performs the one-step cutover to the
+   batch schema, is refused while a schema-3 batch is active, and locks out
+   older clients, so confirm it only when every process with state-branch
+   access is stopped or upgraded. Write the owner generation to the ledger
+   before registering; it is a credential and no tool serves it back.
 2. Create each member with matching batch metadata and an explicit
    implementation edge before dispatch. Batch metadata is never inferred from
    `needs`.
@@ -251,7 +260,8 @@ Interruption between the merge and `prepare` is recovered in
 
 When every member has landed, publish the integration branch as the one final
 PR through the repository's batch protocol, and bind it with `bind_batch_pr`
-(`head` equals the registered integration head). Review the combined diff under
+(`pr_repository` is the PR's own `owner/repo`, `head` equals the registered
+integration head). Review the combined diff under
 `shared-review-protocol` before publishing; members were reviewed individually
 before landing.
 
@@ -259,14 +269,19 @@ Review fixes after the PR opens are **leader commits** on the integration
 branch, never member re-landings:
 
 1. commit the fix in the integration worktree;
-2. `advance_batch_head(reason="fix", expected_head=<old>, head=<new>,
-   changed_files=[...])` (a fix stays inside the union of member scopes; a merge
-   of the integration base uses `reason="develop-merge"` with a real merge
-   commit);
-3. push, then `bind_batch_pr(head=<new>, expected_previous_head=<old>)`. The
+2. `advance_batch_head(owner_generation=<ledger>, reason="fix",
+   expected_head=<old>, head=<new>, changed_files=[...])` (`changed_files` must
+   equal the exact rename-free diff `expected_head..head`; a fix stays inside the
+   union of member scopes. A merge of the integration base uses
+   `reason="develop-merge"` with a real `--no-ff` merge commit whose second
+   parent is under the batch's registered `develop_ref`; the call has no ref of
+   its own, and a batch registered without `develop_ref` refuses it);
+3. push, then `bind_batch_pr(pr_repository=..., number=..., node_id=...,
+   head=<new>, expected_previous_head=<old>)` for the same PR identity. The
    binding moves with the head; evidence built for the old head is stale.
 
-Heads cannot move once any member is `done`; resume closeout instead.
+An exact retry of either call is idempotent. Heads cannot move once any member
+is `done`; resume closeout instead.
 
 ### Finish
 
@@ -282,9 +297,10 @@ false done.
 
 ### Owner recovery and abort
 
-If the leader's session is dead, a new session with access to the stored owner
-generation calls `recover_batch_owner` (see `references/recovery.md`); it
-needs no live member claim and keeps valid receipts. If work must stop, the
+If the leader's session is dead, a new session calls `recover_batch_owner`
+(see `references/recovery.md`) with the recorded owner and its generation and a
+new generation it generated and wrote to its own ledger first; the call needs no
+live member claim and keeps valid receipts. If work must stop, the
 owner calls `abort_batch` after releasing all member claims. Abort is durable
 and idempotent: it invalidates prepared and final evidence, retains an already
 bound final PR as history, detaches recoverable members from the archived batch,
@@ -292,7 +308,12 @@ and returns them to ordinary claim/finish. It refuses once any member is `done`.
 Use abort as the fallback when recovery is impossible (generation lost with no
 Git access to the state branch) or the batch should be redone.
 
-Any member, scope, dependency, conflict, or late-enrollment change invalidates
-affected prepared and final evidence transitively; only a `context` edit keeps a
-receipt. Serial mode remains the default for unrelated, cross-repo, or
+A non-`context` edit of a member (`description`, `acceptance`, `links`, `needs`,
+`title`, `priority`, `status`, `not_before`, or any mix with `context`) deletes
+that member's receipt and its dependents' receipts; prepare the member again
+(re-prepare: its accepted head is already in the integration head, so no new
+commit is needed) before finishing. Registered batch metadata cannot be edited
+(abort to reassign), and once any member is `done` invalidating edits are
+refused. Only a `context` edit (including `context_append`) keeps a receipt.
+Serial mode remains the default for unrelated, cross-repo, or
 approval-separated work.

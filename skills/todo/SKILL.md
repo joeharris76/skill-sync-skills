@@ -64,9 +64,16 @@ the product repository.
   and capability-versioned. It requires todo-db 0.13.0 or later (advertises the
   `todo_db_batch` version 2 capability); if the server does not advertise it, or
   the store is not on the matching schema, stop and use serial mode, and never
-  treat legacy per-item receipts as valid. `register_batch` first persists one
+  treat legacy per-item receipts as valid. The first `register_batch` on an older
+  store needs `confirm_schema3_cutover=true` (it confirms the one-step cutover to
+  store schema 4, which older clients then refuse) and only when every process
+  with state-branch access is stopped or upgraded and no other worker holds a
+  live claim; batch writes below schema 4 are refused `E_SCHEMA`.
+  `register_batch` first persists one
   project / repository identity, owner generation, integration branch/worktree
-  and immutable start head, ordered members, frozen scope, delivery boundary,
+  and immutable start head, an optional immutable `develop_ref` (a
+  `refs/remotes/...` ref; required for any later `develop-merge` advance),
+  ordered members, frozen scope, delivery boundary,
   terminal outcome, and (later) one final PR identity. Register each member's
   explicit implementation edge, then the leader `take`s and `prepare`s it as it
   lands, with a clean exact checkout, actual member base (a recorded head),
@@ -100,11 +107,11 @@ the product repository.
 | 3 | `show_item` | One task with needs, readiness, and sections. Large fields spill to `field`/`offset`/`budget` reads. |
 | 4 | `renew` | Extend a long-running claim. Same generation; no progress milestones required. |
 | 5 | `finish` | Close the task with the `generation` from `take`. Every member of an active registered batch must already have a valid prepared receipt and bound final-tree evidence; ordinary tasks use the serial finish path. |
-| — | `register_batch` / `bind_batch_pr` / `abort_batch` | Register the immutable batch contract, bind exactly one final PR identity (revisable only to the current integration head with `expected_previous_head`), or owner-abort after claims are released. Reject duplicates, foreign owners, late membership, and incompatible capability/schema versions. |
+| — | `register_batch` / `bind_batch_pr` / `abort_batch` | Register the immutable batch contract (with `develop_ref` if develop merges will be recorded, and `confirm_schema3_cutover` on the first registration), bind exactly one final PR identity (`pr_repository`, `number`, `node_id`, `head`; revisable only to the current integration head with `expected_previous_head`), or owner-abort after claims are released. Reject duplicates, foreign owners, foreign live claims, late membership, and incompatible capability/schema versions. |
 | — | `prepare` | Owner-only. Persist verified member work and hand back the claim without marking the member done. Requires the registered batch, explicit same-batch edge, exact clean source checkout, a recorded head as base, accepted and new integration heads, and frozen scope. |
-| — | `show_batch` | Read one batch: heads, owner and `owner_epoch`, final PR, member status, receipts, `acceptance_required`, log; large sections page like `show_item`. Never serves the owner generation. |
-| — | `advance_batch_head` | Owner-only. Record a leader fix or integration-base merge as a new integration head (`expected_head`, `head`, `reason` `fix`\|`develop-merge`, `changed_files`). Refused once any member is `done`. |
-| — | `recover_batch_owner` | Take over a dead leader's batch with the recorded owner and generation and a reason; issues a new owner generation, needs no member claim, keeps receipts. |
+| — | `show_batch` | Read one batch: heads, owner and `owner_epoch`, final PR, member status, receipts, `acceptance_required`, log; large sections page like `show_item`. Never serves the owner generation, so the leader keeps it in its ledger. Scripts and CI read the same data with `todo-db batch show <batch_id>`. |
+| — | `advance_batch_head` | Owner-only. Record a leader fix or integration-base merge as a new integration head (`owner_generation`, `expected_head`, `head`, `reason` `fix`\|`develop-merge`, `changed_files`). A `develop-merge` must be a real two-parent merge whose merged parent is under the batch's registered `develop_ref`; there is no per-call ref. Refused once any member is `done`. |
+| — | `recover_batch_owner` | Take over a dead leader's batch with the recorded owner and generation, a `new_owner_generation` you generate (32 hex) and record in your ledger **before** the call, and a reason. The server stores it and never returns it. Needs no member claim, keeps receipts. |
 | — | `release` | Hand the claim back without finishing (needs the `generation`). |
 | — | `takeover` | Take over a live claim whose session cannot resume: name the inspected holder and why it is dead. Requires todo-db 0.8.1. |
 | — | `drop` | Abandon a task as dropped. Requires `reason`: the owner's decision and any successor, at most 2000 characters, stored with the status change in one commit. Requires todo-db 0.12.0 or later. Unclaimed tasks drop freely; a live claim needs its `generation`. |
@@ -173,8 +180,12 @@ it as `drop_reason` in the same commit, so do not write a separate
 `context_append` note first.
 
 On a prepared member, `update_item` keeps the receipt only for a `context`
-edit (including `context_append`); any other field change invalidates it and its
-dependents (todo-db 0.13.0 or later).
+edit (including `context_append`); any other field change (`description`,
+`acceptance`, `links`, `needs`, `title`, `priority`, `status`, `not_before`, or
+a mix with `context`) invalidates it and its dependents, and the member is
+prepared again afterwards (re-prepare). Registered batch metadata cannot be
+edited (abort the batch to reassign), and once any member is `done` every
+invalidating edit on the batch is refused (todo-db 0.13.0 or later).
 
 Use `not_before` rather than `blocked` when a task is waiting for a known time,
 such as the end of a measurement window. It takes a future RFC 3339 time with
@@ -189,11 +200,11 @@ todo-db 0.8.0 keep the field but do not enforce the hold.
 `list_items(ready_only=true)` returns only claimable tasks: `open`, unclaimed,
 not held by a future `not_before`, dependencies all `done`, except that an explicitly registered same-batch
 implementation edge may consume a valid prepared receipt whose accepted head is
-present at the registered integration head and whose base, scope, owner
-generation, repository, and member identity all match. Readiness and unlock
-counts are computed by the program — never scan history yourself. Any member,
-scope, dependency, conflict, or late-enrollment change invalidates affected
-prepared evidence transitively.
+present at the registered integration head and whose base, scope, owner epoch,
+repository, and member identity all match. Readiness and unlock
+counts are computed by the program — never scan history yourself. Any
+non-context edit of a member, or a dependency, conflict, or other change to
+the evidence it binds, invalidates affected prepared evidence transitively.
 
 ## Finding the right tool
 

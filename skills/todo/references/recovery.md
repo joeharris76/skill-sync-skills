@@ -59,6 +59,12 @@ version 2 capability). Read the live state first with `show_batch` and
   a fix or merged the integration base, record it first with `advance_batch_head`
   and retry `prepare`. If a member's base is not a recorded head, create the
   member worktree again from a recorded head, merge, and re-request landing.
+  `E_BATCH_HEAD` also refuses a `develop-merge` advance that is not a real
+  two-parent merge, whose merged parent is not under the batch's registered
+  `develop_ref`, or on a batch registered without one (the ref is immutable:
+  record the merge only if it was set at registration, otherwise it cannot be
+  recorded), and a `fix` advance that touches paths outside the union of member
+  scopes.
 - **Stale integration head** (`E_CONFLICT` on `advance_batch_head` or
   `bind_batch_pr`, or the integration branch moved while a member was working):
   re-read with `show_batch`, reconcile with Git, and retry with the current head
@@ -72,20 +78,38 @@ version 2 capability). Read the live state first with `show_batch` and
   dirty or the merge is unfinished, finish or abort the merge in Git first. A
   later `prepare` for an earlier member cannot be accepted until this one is
   recorded or the commit is reverted before anything else lands.
-- **Dead leader**: a new session calls `recover_batch_owner(batch_id,
-  expected_owner, expected_owner_generation, reason)`, naming the owner it
-  inspected and why that session is gone. It needs no live member claim, rotates
-  the owner generation (returned once, never readable again; store it in the new
-  ledger), leaves existing receipts valid, and makes the caller the owner. A
-  stale generation fails `E_CLAIM_STALE`; a changed owner fails `E_CONFLICT`.
-  The new leader rebuilds its ledger from `show_batch`, Git, and open member
-  branches, then resumes. If the generation is lost and no one with Git access to
-  the state branch can supply it, abort the batch and re-run.
+- **Dead leader**: a new session generates a fresh 32-hex
+  `new_owner_generation`, **writes it to its own ledger first**, then calls
+  `recover_batch_owner(batch_id, expected_owner, expected_owner_generation,
+  new_owner_generation, reason)`, naming the owner it inspected and why that
+  session is gone. The server stores the new generation and never returns it, so
+  a lost reply loses nothing; an exact retry is idempotent. The call needs no
+  live member claim, leaves existing receipts valid, and makes the caller the
+  owner (the current owner may also call it to rotate a generation whose ledger
+  was lost). The old generation goes stale. A wrong generation fails
+  `E_CLAIM_STALE`; a changed owner fails `E_CONFLICT`. The
+  `expected_owner_generation` comes from the dead leader's ledger or from a human
+  with Git access to the state branch; `show_batch` never serves it. The new
+  leader rebuilds the rest of its ledger from `show_batch`, Git, and open member
+  branches, then resumes. If the generation is lost and no one can supply it,
+  abort the batch and re-run.
 - **Review revisions**: after the final PR opens, fixes are leader commits:
-  `advance_batch_head(reason="fix")`, push, `bind_batch_pr(head=<new>,
+  `advance_batch_head(owner_generation=<ledger>, reason="fix")`, push,
+  `bind_batch_pr(pr_repository, number, node_id, head=<new>,
   expected_previous_head=<old>)`. If the second step is interrupted, the registered
   head is ahead of the binding: re-push and rebind; do not commit more first.
   Once any member is `done`, heads and bindings cannot change: resume closeout.
+- **Receipt invalidated by an edit**: only `context`/`context_append` edits keep a
+  receipt; any other edit of a member deletes it and its dependents' receipts.
+  Registered batch metadata edits are refused, and once any member is `done`
+  invalidating edits are refused (`E_STATE`, "closeout has started"). Before
+  closeout, prepare the member again (re-prepare): `take` it, then `prepare` at
+  the current integration head; its accepted head is already contained, so no new
+  commit is needed. Dependents are re-prepared the same way.
+- **`E_SCHEMA` on a batch call**: the store is below schema 4, or a legacy
+  receipt is under a v2 batch. A human upgrades the clients and the first
+  `register_batch` with `confirm_schema3_cutover=true` performs the cutover; do
+  not work around it.
 
 ## Prepared receipt recovery
 
