@@ -89,8 +89,10 @@ done
 tools/skill-sync check  -C ~ -f "$CONF"
 tools/skill-sync verify -C ~ -f "$CONF"
 
-# 5. Remove the renamed symlinks (the snapshots under releases/ stay).
+# 5. Remove the renamed symlinks and the emptied staging root (the snapshots
+#    under releases/ stay).
 for loader in claude codex agents; do rm ~/.$loader/skills.symlink; done
+rm -r "$STAGE"
 ```
 
 Between the two `mv` calls of step 3 the loader folder is absent for an
