@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS_DIR = ROOT / "skills"
 
-FORBIDDEN_TRACKER_NAMES = {"todo-db", "tracker", "todos"}
+FORBIDDEN_TRACKER_NAMES = {"todo-db", "tractable", "tracker", "todos"}
 
 
 def extract_frontmatter_name(content: str) -> str | None:
