@@ -188,9 +188,9 @@ resending the context, pass `context_append`: the
 server adds it to the end of the current context when the write lands, so a
 concurrent note is not lost. Closing goes through `finish`; dropping a task is
 a human decision reported to the user. Once the owner has decided, call `drop`
-with their decision and any successor item as `reason` (required, up to 2000 characters, newlines allowed); the server
-stores it as `drop_reason` in the same commit, so do not write a separate
-`context_append` note first.
+with their decision and any successor item as `reason` (required, up to 2000
+characters, newlines allowed); the server stores it as `drop_reason` in the
+same commit, so do not write a separate `context_append` note first.
 
 On a prepared member, `update_item` keeps the receipt only for a `context`
 edit (including `context_append`); any other field change (`description`,

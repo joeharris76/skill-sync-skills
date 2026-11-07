@@ -12,7 +12,7 @@ rest of the skill assume `tractable` 1.0.0 or later.
 A human installs the tool from PyPI and upgrades it the same way:
 
 ```sh
-uv tool install 'tractable[mcp]>=1.0.0'
+uv tool install --default-index https://pypi.org/simple 'tractable[mcp]>=1.0.0'
 uv tool upgrade tractable
 ```
 
@@ -58,12 +58,13 @@ untouched.
   the discovered `.tractable/config.json` — in that order.
 - One server instance is one worker identity (`--actor`, else `TRACTABLE_ACTOR`,
   else the client name from the MCP handshake).
-- Registration names the server `tractable` and runs `tractable-mcp`. For
-  example, Claude Code: `claude mcp add tractable -- tractable-mcp --config
-  .tractable/config.json`; a JSON-config client (Cursor, Windsurf, Zed) uses
-  `{"mcpServers": {"tractable": {"command": "tractable-mcp", "args":
-  ["--config", ".tractable/config.json"]}}}`; Codex uses
-  `[mcp_servers.tractable]` with `command = "tractable-mcp"` in its config.
+- Registration names the server `tractable` and runs `tractable-mcp`. Claude
+  Code reads `.mcp.json` at the project root and needs no arguments:
+  `{"mcpServers": {"tractable": {"command": "tractable-mcp", "args": []}}}`.
+  Codex needs `[mcp_servers.tractable]` with `command = "tractable-mcp"` in
+  `~/.codex/config.toml`. Cursor and Windsurf pass
+  `["--repo-root", "${workspaceFolder}"]`; Zed uses `context_servers`, not
+  `mcpServers`.
 - Per-client registration (Claude Code, Codex, Cursor, Windsurf, Zed) lives in
   the tractable repository's `docs/operations/mcp-clients.md`.
 
