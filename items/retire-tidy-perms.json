@@ -7,6 +7,16 @@
     "PR #118 body states the capability is intentionally not replaced and names the consumers that still list it (CHANGE-REMOVAL-001)."
   ],
   "context": "Batch: skillspector-remediation (serial mode; this repository names no prepared-delivery policy). All catalog work lands on branch chore/retire-tidy-perms, worktree ~/Developer/skill-sync-skills.wt-retire-tidy-perms, in the one final PR #118. Owner decisions (2026-11-13) are recorded in ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0 at commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Close each item only after PR #118 has actually merged, unless the item says otherwise. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gate: none left; the owner chose retirement. Out of scope: editing BenchBox, Oxbow, tractable or skill-sync configs (owner deferred those to each project's next pin bump).",
+  "deferrals": [
+    {
+      "created_at": "2026-11-13T18:39:20Z",
+      "from_item": "retire-tidy-perms",
+      "id": 1,
+      "reason": "Owner deferred consumer edits on 2026-11-13: they keep working at their pinned rev and fail only when they pin a rev that includes the removal.",
+      "resolution": "open",
+      "summary": "Drop `skill = tidy-perms` from BenchBox, Oxbow, tractable and skill-sync skill-sync.conf at each project's next catalog pin bump"
+    }
+  ],
   "description": "tidy-perms has no recorded run since 2026-03-27 and was the only skill reading agent global config files (4 of 11 SkillSpector findings, score 39). Owner decision: retire it without a replacement. This supersedes the earlier proposal to add a secrets rule to it. The removal commit (ad38b45) is already on PR #118 and the skill is already uninstalled from the three global loader folders; this item closes when that PR merges.",
   "links": [
     "https://github.com/joeharris76/skill-sync-skills/pull/118"
@@ -18,6 +28,14 @@
       "client": "omp-stdio",
       "op": "create",
       "op_id": "c7e040bd054441fc91cdc0a82605948a",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:39:20Z",
+      "client": "omp-stdio",
+      "op": "defer",
+      "op_id": "619e2270f7614eaa8c5702c618e6bf6b",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
