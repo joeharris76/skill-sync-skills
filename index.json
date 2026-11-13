@@ -1,6 +1,13 @@
 {
   "batches": {},
   "items": {
+    "consumers-drop-tidy-perms": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Drop tidy-perms from consumer skill-sync configs at their next catalog pin bump"
+    },
     "deploy-imported-skills": {
       "claim": null,
       "needs": [

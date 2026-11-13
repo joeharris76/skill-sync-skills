@@ -1,0 +1,18 @@
+{
+  "acceptance": [
+    "Each listed project that has bumped its catalog pin past the removal no longer lists tidy-perms, and its skill-sync check passes.",
+    "Projects that have not bumped are listed as still pending."
+  ],
+  "context": "Cross-repository; each edit follows that repository's own change process. Not part of the skillspector-remediation batch.",
+  "description": "The catalog no longer ships tidy-perms. BenchBox, Oxbow, tractable and skill-sync list `skill = tidy-perms` in skill-sync.conf; letterops-mcp and textcharts list it in older skill-sync.yaml manifests. Each keeps working at its pinned rev and fails to sync only when it pins a rev that includes the removal. The owner deferred these edits (2026-11-13) to each project's next pin bump.",
+  "sessions": [
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:51:43Z",
+      "client": "omp-stdio",
+      "op": "create",
+      "op_id": "fa192cd65b3d4d999cd38bd442e9d838",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    }
+  ]
+}
