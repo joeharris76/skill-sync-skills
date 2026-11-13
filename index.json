@@ -1,5 +1,73 @@
 {
-  "batches": {},
+  "batches": {
+    "skillspector-remediation": {
+      "accepted_members": {},
+      "batch_schema": 2,
+      "delivery_boundary": "One squash-merged pull request (#118) into main of joeharris76/skill-sync-skills",
+      "develop_ref": "refs/remotes/origin/main",
+      "final_pr_history": [],
+      "integrated_members": {},
+      "integration_branch": "chore/retire-tidy-perms",
+      "integration_head": "ad38b456fd86a3dd3105fea0c95273af7e1d57dd",
+      "integration_log": [
+        {
+          "at": "2026-11-13T18:52:08Z",
+          "head": "ad38b456fd86a3dd3105fea0c95273af7e1d57dd",
+          "kind": "start",
+          "seq": 0
+        }
+      ],
+      "integration_worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms",
+      "lifecycle": "active",
+      "members": [
+        "import-upstream-skills",
+        "skillspector-semantic-pass",
+        "skillspector-baseline",
+        "skillspector-ci-gate"
+      ],
+      "owner": "omp-skillspector-leader",
+      "owner_epoch": 0,
+      "owner_generation": "09a86de432bd9e21c960872aa61d6ede",
+      "project_id": "skill-sync-skills",
+      "recoveries": [],
+      "repository": "https://github.com/joeharris76/skill-sync-skills.git",
+      "scope": {
+        "import-upstream-skills": [
+          "skills/retro/*",
+          "skills/writing-for-agents/*",
+          "docs/dependency-closure.md",
+          "README.md"
+        ],
+        "skillspector-baseline": [
+          ".skillspector/baselines/*.yaml"
+        ],
+        "skillspector-ci-gate": [
+          ".github/workflows/verify-deployment.yml",
+          "scripts/skillspector_scan.py",
+          "README.md"
+        ],
+        "skillspector-semantic-pass": [
+          "skills/benchbox/*",
+          "skills/blog/*",
+          "skills/code/*",
+          "skills/docs/*",
+          "skills/memex-search/*",
+          "skills/session-takeover/*",
+          "skills/shared-agent-execution/*",
+          "skills/shared-change-framework/*",
+          "skills/shared-investigation-framework/*",
+          "skills/shared-review-protocol/*",
+          "skills/substack/*",
+          "skills/test/*",
+          "skills/todo/*",
+          "docs/skillspector-triage.md"
+        ]
+      },
+      "scope_hash": "6e299333ced5dd2d9436f488ae5d5e5fb20feeb8e0e46533c7a1d78fc3bf5158",
+      "start_head": "ad38b456fd86a3dd3105fea0c95273af7e1d57dd",
+      "terminal_outcome": "PR #118 merged into main with all four members finished"
+    }
+  },
   "items": {
     "consumers-drop-tidy-perms": {
       "claim": null,
@@ -82,5 +150,5 @@
       "title": "Run one SkillSpector LLM semantic pass over the catalog and triage it"
     }
   },
-  "schema_version": 3
+  "schema_version": 4
 }
