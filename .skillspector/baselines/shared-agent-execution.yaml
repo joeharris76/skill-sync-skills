@@ -1,0 +1,14 @@
+# SkillSpector baseline for skills/shared-agent-execution. Suppress by
+# fingerprint only, never by rule; each reason comes from docs/skillspector-triage.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:f94bad1a56ea388dd93b50a4bd748659f1649983470fc97db76b8c4b4f728ebc
+  rule_id: EA2
+  file: references/external-harnesses.md
+  reason: "False positive (match on auto-approve): the sentence limits confirmation automation to an authorized, dedicated worktree."
+- hash: sha256:41abed4017d040c6381f3d0b1cfe91de8a54a33d994ddd4921243148025ef4a2
+  rule_id: EA2
+  file: references/external-harnesses.md
+  reason: "False positive (match on --auto-approve): the sentence limits confirmation automation to an authorized, dedicated worktree."
