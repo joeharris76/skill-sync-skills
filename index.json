@@ -29,7 +29,7 @@
         }
       },
       "integration_branch": "chore/retire-tidy-perms",
-      "integration_head": "e74030f85aec73dc95a3d9596664c2c515fc844c",
+      "integration_head": "3b018ca58562e3a22e36db28d66f270c52003e07",
       "integration_log": [
         {
           "at": "2026-11-13T18:52:08Z",
@@ -45,6 +45,19 @@
           "op_id": "dff57786d5234e7099b82c8fa84ffd5e",
           "previous_head": "ad38b456fd86a3dd3105fea0c95273af7e1d57dd",
           "seq": 1
+        },
+        {
+          "at": "2026-11-13T21:37:56Z",
+          "changed_files": [
+            "deployment/global/skill-sync.conf",
+            "skills/todo/references/batch.md"
+          ],
+          "head": "3b018ca58562e3a22e36db28d66f270c52003e07",
+          "kind": "develop-merge",
+          "merged_parent": "774525aed68e568dd3ac9de8f7f7b5f718149b3b",
+          "op_id": "b5e71d1c8c434537881cdb42da146614",
+          "previous_head": "e74030f85aec73dc95a3d9596664c2c515fc844c",
+          "seq": 2
         }
       ],
       "integration_worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms",
