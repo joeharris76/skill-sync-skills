@@ -148,7 +148,7 @@
         }
       ],
       "integration_worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms",
-      "lifecycle": "active",
+      "lifecycle": "completed",
       "members": [
         "import-upstream-skills",
         "skillspector-semantic-pass",
@@ -269,17 +269,12 @@
       "title": "Commit a SkillSpector baseline with a reason for every accepted finding"
     },
     "skillspector-ci-gate": {
-      "claim": {
-        "expires_at": "2026-11-14T22:18:41Z",
-        "generation": "78879e9a7cf84748af53e354e4db7784",
-        "renewals": 0,
-        "worker": "omp-skillspector-leader"
-      },
+      "claim": null,
       "needs": [
         "skillspector-baseline"
       ],
       "priority": "medium",
-      "status": "active",
+      "status": "done",
       "title": "Gate pull requests on a pinned static SkillSpector scan"
     },
     "skillspector-semantic-pass": {
