@@ -1,0 +1,25 @@
+{
+  "acceptance": [
+    "A semantic scan completed for every tracked skill in skills/ with `llm_available: true` in the report metadata; any skill whose LLM pass failed is listed by name and rerun or reported.",
+    "Every semantic finding has a written triage (real / declared purpose / false positive) citing file and line.",
+    "Every finding triaged as real is fixed by a commit on the batch branch, and a rescan of that skill no longer reports it; or it is recorded with `defer` and reported to the owner with the reason it could not be fixed here.",
+    "No critical or high finding is left untriaged.",
+    "The triage summary is in the PR #118 body."
+  ],
+  "context": "Batch: skillspector-remediation (serial mode; this repository names no prepared-delivery policy). All catalog work lands on branch chore/retire-tidy-perms, worktree ~/Developer/skill-sync-skills.wt-retire-tidy-perms, in the one final PR #118. Owner decisions (2026-11-13) are recorded in ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0 at commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Close each item only after PR #118 has actually merged, unless the item says otherwise. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) If claude_cli is unavailable or errors for every skill, stop and report; do not switch to a provider that needs a new API key or sends skill text to a new vendor. (2) A fix that changes what a skill authorizes or forbids is a behaviour change: make it only when the finding is real and the fix does not weaken a guardrail; otherwise record it and report. (3) Static findings already triaged (7 remaining) are not re-litigated here. Out of scope: skills owned by other repositories (skill-sync), raw reports in the repository (keep them in /tmp; they can quote local paths).",
+  "description": "The first scan was static only, so description-versus-behaviour mismatch, vague triggers and other intent checks never ran. Owner decision: run the semantic analyzers once with SKILLSPECTOR_PROVIDER=claude_cli (uses the existing Claude login) over every skill in skills/, including the two imported ones. Triage every finding as real, declared purpose, or false positive, with the evidence line. Fix real findings in this batch. LLM output varies between runs, so this pass is a one-off review and never a CI gate.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/pull/118",
+    "https://docs.nvidia.com/skills/scanning-agent-skills"
+  ],
+  "sessions": [
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:39:06Z",
+      "client": "omp-stdio",
+      "op": "create",
+      "op_id": "305f78fba89f4e6b98b72e56e62bd280",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    }
+  ]
+}

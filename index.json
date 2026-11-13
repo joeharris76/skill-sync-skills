@@ -16,6 +16,15 @@
       "priority": "high",
       "status": "open",
       "title": "Retire the tidy-perms skill from the catalog and the global loaders"
+    },
+    "skillspector-semantic-pass": {
+      "claim": null,
+      "needs": [
+        "import-upstream-skills"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Run one SkillSpector LLM semantic pass over the catalog and triage it"
     }
   },
   "schema_version": 3
