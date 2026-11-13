@@ -237,12 +237,17 @@
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
     "require-skillspector-check": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-14T22:24:17Z",
+        "generation": "1b96629a120d4e6c8b9d2f6467aaca3e",
+        "renewals": 0,
+        "worker": "omp-skillspector-leader"
+      },
       "needs": [
         "land-skillspector-pr"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "active",
       "title": "Decide whether the SkillSpector job is a required check on main"
     },
     "retire-tidy-perms": {
