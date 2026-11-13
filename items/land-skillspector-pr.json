@@ -1,13 +1,15 @@
 {
   "acceptance": [
-    "PR #118 title and body describe every change in the batch and list the deferred follow-ups (consumer configs that still list tidy-perms; the skill-sync AS3 finding owned by the product repository).",
-    "A review of the full PR diff under shared-review-protocol was run; every Critical and Required finding is fixed and re-verified.",
-    "Every required check on the final head is green, including the new SkillSpector job, at the exact SHA that is merged.",
-    "The PR is squash-merged into main; `gh pr view 118 --json state,mergeCommit` shows MERGED and the merge commit is on origin/main.",
-    "After merge, each earlier item's acceptance is re-checked against merged main before that item is finished."
+    "`show_batch` shows all four members prepared and PR #118 bound with `bind_batch_pr` at the exact integration head before review or merge.",
+    "Final verification ran on the clean final head in the integration worktree: every member's own receipt command plus `python3 -m unittest discover -s tests` and `python3 scripts/skillspector_scan.py`, all passing, with HEAD and cleanliness checked before and after.",
+    "A review of the full PR diff (start of main to head) was run; every Critical and Required finding is fixed, recorded with `advance_batch_head`, and re-verified. A fix that touches a baselined file regenerates that baseline and its reasons and reruns the gate. A fix outside the combined member scope is deferred.",
+    "`gh pr checks 118` shows both jobs passing at head X, and the merge is `gh pr merge 118 --squash --match-head-commit X`.",
+    "`gh pr view 118 --json state,mergeCommit` shows MERGED and the merge commit is on origin/main.",
+    "The merged PR title and body describe every change, keep the 'Not replaced' and 'Consumer impact' sections, record the scanner commit, provider and model, and list every deferral and follow-up item.",
+    "After merge, each member and retire-tidy-perms is finished with its acceptance re-checked against merged main; then this item is finished."
   ],
-  "context": "Batch: skillspector-remediation (serial mode; this repository names no prepared-delivery policy). All catalog work lands on branch chore/retire-tidy-perms, worktree ~/Developer/skill-sync-skills.wt-retire-tidy-perms, in the one final PR #118. Owner decisions (2026-11-13) are recorded in ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0 at commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Close each item only after PR #118 has actually merged, unless the item says otherwise. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) Merge only when checks are green on the head being merged; a red or pending check is a wait, never a bypass (no admin override, no skipping checks). (2) If main moved, merge main into the branch and re-run checks; no force-push. (3) If branch protection requires a human approval the agent cannot give, stop at ready-for-review and report. Guardrail: the squash commit message follows Conventional Commits and carries no session process (item IDs, batch labels).",
-  "description": "Owner decision: one final PR, marked ready and squash-merged by the agent once checks pass. PR #118 currently carries only the tidy-perms removal and still has that title. Before merge it must describe the whole change: retirement, imported skills with provenance, semantic triage, baseline, CI gate, and the deferred follow-ups.",
+  "context": "Feature batch `skillspector-remediation` (prepared delivery, owner-selected). Integration branch chore/retire-tidy-perms, worktree /Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms, start head ad38b45 (the tidy-perms removal), one final PR #118, base refs/remotes/origin/main. Edges: semantic-pass -> import; baseline -> semantic-pass; ci-gate -> baseline. The leader is the only tracker writer; a member works in its own worktree branched from a recorded integration head, never the main checkout, and ends at a committed, checked change. Members finish only after PR #118 has actually merged. Owner decisions (2026-11-13): ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0, commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Scan reports and other scratch output go outside the repository (/tmp). Blocked reason: waits for all four members to be prepared. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) Merge only when checks are green on the head being merged; a red or pending check is a wait, never a bypass (no admin override). (2) If main moved and conflicts, merge origin/main into the integration branch as a real two-parent merge recorded with `advance_batch_head` (develop-merge), then re-verify; no force-push. (3) If a human approval is required that the agent cannot give, stop at ready-for-review and report. Guardrails: the squash commit message follows Conventional Commits and carries no session process; member worktrees and branches are removed only after the merge is proven, the integration worktree last.",
+  "description": "Umbrella item for feature batch `skillspector-remediation`. Owner decision: one final PR (#118), marked ready and squash-merged by the agent once checks pass. PR #118 currently carries only the tidy-perms removal and that title. Before merge it must describe the whole change: retirement, imported skills with provenance, semantic triage, baseline, CI gate, and every follow-up. This item is blocked until all four members are prepared; it is unblocked, taken and finished after the merge and after every member and retire-tidy-perms is finished.",
   "links": [
     "https://github.com/joeharris76/skill-sync-skills/pull/118"
   ],
@@ -18,6 +20,14 @@
       "client": "omp-stdio",
       "op": "create",
       "op_id": "72fdff04e2d74503be2f40925047991f",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:51:20Z",
+      "client": "omp-stdio",
+      "op": "update",
+      "op_id": "f3408948c18e4c0ca834c48456b8fbcc",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]

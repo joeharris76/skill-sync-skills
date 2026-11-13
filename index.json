@@ -19,15 +19,9 @@
     },
     "land-skillspector-pr": {
       "claim": null,
-      "needs": [
-        "retire-tidy-perms",
-        "import-upstream-skills",
-        "skillspector-semantic-pass",
-        "skillspector-baseline",
-        "skillspector-ci-gate"
-      ],
+      "needs": [],
       "priority": "medium",
-      "status": "open",
+      "status": "blocked",
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
     "retire-tidy-perms": {
