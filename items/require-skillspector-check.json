@@ -37,6 +37,15 @@
       "op": "take",
       "op_id": "11cceb0b42c046ed8a19948e00e19c93",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T22:24:19Z",
+      "client": "omp-stdio",
+      "generation": "1b96629a120d4e6c8b9d2f6467aaca3e",
+      "op": "finish",
+      "op_id": "0b005b981a694840a0ceabcc641f8931",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
 }
