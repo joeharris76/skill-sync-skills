@@ -1,0 +1,10 @@
+depends:
+  - writing-for-agents
+tags:
+  - workflow
+  - retrospective
+category: workflow
+targets:
+  claude: true
+  codex: true
+  gemini: true

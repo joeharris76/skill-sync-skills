@@ -1,0 +1,8 @@
+tags:
+  - writing
+  - skills
+category: reference
+targets:
+  claude: true
+  codex: true
+  gemini: true
