@@ -3,6 +3,7 @@
     "skillspector-remediation": {
       "accepted_members": {
         "import-upstream-skills": "6a570d940bbacd63fd9af594a95e529a3cceda3d",
+        "skillspector-baseline": "025f778a42731f796d13ac59cd69c5bec937e9bc",
         "skillspector-semantic-pass": "1dfe96d0f50261833d4db468eeb9361740873b7d"
       },
       "batch_schema": 2,
@@ -28,6 +29,17 @@
           "integration_head": "e74030f85aec73dc95a3d9596664c2c515fc844c",
           "integration_seq": 1
         },
+        "skillspector-baseline": {
+          "accepted_head": "025f778a42731f796d13ac59cd69c5bec937e9bc",
+          "changed_files": [
+            ".skillspector/baselines/code.yaml",
+            ".skillspector/baselines/shared-agent-execution.yaml",
+            ".skillspector/baselines/shared-investigation-framework.yaml",
+            ".skillspector/baselines/todo.yaml"
+          ],
+          "integration_head": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
+          "integration_seq": 4
+        },
         "skillspector-semantic-pass": {
           "accepted_head": "1dfe96d0f50261833d4db468eeb9361740873b7d",
           "changed_files": [
@@ -39,7 +51,7 @@
         }
       },
       "integration_branch": "chore/retire-tidy-perms",
-      "integration_head": "28f6df96e78619eb68a7fe5ff1e463ee93df12da",
+      "integration_head": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
       "integration_log": [
         {
           "at": "2026-11-13T18:52:08Z",
@@ -77,6 +89,15 @@
           "op_id": "d675af329d5a4bbcb5cda4dd8ebd76bc",
           "previous_head": "3b018ca58562e3a22e36db28d66f270c52003e07",
           "seq": 3
+        },
+        {
+          "at": "2026-11-13T22:09:02Z",
+          "head": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
+          "kind": "prepare",
+          "member": "skillspector-baseline",
+          "op_id": "d220c1ed82124561ab5b0ca008be8f6e",
+          "previous_head": "28f6df96e78619eb68a7fe5ff1e463ee93df12da",
+          "seq": 4
         }
       ],
       "integration_worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms",
@@ -192,17 +213,12 @@
       "title": "Triage the SkillSpector AS3 finding in the skill-sync operator skill"
     },
     "skillspector-baseline": {
-      "claim": {
-        "expires_at": "2026-11-14T22:08:59Z",
-        "generation": "4f384388a0c742a7bf4618d1e995f786",
-        "renewals": 0,
-        "worker": "omp-skillspector-leader"
-      },
+      "claim": null,
       "needs": [
         "skillspector-semantic-pass"
       ],
       "priority": "medium",
-      "status": "active",
+      "status": "open",
       "title": "Commit a SkillSpector baseline with a reason for every accepted finding"
     },
     "skillspector-ci-gate": {

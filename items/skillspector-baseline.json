@@ -32,6 +32,47 @@
   "links": [
     "https://github.com/joeharris76/skill-sync-skills/pull/118"
   ],
+  "prepared": {
+    "accepted_head": "025f778a42731f796d13ac59cd69c5bec937e9bc",
+    "batch_id": "skillspector-remediation",
+    "changed_files": [
+      ".skillspector/baselines/code.yaml",
+      ".skillspector/baselines/shared-agent-execution.yaml",
+      ".skillspector/baselines/shared-investigation-framework.yaml",
+      ".skillspector/baselines/todo.yaml"
+    ],
+    "integration_head": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
+    "integration_seq": 4,
+    "member_id": "skillspector-baseline",
+    "overlaps": [],
+    "owner_epoch": 0,
+    "schema": "prepared_work_v2",
+    "scope_hash": "6e299333ced5dd2d9436f488ae5d5e5fb20feeb8e0e46533c7a1d78fc3bf5158",
+    "source_base": "28f6df96e78619eb68a7fe5ff1e463ee93df12da",
+    "source_revision": "025f778a42731f796d13ac59cd69c5bec937e9bc",
+    "source_worktree": "/Users/joe/Developer/skill-sync-skills.wt-m-baseline",
+    "verification": {
+      "clean": true,
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "review": {
+        "base": "28f6df96e78619eb68a7fe5ff1e463ee93df12da",
+        "findings": "1 Optional: triage doc wording 'reason column is the text each entry carries' vs paraphrased reasons; to be fixed by a leader fix in docs/skillspector-triage.md",
+        "head": "025f778a42731f796d13ac59cd69c5bec937e9bc",
+        "outcome": "clear",
+        "reviewer": "ReviewBaseline (independent reviewer agent)"
+      },
+      "revision": "025f778a42731f796d13ac59cd69c5bec937e9bc",
+      "status": "passed",
+      "suite": "catalog-unittests"
+    }
+  },
   "sessions": [
     {
       "actor": "omp-skillspector-leader",
@@ -80,6 +121,15 @@
       "generation": "4f384388a0c742a7bf4618d1e995f786",
       "op": "take",
       "op_id": "88fe9f019bb949afa48f33ea6560c8ae",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T22:09:02Z",
+      "client": "omp-stdio",
+      "generation": "4f384388a0c742a7bf4618d1e995f786",
+      "op": "prepare",
+      "op_id": "d220c1ed82124561ab5b0ca008be8f6e",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
