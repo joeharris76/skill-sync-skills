@@ -2,7 +2,8 @@
   "batches": {
     "skillspector-remediation": {
       "accepted_members": {
-        "import-upstream-skills": "6a570d940bbacd63fd9af594a95e529a3cceda3d"
+        "import-upstream-skills": "6a570d940bbacd63fd9af594a95e529a3cceda3d",
+        "skillspector-semantic-pass": "1dfe96d0f50261833d4db468eeb9361740873b7d"
       },
       "batch_schema": 2,
       "delivery_boundary": "One squash-merged pull request (#118) into main of joeharris76/skill-sync-skills",
@@ -26,10 +27,19 @@
           ],
           "integration_head": "e74030f85aec73dc95a3d9596664c2c515fc844c",
           "integration_seq": 1
+        },
+        "skillspector-semantic-pass": {
+          "accepted_head": "1dfe96d0f50261833d4db468eeb9361740873b7d",
+          "changed_files": [
+            "docs/skillspector-triage.md",
+            "skills/substack/SKILL.md"
+          ],
+          "integration_head": "28f6df96e78619eb68a7fe5ff1e463ee93df12da",
+          "integration_seq": 3
         }
       },
       "integration_branch": "chore/retire-tidy-perms",
-      "integration_head": "3b018ca58562e3a22e36db28d66f270c52003e07",
+      "integration_head": "28f6df96e78619eb68a7fe5ff1e463ee93df12da",
       "integration_log": [
         {
           "at": "2026-11-13T18:52:08Z",
@@ -58,6 +68,15 @@
           "op_id": "b5e71d1c8c434537881cdb42da146614",
           "previous_head": "e74030f85aec73dc95a3d9596664c2c515fc844c",
           "seq": 2
+        },
+        {
+          "at": "2026-11-13T22:05:15Z",
+          "head": "28f6df96e78619eb68a7fe5ff1e463ee93df12da",
+          "kind": "prepare",
+          "member": "skillspector-semantic-pass",
+          "op_id": "d675af329d5a4bbcb5cda4dd8ebd76bc",
+          "previous_head": "3b018ca58562e3a22e36db28d66f270c52003e07",
+          "seq": 3
         }
       ],
       "integration_worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms",
@@ -191,17 +210,12 @@
       "title": "Gate pull requests on a pinned static SkillSpector scan"
     },
     "skillspector-semantic-pass": {
-      "claim": {
-        "expires_at": "2026-11-14T22:05:11Z",
-        "generation": "bb8e7095148e4c19943108e4dd22a305",
-        "renewals": 0,
-        "worker": "omp-skillspector-leader"
-      },
+      "claim": null,
       "needs": [
         "import-upstream-skills"
       ],
       "priority": "medium",
-      "status": "active",
+      "status": "open",
       "title": "Run one SkillSpector LLM semantic pass over the catalog and triage it"
     }
   },
