@@ -7,6 +7,16 @@
     "No baseline entry suppresses a finding triaged as real."
   ],
   "context": "Batch: skillspector-remediation (serial mode; this repository names no prepared-delivery policy). All catalog work lands on branch chore/retire-tidy-perms, worktree ~/Developer/skill-sync-skills.wt-retire-tidy-perms, in the one final PR #118. Owner decisions (2026-11-13) are recorded in ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0 at commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Close each item only after PR #118 has actually merged, unless the item says otherwise. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) Test whether `skillspector scan --recursive` accepts `--baseline`. If yes, use one baseline for skills/; if not, use one baseline per affected skill and a per-skill loop. Record which. (2) If the baseline matches by line number or content fingerprint, note in README how to regenerate it after a legitimate edit to a flagged line. (3) A new static finding that appears since the first scan must be triaged before it is baselined. Guardrail: never baseline by rule ID or whole file if the format allows a narrower match. Expected static findings: todo AS1 references/bootstrap.md:65 and RA2 references/queries.md:21; shared-agent-execution EA2 x2 references/external-harnesses.md:115; code EA2 references/pr-sweep.md:26; shared-investigation-framework EA2 SKILL.md:83. Out of scope: the skill-sync AS3 finding (owned by ~/Developer/skill-sync).",
+  "deferrals": [
+    {
+      "created_at": "2026-11-13T18:39:24Z",
+      "from_item": "skillspector-baseline",
+      "id": 1,
+      "reason": "The skill-sync operator skill is owned by ~/Developer/skill-sync, not this catalog; the finding is sample diff output (false positive) and cannot be baselined here.",
+      "resolution": "open",
+      "summary": "Triage SkillSpector AS3 at skill-sync references/operations.md:42 in the skill-sync product repository"
+    }
+  ],
   "description": "After the tidy-perms removal, the static scan reports 6 findings (two of them the same line) across todo, shared-agent-execution, code and shared-investigation-framework. All were triaged as false positives or declared purpose. Without a baseline a CI gate fails on its first run; rewording the flagged guardrail sentences to satisfy keyword rules would weaken them. Owner decision: commit a baseline that suppresses exactly these findings, each with its own written reason. Baselines are generated with `skillspector baseline --no-llm`, then the generic reason is replaced per finding.",
   "links": [
     "https://github.com/joeharris76/skill-sync-skills/pull/118"
@@ -18,6 +28,14 @@
       "client": "omp-stdio",
       "op": "create",
       "op_id": "8b865622ff634be4b4aefeb24d9cb4d6",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:39:24Z",
+      "client": "omp-stdio",
+      "op": "defer",
+      "op_id": "ced055387d07423fa9762798e99163b3",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
