@@ -15,6 +15,151 @@
   },
   "context": "Feature batch `skillspector-remediation` (prepared delivery, owner-selected). Integration branch chore/retire-tidy-perms, worktree /Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms, start head ad38b45 (the tidy-perms removal), one final PR #118, base refs/remotes/origin/main. Edges: semantic-pass -> import; baseline -> semantic-pass; ci-gate -> baseline. The leader is the only tracker writer; a member works in its own worktree branched from a recorded integration head, never the main checkout, and ends at a committed, checked change. Members finish only after PR #118 has actually merged. Owner decisions (2026-11-13): ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0, commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Scan reports and other scratch output go outside the repository (/tmp). Frozen scope: skills/retro/*, skills/writing-for-agents/*, docs/dependency-closure.md, README.md. A change outside it is deferred, not made. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) If the installed copies differ from upstream at the recorded commit, stop and report: a local edit would otherwise be lost at deploy. (2) If the upstream licence is not MIT, stop and block. (3) If the upstream bytes fail the test suite, stop rather than edit them. (4) If the static scan reports a finding in an imported skill, stop and report before baselining third-party text. Out of scope: selecting the skills in deployment/global/skill-sync.conf (the template can only pin a commit that already exists; see deploy-imported-skills).\n\n\n[owner decisions 2026-11-13, second round] A real semantic finding in a vendored skill is patched locally and recorded in the README provenance table, so 'unmodified upstream' then reads 'upstream plus the recorded patch'.",
   "description": "retro and writing-for-agents exist only in ~/.claude/skills, installed on 2026-11-11 with `npx skills add mattpocock/skills`. They are outside this catalog and the skill-sync manifest, so Codex and other loaders do not get them and nothing pins their content. Owner decision: import both into skills/. Upstream is github.com/mattpocock/skills (MIT, Copyright (c) 2026 Matt Pocock), paths skills/engineering/retro and skills/productivity/writing-for-agents, at commit 5863806dd4e15c63174bee4e7515a4256792ecfa. The upstream bytes are imported unmodified; the catalog adds only skill.yaml and LICENSE per skill. skill-sync copies whole skill directories to the loaders, so the MIT notice must sit inside each skill directory. retro's first step invokes writing-for-agents, so retro depends on it. The removal of tidy-perms is already in the batch start head; this item does not wait on it.",
+  "final_evidence": {
+    "batch_id": "skillspector-remediation",
+    "changed_files": [
+      ".github/workflows/verify-deployment.yml",
+      ".skillspector/baselines/code.yaml",
+      ".skillspector/baselines/shared-agent-execution.yaml",
+      ".skillspector/baselines/shared-investigation-framework.yaml",
+      ".skillspector/baselines/todo.yaml",
+      "README.md",
+      "docs/dependency-closure.md",
+      "docs/skillspector-triage.md",
+      "scripts/skillspector_scan.py",
+      "skills/retro/LICENSE",
+      "skills/retro/SKILL.md",
+      "skills/retro/agents/openai.yaml",
+      "skills/retro/skill.yaml",
+      "skills/substack/SKILL.md",
+      "skills/writing-for-agents/LICENSE",
+      "skills/writing-for-agents/SKILL-MECHANICS.md",
+      "skills/writing-for-agents/SKILL.md",
+      "skills/writing-for-agents/agents/openai.yaml",
+      "skills/writing-for-agents/skill.yaml"
+    ],
+    "clean": true,
+    "commands": [
+      [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      [
+        "python3",
+        "scripts/skillspector_scan.py"
+      ]
+    ],
+    "current_acceptance": {
+      "import-upstream-skills": {
+        "clean": true,
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ],
+        "revision": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+        "status": "passed",
+        "suite": "catalog-unittests",
+        "worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms"
+      },
+      "skillspector-baseline": {
+        "clean": true,
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ],
+        "revision": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+        "status": "passed",
+        "suite": "catalog-unittests",
+        "worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms"
+      },
+      "skillspector-ci-gate": {
+        "clean": true,
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ],
+        "revision": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+        "status": "passed",
+        "suite": "catalog-unittests",
+        "worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms"
+      },
+      "skillspector-semantic-pass": {
+        "clean": true,
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ],
+        "revision": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+        "status": "passed",
+        "suite": "catalog-unittests",
+        "worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms"
+      }
+    },
+    "final_pr": {
+      "head": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+      "node_id": "PR_kwDOSVPH7s8AAAABO_Rmjg",
+      "number": 118,
+      "repository": "joeharris76/skill-sync-skills"
+    },
+    "integration_branch": "chore/retire-tidy-perms",
+    "integration_head": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+    "member_heads": {
+      "import-upstream-skills": "6a570d940bbacd63fd9af594a95e529a3cceda3d",
+      "skillspector-baseline": "025f778a42731f796d13ac59cd69c5bec937e9bc",
+      "skillspector-ci-gate": "8372b24bddaab305b5eaa6d48d6b2b70103df94a",
+      "skillspector-semantic-pass": "1dfe96d0f50261833d4db468eeb9361740873b7d"
+    },
+    "member_ranges": {
+      "import-upstream-skills": {
+        "base": "ad38b456fd86a3dd3105fea0c95273af7e1d57dd",
+        "head": "6a570d940bbacd63fd9af594a95e529a3cceda3d"
+      },
+      "skillspector-baseline": {
+        "base": "28f6df96e78619eb68a7fe5ff1e463ee93df12da",
+        "head": "025f778a42731f796d13ac59cd69c5bec937e9bc"
+      },
+      "skillspector-ci-gate": {
+        "base": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
+        "head": "8372b24bddaab305b5eaa6d48d6b2b70103df94a"
+      },
+      "skillspector-semantic-pass": {
+        "base": "3b018ca58562e3a22e36db28d66f270c52003e07",
+        "head": "1dfe96d0f50261833d4db468eeb9361740873b7d"
+      }
+    },
+    "merged_pr": {
+      "ci": "https://github.com/joeharris76/skill-sync-skills/actions/runs/43517652090",
+      "merge_commit": "6497b599b441574e5e49bc87c0a43b4783529d06",
+      "number": 118
+    },
+    "project_id": "skill-sync-skills",
+    "repository": "https://github.com/joeharris76/skill-sync-skills.git",
+    "scope_hash": "6e299333ced5dd2d9436f488ae5d5e5fb20feeb8e0e46533c7a1d78fc3bf5158",
+    "status": "passed",
+    "suite": "catalog-unittests + skillspector-static-scan",
+    "tree_revision": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+    "tree_worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms"
+  },
   "links": [
     "https://github.com/joeharris76/skill-sync-skills/pull/118",
     "https://github.com/mattpocock/skills"
@@ -143,6 +288,15 @@
       "generation": "38058ee1562c48c48e69e585a69f151a",
       "op": "take",
       "op_id": "33f9f55a351c444f84d26d32f0cb9289",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T22:18:29Z",
+      "client": "omp-stdio",
+      "generation": "38058ee1562c48c48e69e585a69f151a",
+      "op": "finish",
+      "op_id": "f5d67a324d0249a38b110f8d1f470c0a",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
