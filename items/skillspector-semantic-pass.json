@@ -108,6 +108,15 @@
       "op": "prepare",
       "op_id": "d675af329d5a4bbcb5cda4dd8ebd76bc",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T22:18:31Z",
+      "client": "omp-stdio",
+      "generation": "e99ca12a20fc44a38ea4d0adcea23d5e",
+      "op": "take",
+      "op_id": "d228e58e1d514ffea9b1c56758cb3a10",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
 }
