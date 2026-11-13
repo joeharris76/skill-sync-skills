@@ -14,7 +14,9 @@
       "from_item": "retire-tidy-perms",
       "id": 1,
       "reason": "Owner deferred consumer edits on 2026-11-13: they keep working at their pinned rev and fail only when they pin a rev that includes the removal.",
-      "resolution": "open",
+      "resolution": "promoted",
+      "resolved_at": "2026-11-13T18:51:49Z",
+      "resolved_item": "consumers-drop-tidy-perms",
       "summary": "Drop `skill = tidy-perms` from BenchBox, Oxbow, tractable and skill-sync skill-sync.conf at each project's next catalog pin bump"
     }
   ],
@@ -45,6 +47,14 @@
       "client": "omp-stdio",
       "op": "update",
       "op_id": "d9ea9b1a85dd418fb8421663487f2d17",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:51:50Z",
+      "client": "omp-stdio",
+      "op": "promote",
+      "op_id": "c2655902cdd54c1892968b2a97ecc012",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
