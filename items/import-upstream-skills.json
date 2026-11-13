@@ -19,6 +19,54 @@
     "https://github.com/joeharris76/skill-sync-skills/pull/118",
     "https://github.com/mattpocock/skills"
   ],
+  "prepared": {
+    "accepted_head": "6a570d940bbacd63fd9af594a95e529a3cceda3d",
+    "batch_id": "skillspector-remediation",
+    "changed_files": [
+      "README.md",
+      "docs/dependency-closure.md",
+      "skills/retro/LICENSE",
+      "skills/retro/SKILL.md",
+      "skills/retro/agents/openai.yaml",
+      "skills/retro/skill.yaml",
+      "skills/writing-for-agents/LICENSE",
+      "skills/writing-for-agents/SKILL-MECHANICS.md",
+      "skills/writing-for-agents/SKILL.md",
+      "skills/writing-for-agents/agents/openai.yaml",
+      "skills/writing-for-agents/skill.yaml"
+    ],
+    "integration_head": "e74030f85aec73dc95a3d9596664c2c515fc844c",
+    "integration_seq": 1,
+    "member_id": "import-upstream-skills",
+    "overlaps": [],
+    "owner_epoch": 0,
+    "schema": "prepared_work_v2",
+    "scope_hash": "6e299333ced5dd2d9436f488ae5d5e5fb20feeb8e0e46533c7a1d78fc3bf5158",
+    "source_base": "ad38b456fd86a3dd3105fea0c95273af7e1d57dd",
+    "source_revision": "6a570d940bbacd63fd9af594a95e529a3cceda3d",
+    "source_worktree": "/Users/joe/Developer/skill-sync-skills.wt-m-import",
+    "verification": {
+      "clean": true,
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "review": {
+        "base": "ad38b456fd86a3dd3105fea0c95273af7e1d57dd",
+        "findings": "no Critical or Required; 2 Optional (category naming, README verification hint)",
+        "head": "6a570d940bbacd63fd9af594a95e529a3cceda3d",
+        "outcome": "clear",
+        "reviewer": "ReviewImport (independent reviewer agent)"
+      },
+      "revision": "6a570d940bbacd63fd9af594a95e529a3cceda3d",
+      "status": "passed",
+      "suite": "catalog-unittests"
+    }
+  },
   "sessions": [
     {
       "actor": "omp-skillspector-leader",
@@ -51,6 +99,15 @@
       "generation": "2ce38db29f174d4dae942d8a850647d3",
       "op": "take",
       "op_id": "70830085bd6d48d99b732b4b451b3cf0",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:54:57Z",
+      "client": "omp-stdio",
+      "generation": "2ce38db29f174d4dae942d8a850647d3",
+      "op": "prepare",
+      "op_id": "dff57786d5234e7099b82c8fa84ffd5e",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]

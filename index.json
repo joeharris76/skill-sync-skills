@@ -1,20 +1,50 @@
 {
   "batches": {
     "skillspector-remediation": {
-      "accepted_members": {},
+      "accepted_members": {
+        "import-upstream-skills": "6a570d940bbacd63fd9af594a95e529a3cceda3d"
+      },
       "batch_schema": 2,
       "delivery_boundary": "One squash-merged pull request (#118) into main of joeharris76/skill-sync-skills",
       "develop_ref": "refs/remotes/origin/main",
       "final_pr_history": [],
-      "integrated_members": {},
+      "integrated_members": {
+        "import-upstream-skills": {
+          "accepted_head": "6a570d940bbacd63fd9af594a95e529a3cceda3d",
+          "changed_files": [
+            "README.md",
+            "docs/dependency-closure.md",
+            "skills/retro/LICENSE",
+            "skills/retro/SKILL.md",
+            "skills/retro/agents/openai.yaml",
+            "skills/retro/skill.yaml",
+            "skills/writing-for-agents/LICENSE",
+            "skills/writing-for-agents/SKILL-MECHANICS.md",
+            "skills/writing-for-agents/SKILL.md",
+            "skills/writing-for-agents/agents/openai.yaml",
+            "skills/writing-for-agents/skill.yaml"
+          ],
+          "integration_head": "e74030f85aec73dc95a3d9596664c2c515fc844c",
+          "integration_seq": 1
+        }
+      },
       "integration_branch": "chore/retire-tidy-perms",
-      "integration_head": "ad38b456fd86a3dd3105fea0c95273af7e1d57dd",
+      "integration_head": "e74030f85aec73dc95a3d9596664c2c515fc844c",
       "integration_log": [
         {
           "at": "2026-11-13T18:52:08Z",
           "head": "ad38b456fd86a3dd3105fea0c95273af7e1d57dd",
           "kind": "start",
           "seq": 0
+        },
+        {
+          "at": "2026-11-13T18:54:57Z",
+          "head": "e74030f85aec73dc95a3d9596664c2c515fc844c",
+          "kind": "prepare",
+          "member": "import-upstream-skills",
+          "op_id": "dff57786d5234e7099b82c8fa84ffd5e",
+          "previous_head": "ad38b456fd86a3dd3105fea0c95273af7e1d57dd",
+          "seq": 1
         }
       ],
       "integration_worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms",
@@ -86,15 +116,10 @@
       "title": "Select the imported skills in the global deployment and apply it"
     },
     "import-upstream-skills": {
-      "claim": {
-        "expires_at": "2026-11-14T18:54:54Z",
-        "generation": "2ce38db29f174d4dae942d8a850647d3",
-        "renewals": 0,
-        "worker": "omp-skillspector-leader"
-      },
+      "claim": null,
       "needs": [],
       "priority": "medium",
-      "status": "active",
+      "status": "open",
       "title": "Import retro and writing-for-agents from mattpocock/skills into the catalog"
     },
     "land-skillspector-pr": {
