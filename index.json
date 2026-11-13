@@ -214,12 +214,17 @@
       "title": "Drop tidy-perms from consumer skill-sync configs at their next catalog pin bump"
     },
     "deploy-imported-skills": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-14T22:19:21Z",
+        "generation": "19f7d207e6f947a7816badff78e47d40",
+        "renewals": 0,
+        "worker": "omp-skillspector-leader"
+      },
       "needs": [
         "land-skillspector-pr"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "active",
       "title": "Select the imported skills in the global deployment and apply it"
     },
     "import-upstream-skills": {
