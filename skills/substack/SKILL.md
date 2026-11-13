@@ -1,6 +1,6 @@
 ---
 name: substack
-description: "`auth`, `status`, `preview`, `draft`, `publish`, `schedule`, `update`, `suggest_tags`, `pending`, `fetch`, `sync`, `pull`"
+description: "Use for Substack newsletter work through the letterops MCP server: `auth`, `status`, `preview`, `draft`, `publish`, `schedule`, `update`, `suggest_tags`, `pending`, `fetch`, `sync`, `pull`. Not for git or other sync, pull, fetch or status requests."
 ---
 
 # Substack Workflow
