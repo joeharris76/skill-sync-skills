@@ -7,7 +7,7 @@
     "The merged PR #118 body keeps the 'Not replaced' and 'Consumer impact' sections (CHANGE-REMOVAL-001).",
     "Deferral 1 on this item is promoted to its own item before finish."
   ],
-  "context": "Ordinary (non-batch) item: its commit ad38b45 is the start head of feature batch `skillspector-remediation`, so it lands with PR #118 and is finished after that PR merges. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gate: none left; the owner chose retirement without replacement. Out of scope: editing other projects' configs (deferred by the owner to each project's next pin bump).",
+  "context": "Ordinary (non-batch) item: its commit ad38b45 is the start head of feature batch `skillspector-remediation`, so it lands with PR #118 and is finished after that PR merges. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gate: none left; the owner chose retirement without replacement. Out of scope: editing other projects' configs (deferred by the owner to each project's next pin bump).\n\n\n[closeout] PR #118 merged as 6497b59. On merged main: skills/tidy-perms absent; no tidy-perms in deployment conf or dependency-closure; tests and closure check pass (CI run 43517652090); loader folders have no tidy-perms; PR body keeps 'Not replaced' and 'Consumer impact'. Deferral promoted to consumers-drop-tidy-perms.",
   "deferrals": [
     {
       "created_at": "2026-11-13T18:39:20Z",
@@ -55,6 +55,14 @@
       "client": "omp-stdio",
       "op": "promote",
       "op_id": "c2655902cdd54c1892968b2a97ecc012",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T22:19:00Z",
+      "client": "omp-stdio",
+      "op": "update",
+      "op_id": "e5c70642cd3143afaaabe92fec4eec83",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
