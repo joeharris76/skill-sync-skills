@@ -15,7 +15,9 @@
       "from_item": "skillspector-baseline",
       "id": 1,
       "reason": "The skill-sync operator skill is owned by ~/Developer/skill-sync, not this catalog; the finding is sample diff output (false positive) and cannot be baselined here.",
-      "resolution": "open",
+      "resolution": "promoted",
+      "resolved_at": "2026-11-13T18:51:52Z",
+      "resolved_item": "skill-sync-operator-as3-triage",
       "summary": "Triage SkillSpector AS3 at skill-sync references/operations.md:42 in the skill-sync product repository"
     }
   ],
@@ -46,6 +48,14 @@
       "client": "omp-stdio",
       "op": "update",
       "op_id": "abc71a0622d94746a3665f22a51f2431",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:51:53Z",
+      "client": "omp-stdio",
+      "op": "promote",
+      "op_id": "22d6e26622a34c2a99903cc7f31a8226",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
