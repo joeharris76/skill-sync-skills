@@ -1,6 +1,15 @@
 {
   "batches": {},
   "items": {
+    "import-upstream-skills": {
+      "claim": null,
+      "needs": [
+        "retire-tidy-perms"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Import retro and writing-for-agents from mattpocock/skills into the catalog"
+    },
     "retire-tidy-perms": {
       "claim": null,
       "needs": [],

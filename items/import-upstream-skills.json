@@ -1,0 +1,26 @@
+{
+  "acceptance": [
+    "skills/retro and skills/writing-for-agents are tracked, each with SKILL.md and skill.yaml; the unittest suite passes.",
+    "Imported skill files are byte-identical to upstream at the recorded commit SHA, except for documented additions (skill.yaml, provenance/licence file); a `diff -r` against an upstream checkout at that SHA shows only those additions.",
+    "A tracked file records, per skill: upstream repo URL, commit SHA, upstream path, and the full upstream MIT licence text with its copyright line.",
+    "docs/dependency-closure.md is regenerated and `--check` passes.",
+    "A static SkillSpector scan of each imported skill reports zero findings, or each finding is carried into the baseline item with a reason.",
+    "README.md states that these two skills are vendored from upstream and how to refresh them."
+  ],
+  "context": "Batch: skillspector-remediation (serial mode; this repository names no prepared-delivery policy). All catalog work lands on branch chore/retire-tidy-perms, worktree ~/Developer/skill-sync-skills.wt-retire-tidy-perms, in the one final PR #118. Owner decisions (2026-11-13) are recorded in ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0 at commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Close each item only after PR #118 has actually merged, unless the item says otherwise. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) If the installed copies in ~/.claude/skills differ from upstream HEAD, import upstream at a pinned SHA, not the local copy, and note the difference. (2) If the upstream licence is not MIT or the notice cannot be reproduced, stop and block the item. (3) If a file fails the metadata tests (for example an unsupported frontmatter key), prefer adding catalog metadata over editing upstream text; any edit to upstream text must be listed in the provenance file. Out of scope: selecting the skills in deployment/global/skill-sync.conf (the template can only pin a commit that already exists; see deploy-imported-skills).",
+  "description": "retro and writing-for-agents exist only in ~/.claude/skills, installed on 2026-11-11 with `npx skills add mattpocock/skills`. They are outside this catalog and the skill-sync manifest, so Codex and other loaders do not get them and nothing pins their content. Owner decision: import both into skills/. Upstream is github.com/mattpocock/skills (MIT), paths skills/engineering/retro and skills/productivity/writing-for-agents. Each imported skill needs a skill.yaml that passes tests/test_skill_metadata.py, and a provenance record: upstream repository, exact commit SHA, upstream path, and the upstream MIT copyright notice.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/pull/118",
+    "https://github.com/mattpocock/skills"
+  ],
+  "sessions": [
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:39:03Z",
+      "client": "omp-stdio",
+      "op": "create",
+      "op_id": "7503504879e74a8f8a1ad79ac58ec056",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    }
+  ]
+}
