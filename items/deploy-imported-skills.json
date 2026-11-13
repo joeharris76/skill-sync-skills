@@ -1,0 +1,25 @@
+{
+  "acceptance": [
+    "A merged PR bumps the catalog `rev` in deployment/global/skill-sync.conf to the PR #118 merge commit and selects retro and writing-for-agents; tests/test_skill_sync_conf.py passes in CI.",
+    "~/.skill-sync-deployment/skill-sync.conf matches the merged template except for intentionally local values, and `diff` between them shows no unexplained difference.",
+    "`tools/skill-sync apply`, `verify` and `check` against the live config all succeed.",
+    "retro and writing-for-agents exist in ~/.claude/skills, ~/.codex/skills and ~/.agents/skills, and each target's skill-sync.manifest lists them.",
+    "The previous unmanaged copies were saved to a dated backup directory outside the loader folders before being replaced; the backup path is reported.",
+    "`tools/skill-sync preview` was read before apply and showed only the two additions plus the changes the new rev implies; nothing was removed unexpectedly."
+  ],
+  "context": "Batch: skillspector-remediation (serial mode; this repository names no prepared-delivery policy). All catalog work lands on branch chore/retire-tidy-perms, worktree ~/Developer/skill-sync-skills.wt-retire-tidy-perms, in the one final PR #118. Owner decisions (2026-11-13) are recorded in ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0 at commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Close each item only after PR #118 has actually merged, unless the item says otherwise. This item closes when its own pin-bump PR has merged and the live apply is verified. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) If preview shows any removal or any change outside the two new skills and the files the rev bump implies, stop and report before apply. (2) If skill-sync refuses the unmanaged directories, move them to ~/.skill-sync-deployment/backups/<date>/ (never delete), then apply. (3) The live config's catalog rev is currently 24693de, ahead of the template's cdb35df at the time of the first scan; reconcile to the new merge commit, and if the live file has other local differences, keep them and report them. Guardrails: never touch ~/.claude/skills/synced or ~/.codex/skills/.system; never point the config at an authoring worktree; `rev` must be a full SHA present in ~/Developer/skill-sync-skills (fetch main there first, without disturbing local changes).",
+  "description": "The deployment template pins an existing catalog commit, so it cannot select retro and writing-for-agents in the same PR that adds them. After PR #118 merges, a second small PR adds both `skill =` lines to deployment/global/skill-sync.conf and bumps `rev` to the merge commit (this repository's established 'pin the global catalog' pattern). Then the live config ~/.skill-sync-deployment/skill-sync.conf takes the same change and apply/verify/check run, so all three loader folders get the catalog copies. ~/.claude/skills currently holds unmanaged copies of both skills from `npx skills add`; skill-sync may refuse to overwrite a directory it does not own.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/pull/118"
+  ],
+  "sessions": [
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:39:18Z",
+      "client": "omp-stdio",
+      "op": "create",
+      "op_id": "288171e78c3f48c7ae1d9a3e7a4fd544",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    }
+  ]
+}

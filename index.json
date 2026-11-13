@@ -1,6 +1,15 @@
 {
   "batches": {},
   "items": {
+    "deploy-imported-skills": {
+      "claim": null,
+      "needs": [
+        "land-skillspector-pr"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Select the imported skills in the global deployment and apply it"
+    },
     "import-upstream-skills": {
       "claim": null,
       "needs": [
