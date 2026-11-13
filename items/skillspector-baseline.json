@@ -29,6 +29,151 @@
     }
   ],
   "description": "After the tidy-perms removal the static scan is expected to report 6 findings (two on the same line) across todo, shared-agent-execution, code and shared-investigation-framework, all triaged as false positives or declared purpose. Without a baseline a CI gate fails on its first run; rewording the flagged guardrail sentences to satisfy keyword rules would weaken them. Owner decision: commit a baseline that suppresses the static findings present on the batch head after the semantic-pass fixes, each with its own written reason. SkillSpector refuses `--baseline` on a recursive scan, so there is one baseline per affected skill, at .skillspector/baselines/<skill>.yaml: outside skills/, so it is never copied to a loader folder and never read by `--use-shipped-baseline`. Fingerprints bind file content, so an edit to a flagged file invalidates its entries.",
+  "final_evidence": {
+    "batch_id": "skillspector-remediation",
+    "changed_files": [
+      ".github/workflows/verify-deployment.yml",
+      ".skillspector/baselines/code.yaml",
+      ".skillspector/baselines/shared-agent-execution.yaml",
+      ".skillspector/baselines/shared-investigation-framework.yaml",
+      ".skillspector/baselines/todo.yaml",
+      "README.md",
+      "docs/dependency-closure.md",
+      "docs/skillspector-triage.md",
+      "scripts/skillspector_scan.py",
+      "skills/retro/LICENSE",
+      "skills/retro/SKILL.md",
+      "skills/retro/agents/openai.yaml",
+      "skills/retro/skill.yaml",
+      "skills/substack/SKILL.md",
+      "skills/writing-for-agents/LICENSE",
+      "skills/writing-for-agents/SKILL-MECHANICS.md",
+      "skills/writing-for-agents/SKILL.md",
+      "skills/writing-for-agents/agents/openai.yaml",
+      "skills/writing-for-agents/skill.yaml"
+    ],
+    "clean": true,
+    "commands": [
+      [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      [
+        "python3",
+        "scripts/skillspector_scan.py"
+      ]
+    ],
+    "current_acceptance": {
+      "import-upstream-skills": {
+        "clean": true,
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ],
+        "revision": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+        "status": "passed",
+        "suite": "catalog-unittests",
+        "worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms"
+      },
+      "skillspector-baseline": {
+        "clean": true,
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ],
+        "revision": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+        "status": "passed",
+        "suite": "catalog-unittests",
+        "worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms"
+      },
+      "skillspector-ci-gate": {
+        "clean": true,
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ],
+        "revision": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+        "status": "passed",
+        "suite": "catalog-unittests",
+        "worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms"
+      },
+      "skillspector-semantic-pass": {
+        "clean": true,
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ],
+        "revision": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+        "status": "passed",
+        "suite": "catalog-unittests",
+        "worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms"
+      }
+    },
+    "final_pr": {
+      "head": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+      "node_id": "PR_kwDOSVPH7s8AAAABO_Rmjg",
+      "number": 118,
+      "repository": "joeharris76/skill-sync-skills"
+    },
+    "integration_branch": "chore/retire-tidy-perms",
+    "integration_head": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+    "member_heads": {
+      "import-upstream-skills": "6a570d940bbacd63fd9af594a95e529a3cceda3d",
+      "skillspector-baseline": "025f778a42731f796d13ac59cd69c5bec937e9bc",
+      "skillspector-ci-gate": "8372b24bddaab305b5eaa6d48d6b2b70103df94a",
+      "skillspector-semantic-pass": "1dfe96d0f50261833d4db468eeb9361740873b7d"
+    },
+    "member_ranges": {
+      "import-upstream-skills": {
+        "base": "ad38b456fd86a3dd3105fea0c95273af7e1d57dd",
+        "head": "6a570d940bbacd63fd9af594a95e529a3cceda3d"
+      },
+      "skillspector-baseline": {
+        "base": "28f6df96e78619eb68a7fe5ff1e463ee93df12da",
+        "head": "025f778a42731f796d13ac59cd69c5bec937e9bc"
+      },
+      "skillspector-ci-gate": {
+        "base": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
+        "head": "8372b24bddaab305b5eaa6d48d6b2b70103df94a"
+      },
+      "skillspector-semantic-pass": {
+        "base": "3b018ca58562e3a22e36db28d66f270c52003e07",
+        "head": "1dfe96d0f50261833d4db468eeb9361740873b7d"
+      }
+    },
+    "merged_pr": {
+      "ci": "https://github.com/joeharris76/skill-sync-skills/actions/runs/43517652090",
+      "merge_commit": "6497b599b441574e5e49bc87c0a43b4783529d06",
+      "number": 118
+    },
+    "project_id": "skill-sync-skills",
+    "repository": "https://github.com/joeharris76/skill-sync-skills.git",
+    "scope_hash": "6e299333ced5dd2d9436f488ae5d5e5fb20feeb8e0e46533c7a1d78fc3bf5158",
+    "status": "passed",
+    "suite": "catalog-unittests + skillspector-static-scan",
+    "tree_revision": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+    "tree_worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms"
+  },
   "links": [
     "https://github.com/joeharris76/skill-sync-skills/pull/118"
   ],
@@ -139,6 +284,15 @@
       "generation": "a396c7daf054457ba8fd98fc0fe225a5",
       "op": "take",
       "op_id": "7526f3b099934828bfc596ae46bfb705",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T22:18:39Z",
+      "client": "omp-stdio",
+      "generation": "a396c7daf054457ba8fd98fc0fe225a5",
+      "op": "finish",
+      "op_id": "9bfe0ec5e50b46918635657842cd3d5d",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
