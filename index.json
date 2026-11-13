@@ -26,6 +26,15 @@
       "status": "open",
       "title": "Commit a SkillSpector baseline with a reason for every accepted finding"
     },
+    "skillspector-ci-gate": {
+      "claim": null,
+      "needs": [
+        "skillspector-baseline"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Gate pull requests on a pinned static SkillSpector scan"
+    },
     "skillspector-semantic-pass": {
       "claim": null,
       "needs": [

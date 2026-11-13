@@ -1,0 +1,26 @@
+{
+  "acceptance": [
+    "A CI job on pull requests to main runs the scan and passes on the PR #118 head (link the run).",
+    "SkillSpector is installed from the pinned full SHA; no floating tag, branch or `latest`.",
+    "Negative proof: on a throwaway local copy, adding a line such as an instruction to read `~/.codex/config.toml` to a skill makes the local command exit nonzero and name the finding; the throwaway copy is not committed.",
+    "The job needs no secret and makes no LLM call (`--no-llm`); the workflow grants no more than `contents: read`.",
+    "README.md documents the local command, how to bump the pin, and how to update the baseline.",
+    "The existing 'Template gate and wrapper cycle' job still passes unchanged."
+  ],
+  "context": "Batch: skillspector-remediation (serial mode; this repository names no prepared-delivery policy). All catalog work lands on branch chore/retire-tidy-perms, worktree ~/Developer/skill-sync-skills.wt-retire-tidy-perms, in the one final PR #118. Owner decisions (2026-11-13) are recorded in ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0 at commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Close each item only after PR #118 has actually merged, unless the item says otherwise. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) Recursive-with-baseline or per-skill loop follows the baseline item's recorded choice. (2) If the scan needs network at run time (for example OSV lookups) and fails offline, keep the gate but record the dependency in README; do not add `continue-on-error`. (3) If install plus scan exceeds about 5 minutes in CI, report it; do not drop skills from the scan to save time. Guardrails: no `continue-on-error`, no `|| true`, no path filter that lets a skills/ change skip the job; pin third-party actions the way the existing workflow does; the script must fail if it scans zero skills. Out of scope: SARIF upload, semantic (LLM) checks in CI.",
+  "description": "Nothing stops a new skill or edit from introducing a hidden instruction, an exfiltration pattern or an overbroad permission. Owner decision: add a job to .github/workflows/verify-deployment.yml that installs SkillSpector pinned to full commit SHA 9dc82fe473329b2b742aa5097dcfe7ae55f51b01, scans every skill under skills/ with `--no-llm` and the committed baseline, and fails on any finding the baseline does not cover. The same scan must be runnable locally from one documented command so a failure can be reproduced.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/pull/118",
+    "https://github.com/NVIDIA/SkillSpector"
+  ],
+  "sessions": [
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:39:11Z",
+      "client": "omp-stdio",
+      "op": "create",
+      "op_id": "1fdae704131a4ae78a9ea895e5bd6a0c",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    }
+  ]
+}
