@@ -46,7 +46,6 @@ receipt while stale copies linger.
 | shared-review-protocol | `shared-agent-execution` | `shared-agent-execution` | `shared-agent-execution`, `shared-review-protocol` |
 | substack | `shared-change-framework` | `shared-change-framework` | `shared-change-framework`, `substack` |
 | test | `shared-change-framework`, `shared-investigation-framework` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `test` |
-| tidy-perms | (none) | (none) | `tidy-perms` |
 | todo | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `todo` |
 
 ## Staying current
