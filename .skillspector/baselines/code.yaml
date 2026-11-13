@@ -1,0 +1,10 @@
+# SkillSpector baseline for skills/code. Suppress by fingerprint only, never by
+# rule; each reason comes from docs/skillspector-triage.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:1dd9851398ae039a6053c47522cb4bd5ae474a97e70938b6d7711fdf87d41938
+  rule_id: EA2
+  file: references/pr-sweep.md
+  reason: "False positive: the sentence says a sweep request does not authorize bypassing approval gates."
