@@ -15,8 +15,7 @@ per skill that has any. The reasons are explained in
 - a baseline suppresses by rule instead of by fingerprint, keeps the
   scanner's auto-generated reason, or names a skill that is not tracked;
 - a scan fails or does not inspect every file;
-- the installed SkillSpector is not the pinned version;
-- the number of skills scanned differs from the number tracked.
+- the installed SkillSpector is not the pinned version.
 
 Usage:
   python3 scripts/skillspector_scan.py            # scan all tracked skills
@@ -49,6 +48,7 @@ BASELINES_DIR = ROOT / ".skillspector" / "baselines"
 
 FINGERPRINT_RE = re.compile(r"^- hash:", re.MULTILINE)
 EMPTY_RULES_RE = re.compile(r"^rules: \[\]$", re.MULTILINE)
+RULES_KEY_RE = re.compile(r"^rules\s*:", re.MULTILINE)
 DEFAULT_REASON = "auto-generated baseline"
 
 
@@ -73,8 +73,10 @@ def scanner() -> str:
 def baseline_problems(baseline: Path) -> list[str]:
     text = baseline.read_text(encoding="utf-8")
     problems = []
-    if not EMPTY_RULES_RE.search(text):
-        problems.append("baseline must keep `rules: []`; suppress by fingerprint only")
+    # A second top-level `rules:` key would win in a YAML loader, so require
+    # exactly one, and that one empty.
+    if len(RULES_KEY_RE.findall(text)) != 1 or not EMPTY_RULES_RE.search(text):
+        problems.append("baseline must have exactly one `rules: []`; suppress by fingerprint only")
     if DEFAULT_REASON in text:
         problems.append("baseline entry keeps the auto-generated reason; write the real one")
     if not FINGERPRINT_RE.search(text):
@@ -97,7 +99,9 @@ def scan(binary: str, skill: str, workdir: Path) -> list[str]:
         command += ["--baseline", str(baseline)]
         expected_suppressed = len(FINGERPRINT_RE.findall(baseline.read_text(encoding="utf-8")))
     result = subprocess.run(command, capture_output=True, text=True)
-    if result.returncode != 0 or not report.is_file():
+    # Exit 1 means a high risk score; the report is still written and lists
+    # the findings. Any other failure, or no report, is a scanner error.
+    if result.returncode not in (0, 1) or not report.is_file():
         tail = (result.stdout + result.stderr).strip().splitlines()[-5:]
         return problems + [f"scan failed (exit {result.returncode}): " + " | ".join(tail)]
     data = json.loads(report.read_text(encoding="utf-8"))
@@ -134,18 +138,15 @@ def main(argv: list[str]) -> int:
     if orphans:
         sys.exit(f"error: baseline without a tracked skill: {', '.join(orphans)}")
     binary = scanner()
-    scanned = failed = 0
+    failed = 0
     with tempfile.TemporaryDirectory() as tmp:
         for skill in skills:
             problems = scan(binary, skill, Path(tmp))
-            scanned += 1
             failed += bool(problems)
             print(f"{'FAIL' if problems else 'ok  '} {skill}")
             for problem in problems:
                 print(f"       {problem}")
-    print(f"\n{len(known)} tracked, {scanned} scanned, {failed} failed")
-    if not argv and scanned != len(known):
-        return 1
+    print(f"\n{len(known)} tracked, {len(skills)} scanned, {failed} failed")
     return 1 if failed else 0
 
 

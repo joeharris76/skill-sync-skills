@@ -188,8 +188,8 @@ finding and a stale-entry error. To fix it:
 
 1. Confirm the finding is still the accepted one. Triage anything new in
    `docs/skillspector-triage.md` first, and never baseline a real finding.
-2. Regenerate that skill's baseline:
-   `skillspector baseline skills/<skill> --no-llm -o .skillspector/baselines/<skill>.yaml`
+2. Regenerate that skill's baseline (with `SRC` from the install above):
+   `"$SRC/.venv/bin/skillspector" baseline skills/<skill> --no-llm -o .skillspector/baselines/<skill>.yaml`
 3. Replace every auto-generated `reason` with the reason from the triage
    record. The scan rejects the default reason and any `rules` entry.
 4. Delete the baseline file if the skill has no findings left.
