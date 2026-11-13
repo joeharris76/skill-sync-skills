@@ -4,6 +4,7 @@
       "accepted_members": {
         "import-upstream-skills": "6a570d940bbacd63fd9af594a95e529a3cceda3d",
         "skillspector-baseline": "025f778a42731f796d13ac59cd69c5bec937e9bc",
+        "skillspector-ci-gate": "8372b24bddaab305b5eaa6d48d6b2b70103df94a",
         "skillspector-semantic-pass": "1dfe96d0f50261833d4db468eeb9361740873b7d"
       },
       "batch_schema": 2,
@@ -40,6 +41,16 @@
           "integration_head": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
           "integration_seq": 4
         },
+        "skillspector-ci-gate": {
+          "accepted_head": "8372b24bddaab305b5eaa6d48d6b2b70103df94a",
+          "changed_files": [
+            ".github/workflows/verify-deployment.yml",
+            "README.md",
+            "scripts/skillspector_scan.py"
+          ],
+          "integration_head": "00d5d507e8b3f5caf59b016f71298c6d94c021c0",
+          "integration_seq": 5
+        },
         "skillspector-semantic-pass": {
           "accepted_head": "1dfe96d0f50261833d4db468eeb9361740873b7d",
           "changed_files": [
@@ -51,7 +62,7 @@
         }
       },
       "integration_branch": "chore/retire-tidy-perms",
-      "integration_head": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
+      "integration_head": "00d5d507e8b3f5caf59b016f71298c6d94c021c0",
       "integration_log": [
         {
           "at": "2026-11-13T18:52:08Z",
@@ -98,6 +109,15 @@
           "op_id": "d220c1ed82124561ab5b0ca008be8f6e",
           "previous_head": "28f6df96e78619eb68a7fe5ff1e463ee93df12da",
           "seq": 4
+        },
+        {
+          "at": "2026-11-13T22:14:01Z",
+          "head": "00d5d507e8b3f5caf59b016f71298c6d94c021c0",
+          "kind": "prepare",
+          "member": "skillspector-ci-gate",
+          "op_id": "f02444b5d02d46ca8b5a09c3aec13acc",
+          "previous_head": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
+          "seq": 5
         }
       ],
       "integration_worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms",
@@ -222,17 +242,12 @@
       "title": "Commit a SkillSpector baseline with a reason for every accepted finding"
     },
     "skillspector-ci-gate": {
-      "claim": {
-        "expires_at": "2026-11-14T22:13:58Z",
-        "generation": "32c18b2fde5841109fa7b48a11691901",
-        "renewals": 0,
-        "worker": "omp-skillspector-leader"
-      },
+      "claim": null,
       "needs": [
         "skillspector-baseline"
       ],
       "priority": "medium",
-      "status": "active",
+      "status": "open",
       "title": "Gate pull requests on a pinned static SkillSpector scan"
     },
     "skillspector-semantic-pass": {

@@ -21,6 +21,54 @@
     "https://github.com/joeharris76/skill-sync-skills/pull/118",
     "https://github.com/NVIDIA/SkillSpector"
   ],
+  "prepared": {
+    "accepted_head": "8372b24bddaab305b5eaa6d48d6b2b70103df94a",
+    "batch_id": "skillspector-remediation",
+    "changed_files": [
+      ".github/workflows/verify-deployment.yml",
+      "README.md",
+      "scripts/skillspector_scan.py"
+    ],
+    "integration_head": "00d5d507e8b3f5caf59b016f71298c6d94c021c0",
+    "integration_seq": 5,
+    "member_id": "skillspector-ci-gate",
+    "overlaps": [
+      {
+        "kind": "member",
+        "member": "import-upstream-skills",
+        "paths": [
+          "README.md"
+        ]
+      }
+    ],
+    "owner_epoch": 0,
+    "schema": "prepared_work_v2",
+    "scope_hash": "6e299333ced5dd2d9436f488ae5d5e5fb20feeb8e0e46533c7a1d78fc3bf5158",
+    "source_base": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
+    "source_revision": "8372b24bddaab305b5eaa6d48d6b2b70103df94a",
+    "source_worktree": "/Users/joe/Developer/skill-sync-skills.wt-m-cigate",
+    "verification": {
+      "clean": true,
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "review": {
+        "base": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
+        "findings": "0 Critical/Required; 4 Optional all fixed in 8372b24 (exit-1 report handling, duplicate rules key, dead count check, README scanner path)",
+        "head": "8372b24bddaab305b5eaa6d48d6b2b70103df94a",
+        "outcome": "clear",
+        "reviewer": "ReviewCiGate (independent reviewer agent)"
+      },
+      "revision": "8372b24bddaab305b5eaa6d48d6b2b70103df94a",
+      "status": "passed",
+      "suite": "catalog-unittests"
+    }
+  },
   "sessions": [
     {
       "actor": "omp-skillspector-leader",
@@ -53,6 +101,15 @@
       "generation": "32c18b2fde5841109fa7b48a11691901",
       "op": "take",
       "op_id": "1fff92f3e4cc4c9c8fee1aa00b55ec55",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T22:14:01Z",
+      "client": "omp-stdio",
+      "generation": "32c18b2fde5841109fa7b48a11691901",
+      "op": "prepare",
+      "op_id": "f02444b5d02d46ca8b5a09c3aec13acc",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
