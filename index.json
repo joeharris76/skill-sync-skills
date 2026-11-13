@@ -191,12 +191,17 @@
       "title": "Gate pull requests on a pinned static SkillSpector scan"
     },
     "skillspector-semantic-pass": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-14T22:05:11Z",
+        "generation": "bb8e7095148e4c19943108e4dd22a305",
+        "renewals": 0,
+        "worker": "omp-skillspector-leader"
+      },
       "needs": [
         "import-upstream-skills"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "active",
       "title": "Run one SkillSpector LLM semantic pass over the catalog and triage it"
     }
   },
