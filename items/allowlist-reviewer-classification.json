@@ -1,0 +1,18 @@
+{
+  "acceptance": [
+    "For each allowlist harness, evidence of whether it loads project-level settings, hooks or startup code from its working directory.",
+    "The classification table and reviewer rows in external-harnesses.md and the definition in shared-agent-execution/SKILL.md agree with that evidence, or the owner records that no change is wanted."
+  ],
+  "context": "Recorded as a follow-up from feature batch skillspector-remediation; see docs/skillspector-triage.md. shared-agent-execution deploys from its own pinned group in deployment/global/skill-sync.conf.",
+  "description": "SkillSpector's semantic pass (2026-11-13, SDI-4) noted that the claude reviewer in shared-agent-execution/references/external-harnesses.md is labelled Hard Read-Only although `--tools` restricts the model's tools, not the process, and it runs inside the reviewed worktree. The skill defines Hard Read-Only as 'a sandbox or tool allowlist', and seven harnesses (claude, pi, jcode, prime-agent, hermes, muse, codex) share the label. Open question: do project settings or hooks loaded from the reviewed worktree make allowlist reviewers effectively soft, and should they move to the Soft Read-Only workspace rules (dedicated detached worktree)?",
+  "sessions": [
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T22:04:20Z",
+      "client": "omp-stdio",
+      "op": "create",
+      "op_id": "470beb918ce34861844ace7ffec95683",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    }
+  ]
+}

@@ -112,6 +112,13 @@
     }
   },
   "items": {
+    "allowlist-reviewer-classification": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Decide whether tool-allowlist reviewers stay Hard Read-Only when run in the reviewed worktree"
+    },
     "consumers-drop-tidy-perms": {
       "claim": null,
       "needs": [],
