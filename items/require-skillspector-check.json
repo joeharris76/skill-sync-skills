@@ -2,7 +2,7 @@
   "acceptance": [
     "The owner has decided: either a ruleset or branch protection on main requires the SkillSpector job (and the existing template gate), or the decision not to is recorded here."
   ],
-  "context": "Owner action. An agent must not change repository settings without that decision.\n\n\n[owner decisions 2026-11-13, second round] Owner chose: add a ruleset on main requiring 'Template gate and wrapper cycle' and 'SkillSpector static scan', after PR #118 merges; admin bypass stays available to the owner.",
+  "context": "Owner action. An agent must not change repository settings without that decision.\n\n\n[owner decisions 2026-11-13, second round] Owner chose: add a ruleset on main requiring 'Template gate and wrapper cycle' and 'SkillSpector static scan', after PR #118 merges; admin bypass stays available to the owner.\n\n\n[closeout] Owner chose a ruleset. Created repository ruleset 27237239 'main: required checks' (active, default branch): requires 'Template gate and wrapper cycle' and 'SkillSpector static scan' from GitHub Actions (app 15368); repository admins may bypass. `gh api repos/joeharris76/skill-sync-skills/rules/branches/main` lists both checks.",
   "description": "main has no branch protection or rulesets, so the SkillSpector CI job reports a failure but cannot block a merge. Making it a required status check is a repository-settings change only the owner can authorize.",
   "sessions": [
     {
@@ -19,6 +19,14 @@
       "client": "omp-stdio",
       "op": "update",
       "op_id": "6f1da529cfcb47ce8ac0ee79cf596a7f",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T22:24:15Z",
+      "client": "omp-stdio",
+      "op": "update",
+      "op_id": "6a4e2a7503c94247a368c2e6c990216d",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
