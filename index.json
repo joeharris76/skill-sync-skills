@@ -233,7 +233,7 @@
       "claim": null,
       "needs": [],
       "priority": "medium",
-      "status": "blocked",
+      "status": "open",
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
     "require-skillspector-check": {
