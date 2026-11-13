@@ -223,15 +223,10 @@
       "title": "Select the imported skills in the global deployment and apply it"
     },
     "import-upstream-skills": {
-      "claim": {
-        "expires_at": "2026-11-14T22:18:16Z",
-        "generation": "9999cb2793e04daa9d65093b2556f5c3",
-        "renewals": 0,
-        "worker": "omp-skillspector-leader"
-      },
+      "claim": null,
       "needs": [],
       "priority": "medium",
-      "status": "active",
+      "status": "open",
       "title": "Import retro and writing-for-agents from mattpocock/skills into the catalog"
     },
     "land-skillspector-pr": {
