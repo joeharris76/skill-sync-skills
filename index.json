@@ -38,6 +38,13 @@
       "status": "open",
       "title": "Retire the tidy-perms skill from the catalog and the global loaders"
     },
+    "skill-sync-operator-as3-triage": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Triage the SkillSpector AS3 finding in the skill-sync operator skill"
+    },
     "skillspector-baseline": {
       "claim": null,
       "needs": [

@@ -1,0 +1,18 @@
+{
+  "acceptance": [
+    "The finding is baselined or reworded in the skill-sync product repository, or the owner records that no action is wanted.",
+    "The owner has decided whether the product repository gets its own scan gate."
+  ],
+  "context": "Owned by ~/Developer/skill-sync. Not part of the skillspector-remediation batch.",
+  "description": "A static SkillSpector scan flags AS3 (skill enumeration) in the skill-sync operator skill at references/operations.md, on sample diff output that shows `.claude/skills/code/SKILL.md`. Triage: false positive. The skill is owned by the skill-sync product repository, so this catalog's baseline and CI gate do not cover it, and nothing scans it today.",
+  "sessions": [
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:51:45Z",
+      "client": "omp-stdio",
+      "op": "create",
+      "op_id": "717890747ca34a4c8a8dc46a5900fe0f",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    }
+  ]
+}
