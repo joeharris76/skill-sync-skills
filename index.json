@@ -269,12 +269,17 @@
       "title": "Commit a SkillSpector baseline with a reason for every accepted finding"
     },
     "skillspector-ci-gate": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-14T22:18:41Z",
+        "generation": "78879e9a7cf84748af53e354e4db7784",
+        "renewals": 0,
+        "worker": "omp-skillspector-leader"
+      },
       "needs": [
         "skillspector-baseline"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "active",
       "title": "Gate pull requests on a pinned static SkillSpector scan"
     },
     "skillspector-semantic-pass": {
