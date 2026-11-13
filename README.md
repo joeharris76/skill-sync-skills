@@ -8,6 +8,28 @@ Canonical source for personal and shared workflow skills. The public
 - Edit catalog skills in `skills/`.
 - Edit the operator in `skill-sync/skills/skill-sync` with its CLI contract.
 - Treat agent and project targets as generated copies.
+- Do not edit vendored skills here; see below.
+
+## Vendored skills
+
+`skills/retro` and `skills/writing-for-agents` are copied unmodified from
+[mattpocock/skills](https://github.com/mattpocock/skills) at commit
+`5863806dd4e15c63174bee4e7515a4256792ecfa`:
+
+| Catalog path | Upstream path | Upstream tree |
+|---|---|---|
+| `skills/retro` | `skills/engineering/retro` | `335c1862a43da9d629abafdb79ca0c0de118be08` |
+| `skills/writing-for-agents` | `skills/productivity/writing-for-agents` | `ad2925850efb8973a72d2e666f7a975f9a2d4a9b` |
+
+Both are © 2026 Matt Pocock under the MIT licence in each directory's
+`LICENSE`, not this repository's licence. The catalog adds only `skill.yaml`
+and `LICENSE`; `retro` depends on `writing-for-agents`.
+
+To refresh one, replace the upstream files with the copy from a newer upstream
+commit, keep `skill.yaml` and `LICENSE`, and update the commit and tree above
+(`git rev-parse <commit>:<upstream path>` in an upstream checkout). Then
+rerun the tests and scan the refreshed skill before committing. Report a
+problem in a vendored skill upstream instead of patching it here.
 
 ## Global loader folders
 

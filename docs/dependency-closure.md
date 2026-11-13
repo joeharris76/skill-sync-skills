@@ -39,6 +39,7 @@ receipt while stale copies linger.
 | code | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `code`, `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
 | docs | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `docs`, `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
 | memex-search | (none) | (none) | `memex-search` |
+| retro | `writing-for-agents` | `writing-for-agents` | `retro`, `writing-for-agents` |
 | session-takeover | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `session-takeover`, `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
 | shared-agent-execution | (none) | (none) | `shared-agent-execution` |
 | shared-change-framework | (none) | (none) | `shared-change-framework` |
@@ -47,6 +48,7 @@ receipt while stale copies linger.
 | substack | `shared-change-framework` | `shared-change-framework` | `shared-change-framework`, `substack` |
 | test | `shared-change-framework`, `shared-investigation-framework` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `test` |
 | todo | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `todo` |
+| writing-for-agents | (none) | (none) | `writing-for-agents` |
 
 ## Staying current
 
