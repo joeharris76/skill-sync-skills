@@ -152,6 +152,57 @@ hook and `.github/workflows/verify-deployment.yml` run the same suite:
 python3 -m unittest discover -s tests -v
 ```
 
+## Security scan
+
+Every pull request to `main` scans each tracked skill in `skills/` with
+[NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) and fails on any
+finding that is not in a baseline. The scan is static (`--no-llm`): it needs
+no credentials and calls no model.
+
+The gate covers only `skills/` in this repository. It does not scan the
+`skill-sync` operator skill (owned by the product repository) or
+loader-owned folders such as `synced/` and `.system/`.
+
+Run the same scan locally:
+
+```bash
+# One-time install of the pinned scanner, using its own lockfile.
+PIN=$(python3 scripts/skillspector_scan.py --print-commit)
+SRC=~/.cache/skillspector-src
+git init --quiet "$SRC"
+git -C "$SRC" fetch --quiet --depth 1 https://github.com/NVIDIA/SkillSpector.git "$PIN"
+git -C "$SRC" checkout --quiet --detach FETCH_HEAD
+uv sync --frozen --no-dev --project "$SRC"
+
+# Scan all tracked skills, or name some: ... skillspector_scan.py code todo
+SKILLSPECTOR_BIN="$SRC/.venv/bin/skillspector" python3 scripts/skillspector_scan.py
+```
+
+### Baselines
+
+Accepted findings are suppressed per skill in
+`.skillspector/baselines/<skill>.yaml`; `docs/skillspector-triage.md` explains
+each one. An entry is a fingerprint of the finding and the file it is in, so it
+stops matching when that file changes. The scan then fails with the old
+finding and a stale-entry error. To fix it:
+
+1. Confirm the finding is still the accepted one. Triage anything new in
+   `docs/skillspector-triage.md` first, and never baseline a real finding.
+2. Regenerate that skill's baseline (with `SRC` from the install above):
+   `"$SRC/.venv/bin/skillspector" baseline skills/<skill> --no-llm -o .skillspector/baselines/<skill>.yaml`
+3. Replace every auto-generated `reason` with the reason from the triage
+   record. The scan rejects the default reason and any `rules` entry.
+4. Delete the baseline file if the skill has no findings left.
+
+### Bumping the scanner
+
+Change `PINNED_COMMIT` and `PINNED_VERSION` together in
+`scripts/skillspector_scan.py`, reinstall, and rerun the scan. Fingerprints
+include the scanner version, so regenerate every baseline and rewrite its
+reasons as above, and triage any finding the new version adds. Rerun the
+semantic pass described in `docs/skillspector-triage.md` after a scanner bump
+or a vendored-skill refresh.
+
 ## Retired TypeScript-transport files (historical)
 
 The rsync wrapper replaced the TypeScript CLI. The files below were removed
