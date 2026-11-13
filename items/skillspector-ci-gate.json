@@ -8,6 +8,13 @@
     "No `continue-on-error`, no `|| true`, no path filter on the job.",
     "README.md documents: the local command and install; how to bump the pin; that a baseline must be regenerated, and its reasons rewritten from docs/skillspector-triage.md, after an edit to a flagged file or a pin bump; and that the gate covers only skills/ in this repository. The documented local command, run verbatim against the PR head, exits 0."
   ],
+  "batch": {
+    "batch_id": "skillspector-remediation",
+    "implementation_dependencies": [
+      "skillspector-baseline"
+    ],
+    "member_id": "skillspector-ci-gate"
+  },
   "context": "Feature batch `skillspector-remediation` (prepared delivery, owner-selected). Integration branch chore/retire-tidy-perms, worktree /Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms, start head ad38b45 (the tidy-perms removal), one final PR #118, base refs/remotes/origin/main. Edges: semantic-pass -> import; baseline -> semantic-pass; ci-gate -> baseline. The leader is the only tracker writer; a member works in its own worktree branched from a recorded integration head, never the main checkout, and ends at a committed, checked change. Members finish only after PR #118 has actually merged. Owner decisions (2026-11-13): ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0, commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Scan reports and other scratch output go outside the repository (/tmp). Frozen scope: .github/workflows/verify-deployment.yml, scripts/skillspector_scan.py, README.md. A change outside it is deferred, not made. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) If the scan needs network at run time and fails offline, keep the gate and record the dependency in README. (2) If install plus scan exceeds about 5 minutes in CI, report it; do not drop skills from the scan. (3) If results differ between local macOS and CI Linux so that baselines do not match, stop and report rather than loosen the check. (4) Making the job a required check on main is an owner action (repository settings): record it as a follow-up item and name it in the PR body. Out of scope: SARIF upload, semantic checks in CI, scanning skills owned by other repositories or loader-owned folders.",
   "description": "Nothing stops a new skill or edit from introducing a hidden instruction, an exfiltration pattern or an overbroad permission. Owner decision: gate pull requests on a static SkillSpector scan pinned to commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. One script (scripts/skillspector_scan.py, standard library only) scans each tracked skill separately with `--no-llm` and its baseline, and is the single entry point for CI and for local use. Pinning the scanner commit alone does not pin its dependencies, and fingerprints depend on scanner output, so the install uses the scanner's own uv.lock. main has no branch protection, so the job reports but cannot block a merge until the owner makes it a required check.",
   "links": [
@@ -29,6 +36,14 @@
       "client": "omp-stdio",
       "op": "update",
       "op_id": "825c847fa6dd4f0d8d990f07df0bec22",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:52:18Z",
+      "client": "omp-stdio",
+      "op": "update",
+      "op_id": "855b2b1ad6c94607b59d1c2a9e2d96a5",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
