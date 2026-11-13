@@ -10,7 +10,20 @@
       "batch_schema": 2,
       "delivery_boundary": "One squash-merged pull request (#118) into main of joeharris76/skill-sync-skills",
       "develop_ref": "refs/remotes/origin/main",
-      "final_pr_history": [],
+      "final_pr": {
+        "head": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+        "node_id": "PR_kwDOSVPH7s8AAAABO_Rmjg",
+        "number": 118,
+        "repository": "joeharris76/skill-sync-skills"
+      },
+      "final_pr_history": [
+        {
+          "at": "2026-11-13T22:15:46Z",
+          "head": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+          "op_id": "a4dfa6463c2b4118a3ab5bd1c05a84a8",
+          "previous_head": null
+        }
+      ],
       "integrated_members": {
         "import-upstream-skills": {
           "accepted_head": "6a570d940bbacd63fd9af594a95e529a3cceda3d",
