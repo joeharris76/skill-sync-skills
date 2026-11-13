@@ -1,5 +1,13 @@
 {
   "batches": {},
-  "items": {},
+  "items": {
+    "retire-tidy-perms": {
+      "claim": null,
+      "needs": [],
+      "priority": "high",
+      "status": "open",
+      "title": "Retire the tidy-perms skill from the catalog and the global loaders"
+    }
+  },
   "schema_version": 3
 }
