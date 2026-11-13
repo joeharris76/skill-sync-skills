@@ -192,12 +192,17 @@
       "title": "Triage the SkillSpector AS3 finding in the skill-sync operator skill"
     },
     "skillspector-baseline": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-14T22:08:59Z",
+        "generation": "4f384388a0c742a7bf4618d1e995f786",
+        "renewals": 0,
+        "worker": "omp-skillspector-leader"
+      },
       "needs": [
         "skillspector-semantic-pass"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "active",
       "title": "Commit a SkillSpector baseline with a reason for every accepted finding"
     },
     "skillspector-ci-gate": {
