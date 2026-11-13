@@ -14,8 +14,8 @@ to keep the baselines in step with this file.
 
 ## Static findings
 
-These are the findings accepted in `.skillspector/baselines/`. The reason
-column is the text each baseline entry carries.
+These are the findings accepted in `.skillspector/baselines/`. Each baseline
+entry's `reason` is a short form of the reason given here.
 
 | Skill | Rule | File | Flagged text | Triage | Reason |
 |---|---|---|---|---|---|
