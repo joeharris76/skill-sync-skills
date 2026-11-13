@@ -12,9 +12,7 @@
     },
     "import-upstream-skills": {
       "claim": null,
-      "needs": [
-        "retire-tidy-perms"
-      ],
+      "needs": [],
       "priority": "medium",
       "status": "open",
       "title": "Import retro and writing-for-agents from mattpocock/skills into the catalog"
