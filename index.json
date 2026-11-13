@@ -17,6 +17,15 @@
       "status": "open",
       "title": "Retire the tidy-perms skill from the catalog and the global loaders"
     },
+    "skillspector-baseline": {
+      "claim": null,
+      "needs": [
+        "skillspector-semantic-pass"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Commit a SkillSpector baseline with a reason for every accepted finding"
+    },
     "skillspector-semantic-pass": {
       "claim": null,
       "needs": [
