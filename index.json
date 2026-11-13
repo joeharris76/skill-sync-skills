@@ -230,15 +230,10 @@
       "title": "Import retro and writing-for-agents from mattpocock/skills into the catalog"
     },
     "land-skillspector-pr": {
-      "claim": {
-        "expires_at": "2026-11-14T22:19:11Z",
-        "generation": "cb6ccae7a69f4d3f96f91cde967be359",
-        "renewals": 0,
-        "worker": "omp-skillspector-leader"
-      },
+      "claim": null,
       "needs": [],
       "priority": "medium",
-      "status": "active",
+      "status": "done",
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
     "require-skillspector-check": {
