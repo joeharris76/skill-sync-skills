@@ -8,6 +8,13 @@
     "Any difference from the 6 expected findings is triaged in docs/skillspector-triage.md before it is baselined (reported to the semantic-pass record via the leader), and no finding triaged as real is suppressed.",
     "Deferral 1 on this item is promoted to its own item before finish."
   ],
+  "batch": {
+    "batch_id": "skillspector-remediation",
+    "implementation_dependencies": [
+      "skillspector-semantic-pass"
+    ],
+    "member_id": "skillspector-baseline"
+  },
   "context": "Feature batch `skillspector-remediation` (prepared delivery, owner-selected). Integration branch chore/retire-tidy-perms, worktree /Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms, start head ad38b45 (the tidy-perms removal), one final PR #118, base refs/remotes/origin/main. Edges: semantic-pass -> import; baseline -> semantic-pass; ci-gate -> baseline. The leader is the only tracker writer; a member works in its own worktree branched from a recorded integration head, never the main checkout, and ends at a committed, checked change. Members finish only after PR #118 has actually merged. Owner decisions (2026-11-13): ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0, commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Scan reports and other scratch output go outside the repository (/tmp). Frozen scope: .skillspector/baselines/*.yaml. A change outside it is deferred, not made. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) Recursive-with-baseline is refused by the scanner (confirmed 2026-11-13); use the per-skill layout. (2) A static finding absent from the first scan must be triaged before it is baselined; if it is real, stop. (3) If a later commit in the batch edits a baselined file, this member is regenerated and prepared again. Expected findings (confirm by rescan; line numbers are not durable): todo AS1 references/bootstrap.md and RA2 references/queries.md; shared-agent-execution EA2 x2 references/external-harnesses.md; code EA2 references/pr-sweep.md; shared-investigation-framework EA2 SKILL.md. Out of scope: the skill-sync AS3 finding (owned by the skill-sync product repository).",
   "deferrals": [
     {
@@ -56,6 +63,14 @@
       "client": "omp-stdio",
       "op": "promote",
       "op_id": "22d6e26622a34c2a99903cc7f31a8226",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:52:15Z",
+      "client": "omp-stdio",
+      "op": "update",
+      "op_id": "a01439ca1bf749edab240240f2ccf1e2",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
