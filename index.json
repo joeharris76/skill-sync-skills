@@ -10,6 +10,19 @@
       "status": "open",
       "title": "Import retro and writing-for-agents from mattpocock/skills into the catalog"
     },
+    "land-skillspector-pr": {
+      "claim": null,
+      "needs": [
+        "retire-tidy-perms",
+        "import-upstream-skills",
+        "skillspector-semantic-pass",
+        "skillspector-baseline",
+        "skillspector-ci-gate"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Land the remediation as one PR (#118) once checks pass"
+    },
     "retire-tidy-perms": {
       "claim": null,
       "needs": [],

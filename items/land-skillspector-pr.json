@@ -1,0 +1,24 @@
+{
+  "acceptance": [
+    "PR #118 title and body describe every change in the batch and list the deferred follow-ups (consumer configs that still list tidy-perms; the skill-sync AS3 finding owned by the product repository).",
+    "A review of the full PR diff under shared-review-protocol was run; every Critical and Required finding is fixed and re-verified.",
+    "Every required check on the final head is green, including the new SkillSpector job, at the exact SHA that is merged.",
+    "The PR is squash-merged into main; `gh pr view 118 --json state,mergeCommit` shows MERGED and the merge commit is on origin/main.",
+    "After merge, each earlier item's acceptance is re-checked against merged main before that item is finished."
+  ],
+  "context": "Batch: skillspector-remediation (serial mode; this repository names no prepared-delivery policy). All catalog work lands on branch chore/retire-tidy-perms, worktree ~/Developer/skill-sync-skills.wt-retire-tidy-perms, in the one final PR #118. Owner decisions (2026-11-13) are recorded in ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0 at commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Close each item only after PR #118 has actually merged, unless the item says otherwise. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) Merge only when checks are green on the head being merged; a red or pending check is a wait, never a bypass (no admin override, no skipping checks). (2) If main moved, merge main into the branch and re-run checks; no force-push. (3) If branch protection requires a human approval the agent cannot give, stop at ready-for-review and report. Guardrail: the squash commit message follows Conventional Commits and carries no session process (item IDs, batch labels).",
+  "description": "Owner decision: one final PR, marked ready and squash-merged by the agent once checks pass. PR #118 currently carries only the tidy-perms removal and still has that title. Before merge it must describe the whole change: retirement, imported skills with provenance, semantic triage, baseline, CI gate, and the deferred follow-ups.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/pull/118"
+  ],
+  "sessions": [
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:39:14Z",
+      "client": "omp-stdio",
+      "op": "create",
+      "op_id": "72fdff04e2d74503be2f40925047991f",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    }
+  ]
+}
