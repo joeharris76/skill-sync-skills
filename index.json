@@ -246,10 +246,15 @@
       "title": "Decide whether the SkillSpector job is a required check on main"
     },
     "retire-tidy-perms": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-14T22:19:02Z",
+        "generation": "0874e1f008e340c48a1cdcf1beec0b9f",
+        "renewals": 0,
+        "worker": "omp-skillspector-leader"
+      },
       "needs": [],
       "priority": "high",
-      "status": "open",
+      "status": "active",
       "title": "Retire the tidy-perms skill from the catalog and the global loaders"
     },
     "skill-sync-operator-as3-triage": {
