@@ -31,6 +31,15 @@
       "status": "blocked",
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
+    "require-skillspector-check": {
+      "claim": null,
+      "needs": [
+        "land-skillspector-pr"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Decide whether the SkillSpector job is a required check on main"
+    },
     "retire-tidy-perms": {
       "claim": null,
       "needs": [],

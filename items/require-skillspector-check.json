@@ -1,0 +1,17 @@
+{
+  "acceptance": [
+    "The owner has decided: either a ruleset or branch protection on main requires the SkillSpector job (and the existing template gate), or the decision not to is recorded here."
+  ],
+  "context": "Owner action. An agent must not change repository settings without that decision.",
+  "description": "main has no branch protection or rulesets, so the SkillSpector CI job reports a failure but cannot block a merge. Making it a required status check is a repository-settings change only the owner can authorize.",
+  "sessions": [
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:51:47Z",
+      "client": "omp-stdio",
+      "op": "create",
+      "op_id": "9e5e473f09264ac5aff3e12f922f96a8",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    }
+  ]
+}
