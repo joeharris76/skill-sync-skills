@@ -8,6 +8,11 @@
     "README.md says both directories are vendored from mattpocock/skills at the recorded commit, are (c) Matt Pocock under MIT rather than this repository's licence, and gives the refresh steps including a rescan.",
     "A static SkillSpector scan of each imported skill reports zero findings."
   ],
+  "batch": {
+    "batch_id": "skillspector-remediation",
+    "implementation_dependencies": [],
+    "member_id": "import-upstream-skills"
+  },
   "context": "Feature batch `skillspector-remediation` (prepared delivery, owner-selected). Integration branch chore/retire-tidy-perms, worktree /Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms, start head ad38b45 (the tidy-perms removal), one final PR #118, base refs/remotes/origin/main. Edges: semantic-pass -> import; baseline -> semantic-pass; ci-gate -> baseline. The leader is the only tracker writer; a member works in its own worktree branched from a recorded integration head, never the main checkout, and ends at a committed, checked change. Members finish only after PR #118 has actually merged. Owner decisions (2026-11-13): ~/.agents/handoffs/skill-sync-skills-skillspector-remediation-20261113.md. Scanner: NVIDIA SkillSpector v2.12.0, commit 9dc82fe473329b2b742aa5097dcfe7ae55f51b01. Scan reports and other scratch output go outside the repository (/tmp). Frozen scope: skills/retro/*, skills/writing-for-agents/*, docs/dependency-closure.md, README.md. A change outside it is deferred, not made. Guardrails: never `git add -A`; stage explicit paths. Commit as the human author in ~/.gitconfig, no agent co-author trailer. No push to main and no history rewrite. Do not reword skill prose to dodge a keyword rule. Do not touch files outside this item's scope; report adjacent issues instead. Run `python3 -m unittest discover -s tests` before each commit; a failure blocks the commit. Decision gates: (1) If the installed copies differ from upstream at the recorded commit, stop and report: a local edit would otherwise be lost at deploy. (2) If the upstream licence is not MIT, stop and block. (3) If the upstream bytes fail the test suite, stop rather than edit them. (4) If the static scan reports a finding in an imported skill, stop and report before baselining third-party text. Out of scope: selecting the skills in deployment/global/skill-sync.conf (the template can only pin a commit that already exists; see deploy-imported-skills).",
   "description": "retro and writing-for-agents exist only in ~/.claude/skills, installed on 2026-11-11 with `npx skills add mattpocock/skills`. They are outside this catalog and the skill-sync manifest, so Codex and other loaders do not get them and nothing pins their content. Owner decision: import both into skills/. Upstream is github.com/mattpocock/skills (MIT, Copyright (c) 2026 Matt Pocock), paths skills/engineering/retro and skills/productivity/writing-for-agents, at commit 5863806dd4e15c63174bee4e7515a4256792ecfa. The upstream bytes are imported unmodified; the catalog adds only skill.yaml and LICENSE per skill. skill-sync copies whole skill directories to the loaders, so the MIT notice must sit inside each skill directory. retro's first step invokes writing-for-agents, so retro depends on it. The removal of tidy-perms is already in the batch start head; this item does not wait on it.",
   "links": [
@@ -29,6 +34,14 @@
       "client": "omp-stdio",
       "op": "update",
       "op_id": "45c3fccb7a074d3c8bd8cbe92ecd64f9",
+      "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
+    },
+    {
+      "actor": "omp-skillspector-leader",
+      "at": "2026-11-13T18:52:10Z",
+      "client": "omp-stdio",
+      "op": "update",
+      "op_id": "7d1319be7cc54c4c8b9db9db2d1baed0",
       "session_id": "4e93e75e8bb54ccbb8540e20904e6624"
     }
   ]
