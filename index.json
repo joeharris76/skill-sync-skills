@@ -62,7 +62,7 @@
         }
       },
       "integration_branch": "chore/retire-tidy-perms",
-      "integration_head": "00d5d507e8b3f5caf59b016f71298c6d94c021c0",
+      "integration_head": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
       "integration_log": [
         {
           "at": "2026-11-13T18:52:08Z",
@@ -118,6 +118,20 @@
           "op_id": "f02444b5d02d46ca8b5a09c3aec13acc",
           "previous_head": "3df3292d1056dc7ad2bc19cbf70110dbebb3dfd3",
           "seq": 5
+        },
+        {
+          "at": "2026-11-13T22:14:18Z",
+          "changed_files": [
+            "docs/skillspector-triage.md"
+          ],
+          "head": "35cbc08f4709002f96a0f8586f8bd930d9d67ef5",
+          "kind": "fix",
+          "op_id": "12cd477571e14e2a9a4afea8a7bf5abd",
+          "previous_head": "00d5d507e8b3f5caf59b016f71298c6d94c021c0",
+          "requires_acceptance": [
+            "skillspector-semantic-pass"
+          ],
+          "seq": 6
         }
       ],
       "integration_worktree": "/Users/joe/Developer/skill-sync-skills.wt-retire-tidy-perms",
