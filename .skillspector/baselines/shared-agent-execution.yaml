@@ -4,11 +4,11 @@ version: 2
 scanner_version: 2.12.0
 rules: []
 fingerprints:
-- hash: sha256:f94bad1a56ea388dd93b50a4bd748659f1649983470fc97db76b8c4b4f728ebc
+- hash: sha256:f23bbaf300576e65411106311eae424406cd4617c4e876f64498f490b9bb3594
   rule_id: EA2
   file: references/external-harnesses.md
-  reason: "False positive (match on auto-approve): the sentence limits confirmation automation to an authorized, dedicated worktree."
-- hash: sha256:41abed4017d040c6381f3d0b1cfe91de8a54a33d994ddd4921243148025ef4a2
+  reason: "False positive (one of two matches, auto-approve and --auto-approve, on one sentence): the sentence limits confirmation automation to an authorized, dedicated worktree."
+- hash: sha256:09279141376ea9a13212116589c3666fa62840f8cf9fca4340104f67c707c69a
   rule_id: EA2
   file: references/external-harnesses.md
-  reason: "False positive (match on --auto-approve): the sentence limits confirmation automation to an authorized, dedicated worktree."
+  reason: "False positive (the other of two matches, auto-approve and --auto-approve, on one sentence): the sentence limits confirmation automation to an authorized, dedicated worktree."
