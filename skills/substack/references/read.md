@@ -1,4 +1,4 @@
-# Read-Only Substack Actions
+# Status and Inspection Actions
 
 ## `auth`
 
@@ -24,6 +24,5 @@ CLI fallback: `make tools-run CMD='pending'`.
 ## `fetch`
 
 Use `mcp__letterops__fetch` to refresh remote state and local hashes without
-pulling content. Prefer it after `publish` or `schedule` and commit state
-changes through the commit framework. CLI fallback:
+pulling content. CLI fallback:
 `make tools-run CMD='status --remote'`.

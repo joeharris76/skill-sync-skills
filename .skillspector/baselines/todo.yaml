@@ -4,11 +4,7 @@ version: 2
 scanner_version: 2.12.0
 rules: []
 fingerprints:
-- hash: sha256:bb97a1a81d9e078c531947130e8477316e6ae28babf0c59f94ef86d5ee5446dd
+- hash: sha256:ffff8b90608cd8e5a7ca5198684fa121005f6e08d99e2267887c20bae467f66b
   rule_id: AS1
   file: references/bootstrap.md
   reason: "Declared purpose: documents where a human registers the tracker MCP server for Codex; the skill never reads the file."
-- hash: sha256:967c7767e9504d856aa3c3f79ebfa7d604dedd95b5838a87dcb487b066ab49ce
-  rule_id: RA2
-  file: references/queries.md
-  reason: "False positive: describes the tracker's not_before field, not a cron job, startup script or other persistence."

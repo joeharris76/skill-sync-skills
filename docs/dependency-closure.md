@@ -43,8 +43,8 @@ receipt while stale copies linger.
 | session-takeover | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `session-takeover`, `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
 | shared-agent-execution | (none) | (none) | `shared-agent-execution` |
 | shared-change-framework | (none) | (none) | `shared-change-framework` |
-| shared-investigation-framework | `shared-review-protocol` | `shared-agent-execution`, `shared-review-protocol` | `shared-agent-execution`, `shared-investigation-framework`, `shared-review-protocol` |
-| shared-review-protocol | `shared-agent-execution` | `shared-agent-execution` | `shared-agent-execution`, `shared-review-protocol` |
+| shared-investigation-framework | `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` |
+| shared-review-protocol | `shared-agent-execution`, `shared-change-framework` | `shared-agent-execution`, `shared-change-framework` | `shared-agent-execution`, `shared-change-framework`, `shared-review-protocol` |
 | substack | `shared-change-framework` | `shared-change-framework` | `shared-change-framework`, `substack` |
 | test | `shared-change-framework`, `shared-investigation-framework` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `test` |
 | todo | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `todo` |
