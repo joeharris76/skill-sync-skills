@@ -1,7 +1,7 @@
 ---
 name: todo
 description: Use when the user asks to "ideate on an idea", "refine an idea", "brainstorm", "write a spec", "create a specification", "create a TODO", "show TODO items", "manage TODOs", "prioritize TODOs", "top N most important todos", "rank the backlog", "what should we work on", "what should I work on", "implement a TODO", "implement a batch of TODOs", "complete a TODO", "finish an item", "release my claim", "why did finish fail", "cleanup TODOs", "review TODO quality", "claim a TODO", "what's ready" / "ready queue", "block"/"unblock a TODO", "create TODOs from a spec", "create a batch handoff", or "close out a reviewed batch". Covers the lifecycle from idea to specification, implementation, and completion.
-version: 4.1.0
+version: 4.2.0
 tools: Bash, Read, Edit, Write, Task
 ---
 
@@ -25,12 +25,20 @@ that name. Requires tractable 1.0.0 or later.
   supply no explicit actor, pins your worker identity.
 - **Confirm the bound store before the first write.** The
   instructions start with a "Bound store" section naming the state remote and
-  branch. A server bound to another project's tracker answers `expect_store`
-  with a `gate`-kind `E_STATE`. On that refusal, stop and write nothing; tell
-  the operator to restart `tractable-mcp` with the project's `--config` or from
-  the project directory. `expect_store` matches whole repository path segments
-  of the remote, so pass the full `owner/repo`; a bare repository name is also
-  accepted, a fragment of a name is not.
+  branch, and a server bound to another project's tracker answers
+  `expect_store` with a `gate`-kind `E_STATE`. On that refusal, stop and write
+  nothing; tell the operator to restart `tractable-mcp` with the project's
+  `--config` or from the project directory. Since tractable 1.1.1 the
+  server compares whole trailing repository path segments of the remote,
+  case-insensitively, and accepts `owner/repo`, a bare repository name or a
+  full URL (with or without `.git`). Keep passing `owner/repo`.
+- **A running server keeps the code it started with.** After
+  `get_instructions`, compare the server's `tractable_batch.tool_version`
+  (experimental capability, or `serverInfo.version`) with the project's pinned
+  runtime; in a vendoring project that is the wheel version under its vendor
+  directory (for example BenchBox
+  `_project/scripts/vendor/tractable-<v>-py3-none-any.whl`). If the server is
+  older, make no tracker writes and ask the operator to restart the session.
 - **Drive the tracker through MCP tools.** Never run tracker verbs through the
   `tractable` CLI or invent a second store. Git, worktree, test, and build
   commands in the shell are ordinary repository work.
@@ -128,9 +136,10 @@ such as the end of a measurement window. It takes a future RFC 3339 time with
 returns on its own; rows and `show_item` show `waiting_until` meanwhile, and
 `take` and `finish` refuse it with `E_NOTHING_READY` — a hold set while you
 hold the claim still blocks `finish`, so `release` instead. The hold also
-applies while the task is `blocked`. `not_before=""` clears the hold; so does
-`clear_not_before=true`, for clients that drop empty strings. Use `blocked` for
-work stalled on something with no known end.
+applies while the task is `blocked`. `not_before=""` clears the hold; tractable 1.1.1+ also accepts
+`update_item(clear_not_before=true)`, for clients that drop empty-string
+arguments, and refuses it together with a non-empty `not_before`. Use
+`blocked` for work stalled on something with no known end.
 
 `list_items(ready_only=true)` returns only claimable tasks: `open`, unclaimed,
 not held by a future `not_before`, dependencies all `done`, except that an explicitly registered same-batch
