@@ -23,7 +23,6 @@ entry's `reason` is a short form of the reason given here.
 | `shared-agent-execution` | EA2 Autonomous Decision Making (two matches: "auto-approve", "--auto-approve") | `references/external-harnesses.md` | "Confirmation automation (`--approval-mode`, `--auto-approve`) is allowed only within that already-bounded write scope." | False positive | The sentence restricts the flag to an authorized, dedicated worktree; it does not grant unattended approval. |
 | `shared-investigation-framework` | EA2 Autonomous Decision Making | `SKILL.md` | "claim a documented rule is mechanically enforced without checking the enforcement path." | False positive | The sentence forbids claiming enforcement without checking it. |
 | `todo` | AS1 Agent Config Directory Access | `references/bootstrap.md` | "`~/.codex/config.toml`" | Declared purpose | Documents where a human registers the tracker's MCP server for Codex; the skill never reads the file. |
-| `todo` | RA2 Session Persistence | `references/queries.md` | "create a task that waits until a set time." | False positive | Describes the tracker's `not_before` field, not a cron job, startup script or other persistence mechanism. |
 
 The retired `tidy-perms` skill accounted for four further AS1 findings; it was
 removed rather than baselined. The `skill-sync` operator skill (owned by the

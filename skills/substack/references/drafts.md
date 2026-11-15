@@ -16,6 +16,7 @@ if the file was not recently validated, then commit local tracking changes.
 Use `mcp__letterops__suggest_tags` with `file_path` before drafting or
 publishing.
 
-Use free audience for open-source deep dives, methodology, history, and feature
-series; use paid for cloud-platform or SF1000+ benchmarks. Confirm missing
-audience metadata before `draft`, `publish`, or `schedule`.
+letterops resolves audience from frontmatter, then `audience_rules` in the
+config, else `default_audience`. Report the resolved audience from the dry-run,
+and confirm it before `draft`, `publish`, or `schedule` when the file sets
+none.

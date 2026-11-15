@@ -75,6 +75,23 @@ from. Test feature branches through project-local targets; do not point the
 deployment config at an authoring worktree, and never record uncommitted
 bytes under a clean SHA.
 
+### Global instruction file
+
+`deployment/global/AGENTS.md` is the source of the instruction file every
+harness loads on every turn. The live copy is `~/.agents/AGENTS.md`;
+`~/.claude/CLAUDE.md` imports it and `~/.codex/AGENTS.md` links to it.
+skill-sync does not manage it. After a change merges, copy it from a checkout
+of `main` and confirm the two match:
+
+```bash
+cp deployment/global/AGENTS.md ~/.agents/AGENTS.md
+diff deployment/global/AGENTS.md ~/.agents/AGENTS.md
+```
+
+Edit the source here, never the live copy. `tests/test_cited_references.py`
+fails when this file, or any catalog skill, cites a skill file, skill name, or
+policy ID that does not exist.
+
 ### One-time migration from the symlink model
 
 Older machines have the three loader folders as symlinks into an immutable
@@ -145,8 +162,11 @@ skills; copy it back if you return to the managed folders later.
 are selected, targets are exactly the three relative loader paths) and runs a
 real preview/apply/check/verify cycle over those targets with the vendored
 wrapper, proving loader-owned content (`synced/`, `.system/`) survives apply
-and covering the mutation cases `verify` must reject. Standard library only. The pre-commit
-hook and `.github/workflows/verify-deployment.yml` run the same suite:
+and covering the mutation cases `verify` must reject. Standard library only.
+`tests/test_cited_references.py` checks that cited skill files, skill names,
+and policy IDs exist. `.github/workflows/verify-deployment.yml` runs the whole
+suite; the pre-commit hooks run the template test, the citation test, and the
+routing check for the files they cover:
 
 ```bash
 python3 -m unittest discover -s tests -v

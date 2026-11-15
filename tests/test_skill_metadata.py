@@ -34,7 +34,6 @@ ALLOWED_SKILL_YAML_KEYS = {
     "category",
     "targets",
     "portability_allow",
-    "standalone_only_commands",
 }
 
 ALLOWED_CONFIG_INPUT_KEYS = {"key", "type", "description"}

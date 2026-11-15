@@ -17,3 +17,16 @@ repos:
         language: system
         pass_filenames: false
         files: ^(deployment/global/skill-sync\.conf|tools/skill-sync|tests/test_skill_sync_conf\.py)$
+      - id: cited-references
+        name: cited skill files, skill names, and policy IDs exist
+        entry: python3 -m unittest tests.test_cited_references
+        language: system
+        pass_filenames: false
+        files: ^(skills/.*\.md|deployment/global/AGENTS\.md|tests/test_cited_references\.py)$
+      # Needs a local `omp`; the routing table is generated from its live config.
+      - id: routing-sync
+        name: agent-execution routing table matches the live OMP config
+        entry: python3 scripts/routing_sync.py check skills/shared-agent-execution/SKILL.md
+        language: system
+        pass_filenames: false
+        files: ^(skills/shared-agent-execution/SKILL\.md|scripts/routing_sync\.py)$
