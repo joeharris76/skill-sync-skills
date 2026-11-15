@@ -1,0 +1,35 @@
+{
+  "acceptance": [
+    "Loading: in a fresh Claude Code session in BenchBox, benchbox-site and Oxbow, /memory lists the project AGENTS.md; in omp and Codex the global file shows no SHARED/ path.",
+    "Deployment: tools/skill-sync check and verify pass against ~/.skill-sync-deployment/skill-sync.conf; scripts/routing_sync.py check reports no drift for the catalog, the global store and the BenchBox mirror; ~/.agents/AGENTS.md equals deployment/global/AGENTS.md on main.",
+    "Regression sweep: every line deleted or reworded between catalog commits e04b1a7 and the deployed pin, in every non-vendored skill, is accounted for as moved, still stated by a named owner, or intentionally dropped with a reason; any lost rule is restored. Safety and authorization rules (commit, push, merge, arming, review pinning, trust of tool output, identity) are checked first.",
+    "Independent review: a reviewer from a non-Claude model family reviews that same diff and the global instruction file, and each finding has a recorded disposition.",
+    "Behaviour: one recorded task per changed workflow runs end to end under the new text without a wrong step: a todo take/finish loop including a deferral, a todo batch landing and final verification, a code review-and-fix request, a PR backlog clearance in a repository that names its own merge command, a session takeover, and a Substack dry-run publish.",
+    "The two disputed model identifiers in shared-agent-execution/references/external-harnesses.md (claude-fable-5-1 for pi and jcode) are confirmed against the installed harnesses or corrected.",
+    "BenchBox .claude/skills is pinned to the same catalog commit as the global deployment and its instruction audit and skill-integrity check pass."
+  ],
+  "context": "Known open points when this was filed: the BenchBox skill mirror refresh was still in review; the previous global file is kept at ~/.agents/AGENTS.md.bak-20261115 for comparison or rollback; rollback of the skills is a pin change back to e04b1a7 (cb44260 for shared-agent-execution) plus skill-sync apply. Rows the cleanup left unapplied on purpose (every Unclear row and low-confidence deletion) are listed per slice in the study folder. Vendored skills (memex-search, retro, writing-for-agents) were not changed. bossmode is retired and out of scope.",
+  "description": "A cleanup of the agent instruction files and catalog skills merged and deployed on 2026-11-15 (skill-sync-skills #123, #127, #129 and the pin changes #126, #128; BenchBox #4224; benchbox-site #155; Oxbow #15; textcharts #15; the global instruction file copied from deployment/global/AGENTS.md). It was verified by tests, scans and file comparison only. No live agent session exercised the changed text, and no model outside the Claude family reviewed it. A BenchBox pre-publication review of the mirrored skills then found three real regressions the catalog checks had passed (two dropped safeguards in todo/references/batch.md, one ungated merge step in code/references/pr-backlog.md), so more may remain in the roughly 400 deleted and 650 reworded lines. This item confirms the change behaves as intended and finds anything else that was lost.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/pull/123",
+    "https://github.com/joeharris76/skill-sync-skills/pull/127",
+    "https://github.com/joeharris76/skill-sync-skills/pull/129",
+    "https://github.com/BenchBox-dev/benchbox/pull/4224",
+    "https://github.com/BenchBox-dev/benchbox-site/pull/155",
+    "https://github.com/joeharris76/Oxbow/pull/15",
+    "https://github.com/joeharris76/textcharts/pull/15",
+    "~/.tractable/finding-drafts/skill-sync-skills/2026-11-13-214445-agent-config-line-study.md",
+    "~/.tractable/finding-drafts/skill-sync-skills/2026-11-13-agent-config-line-study/review-self.md",
+    "~/.tractable/finding-drafts/skill-sync-skills/2026-11-13-agent-config-line-study/remediation-status.md"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-session:joe@joe-mac-mini.local:0422ff404254816dfbaec5a4",
+      "at": "2026-11-15T20:41:22Z",
+      "client": "omp-session",
+      "op": "create",
+      "op_id": "417bae7ba7734d54832b7e2b1f4118a7",
+      "session_id": "53db59c7ff7d4d22a98a369a54f90505"
+    }
+  ]
+}

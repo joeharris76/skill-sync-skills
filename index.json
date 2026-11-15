@@ -285,6 +285,13 @@
       "priority": "medium",
       "status": "done",
       "title": "Run one SkillSpector LLM semantic pass over the catalog and triage it"
+    },
+    "verify-instruction-cleanup-behaviour": {
+      "claim": null,
+      "needs": [],
+      "priority": "high",
+      "status": "open",
+      "title": "Confirm the November instruction and skill cleanup works in live sessions and removed no behaviour"
     }
   },
   "schema_version": 4
