@@ -1,0 +1,37 @@
+#!/bin/sh
+# pre-commit hook: refuse a commit whose author or committer is an AI agent or
+# its vendor. The global instruction file asks agents to check this themselves;
+# in testing, one model did so in a third of sessions.
+#
+# Install once, for every repository (needs Git 2.54 or later):
+#   git config --global hook.reject-agent-identity.command ~/.agents/hooks/reject-agent-identity
+#   git config --global hook.reject-agent-identity.event pre-commit
+# A config-defined hook runs as well as a repository's own hooks. It runs for
+# `git commit` only: a tool that builds commits another way (omp's commit
+# helper, for one) does not run config-defined hooks.
+#
+# When a task really does name an agent identity, allow that one commit with
+#   ALLOW_AGENT_IDENTITY=1 git commit ...
+
+[ "${ALLOW_AGENT_IDENTITY:-}" = "1" ] && exit 0
+
+names='^(claude|codex|chatgpt|openai|anthropic|copilot|github copilot|gemini|cursor|cursor agent|devin|aider|omp|opencode|jules|amp|windsurf|cline)( |$|\[)'
+emails='@(anthropic|openai|cursor|cognition|codeium|sourcegraph)\.(com|ai|sh)$|\[bot\]@users\.noreply\.github\.com$|^(claude|codex|copilot|gemini|cursoragent|devin|aider)@'
+
+for role in AUTHOR COMMITTER; do
+  ident=$(git var "GIT_${role}_IDENT" 2>/dev/null) || continue
+  name=${ident%% <*}
+  email=${ident#*<}
+  email=${email%%>*}
+  if printf '%s\n' "$name" | grep -Eiq "$names" || printf '%s\n' "$email" | grep -Eiq "$emails"; then
+    role_lc=$(printf '%s' "$role" | tr 'A-Z' 'a-z')
+    {
+      echo "reject-agent-identity: the $role_lc identity is '$name <$email>'."
+      echo "Commits must carry the repository owner's identity, not an agent's."
+      echo "Find where it is set: git config --show-origin --get-all user.name; git config --show-origin --get-all user.email"
+      echo "(also check GIT_AUTHOR_* and GIT_COMMITTER_* in the environment). Ask the user before changing it."
+    } >&2
+    exit 1
+  fi
+done
+exit 0
