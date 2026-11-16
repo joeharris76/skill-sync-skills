@@ -4,7 +4,7 @@ version: 2
 scanner_version: 2.12.0
 rules: []
 fingerprints:
-- hash: sha256:4b7e9d740f6004d2aa2b7738ac3f40a6b55ca2509ba02c9f74b82e94316d15ca
+- hash: sha256:4fccf2ca61e843a054fe7e6770a8b93a78e46c1cdcf6fe5b3c813fd4c90afd7a
   rule_id: EA2
   file: SKILL.md
   reason: "False positive: the sentence forbids claiming a rule is enforced without checking the enforcement path."
