@@ -92,6 +92,17 @@ Edit the source here, never the live copy. `tests/test_cited_references.py`
 fails when this file, or any catalog skill, cites a skill file, skill name, or
 policy ID that does not exist.
 
+`deployment/global/hooks/reject-agent-identity` is a pre-commit hook that
+refuses a commit whose author or committer is an AI agent or its vendor. It
+backs the commit-identity rule in the instruction file, which agents do not
+follow reliably. Install it once per machine; the file's header gives the two
+`git config --global` commands:
+
+```bash
+mkdir -p ~/.agents/hooks
+cp deployment/global/hooks/reject-agent-identity ~/.agents/hooks/
+```
+
 ### One-time migration from the symlink model
 
 Older machines have the three loader folders as symlinks into an immutable

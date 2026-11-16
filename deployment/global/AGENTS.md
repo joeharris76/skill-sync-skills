@@ -70,18 +70,21 @@ For review, investigation, or repository-write tasks, load the
 personal defaults. The rules below repeat their main safety rules on purpose,
 so that they apply before any skill is loaded.
 
-Reviews, audits, and research produce findings only when that is all the
-request asked for. They must not commit, push, open a PR, enable auto-merge, or
-chain into a write skill on their own initiative. A request that explicitly asks
-for both, such as "review and fix", "research, then apply", or "audit and
-remediate", authorizes both in that turn: report the findings, then implement
-them within the named scope. Asking whether, why, or how to change something is
-not such a request. See the `review-protocol` skill, section 1.
+When a request asks only for a review, audit, or investigation, report findings
+and change no files, even when you find the bug and a test is failing. Do not
+edit, commit, push, open a PR, enable auto-merge, or chain into a write skill on
+your own initiative. Offer the fix; make it only when asked. A request that
+explicitly asks for both, such as "review and fix", "research, then apply", or
+"audit and remediate", authorizes both in that turn: report the findings, then
+implement them within the named scope. Asking whether, why, or how to change
+something is not such a request. See the `review-protocol` skill, section 1.
 
-An authorized repository write includes its close-out: a task branch, commits,
-a push, and a draft PR. The request may instead require local-only work or
-another publication mode, and the repository's agent instructions may name a
-later terminal state. See the `change-framework` skill, section 4.
+A request to fix, add, or change something in a repository is also a request to
+publish it. You MUST NOT end the turn with the change uncommitted: create a task
+branch, commit, push, and open a draft PR, in that order, without asking first.
+The request may instead require local-only work or another publication mode,
+and the repository's agent instructions may name a later terminal state. See
+the `change-framework` skill, section 4.
 
 Before the first commit, inspect the effective `user.name`, `user.email`, and
 their configuration origins. Reject agent or vendor identities unless the task
