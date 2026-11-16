@@ -12,6 +12,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import concurrent.futures as cf
 import json
 import os
@@ -87,13 +88,21 @@ def global_text(spec: str) -> str | None:
     raise SystemExit(f"unknown global arm {spec!r}")
 
 
-def skills_dir(rev: str, cache: Path) -> Path:
-    """Export the catalog's skills at one revision, once."""
-    dest = cache / "skills" / rev
+def skills_dir(rev: str, cache: Path, descriptions: dict[str, str] | None = None) -> Path:
+    """Export the catalog's skills at one revision, once; optionally with reworded descriptions."""
+    descriptions = descriptions or {}
+    tag = hashlib.sha256(json.dumps(descriptions, sort_keys=True).encode()).hexdigest()[:8] if descriptions else ""
+    dest = cache / "skills" / (rev + tag)
     if not dest.exists():
-        dest.mkdir(parents=True)
+        staging = cache / "skills" / f".{rev}{tag}.{uuid.uuid4().hex[:8]}"
+        staging.mkdir(parents=True)
         archive = subprocess.run(["git", "archive", rev, "skills"], cwd=CATALOG, check=True, capture_output=True)
-        subprocess.run(["tar", "-x", "-C", str(dest)], input=archive.stdout, check=True)
+        subprocess.run(["tar", "-x", "-C", str(staging)], input=archive.stdout, check=True)
+        for skill, text in descriptions.items():
+            path = staging / "skills" / skill / "SKILL.md"
+            path.write_text(re.sub(r"^description:.*$", lambda _: f"description: {json.dumps(text)}",
+                                   path.read_text(), count=1, flags=re.M))
+        staging.rename(dest)
     return dest / "skills"
 
 
@@ -174,7 +183,7 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, model: 
     overlay.write_text(
         "contextFiles:\n  extra:\n    - GLOBAL.md\ndisabledProviders:\n"
         + "".join(f"  - {p}\n" for p in DISABLED_PROVIDERS)
-        + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache)}\n"
+        + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache, arm.get('descriptions'))}\n"
         # The user's config may fall back to another model on a provider error; a session must not.
         + "retry:\n  fallbackChains: {}\n  usageAwareFallback: false\n")
     cmd = ["sandbox-exec", "-f", str(SANDBOX_ROOT / "deny.sb"),
@@ -287,8 +296,8 @@ def main() -> None:
     prepare_sandbox_root()
     jobs = [(s, a, rep) for s in SCENARIOS if not args.scenario or s["id"] in args.scenario
             for a in s["arms"] if not args.arm or a["name"] in args.arm for rep in range(args.reps)]
-    for rev in {a["skills"] for _, a, _ in jobs}:
-        skills_dir(rev, cache)
+    for rev, descriptions in {(a["skills"], json.dumps(a.get("descriptions"))) for _, a, _ in jobs}:
+        skills_dir(rev, cache, json.loads(descriptions))
     print(f"{len(jobs)} sessions", flush=True)
     with cf.ThreadPoolExecutor(args.jobs) as pool:
         futures = {pool.submit(run_one, s, a, rep, args.out, cache, args.model): (s["id"], a["name"], rep)

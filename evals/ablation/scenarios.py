@@ -582,3 +582,64 @@ git add _project/scripts/sum_cells.py && git commit -q -m "feat: sum cells helpe
         "found_bug": '''grep -Eiq 'rows\\[1:\\]|first row|skips' "$FINAL"''',
     },
 })
+
+# --- skill descriptions --------------------------------------------------------
+# omp shows the model a short form of each description: a summary written by the
+# user's small model, or, when that is unavailable, the first sentence if it is
+# under about 100 characters, else the first 95 characters. So the first
+# sentence must carry the trigger on its own.
+DESCRIPTIONS = {
+    "shared-investigation-framework": (
+        "Use to find why something fails or behaves unexpectedly, and before editing unread code. "
+        "Also for comparing artifacts, context trust and authority handling, and validation-driven compression."),
+    "shared-review-protocol": (
+        "Use before any review, audit or investigation: it changes no files unless asked to fix. "
+        "Also covers authorization scope, defect routing, solution-fit assessment, L1/L2/L3 planning-depth "
+        "layers, local-only capture, and plan prior-decision reconciliation."),
+    "shared-change-framework": (
+        "Use before every code edit and to finish it: branch, commit, push and open a draft PR. "
+        "Covers the reuse ladder, slicing, post-edit verification, commit identity and publication. "
+        "Skip for read-only review or Q&A."),
+    "test": (
+        "Use before writing, running or fixing any test. "
+        "Also for coverage gaps, slow tests and committing test changes."),
+}
+
+
+def description_arms(global_text: str) -> list[dict]:
+    return [{"name": "descriptions-old", "global": global_text, "skills": POST},
+            {"name": "descriptions-new", "global": global_text, "skills": POST, "descriptions": DESCRIPTIONS}]
+
+
+def loaded(skill: str) -> str:
+    return f'grep -q "skill://{skill}" "$CMDS"'
+
+
+for _base, _skill, _global in (("review-only", "review-protocol", "none"), ("closeout", "change-framework", "none"),
+                               ("root-cause", "investigation-framework", "full"), ("add-tests", "test", "full")):
+    _scenario = next(s for s in SCENARIOS if s["id"] == _base)
+    SCENARIOS.append({**_scenario, "id": f"{_base}-descriptions",
+                      "unit": f"{_skill} skill description: does the agent load the skill unprompted",
+                      "reference": "descriptions-old", "arms": description_arms(_global),
+                      "checks": {"skill_loaded": loaded(_skill), **_scenario["checks"]}})
+
+# --- Analysis depth and the performance budget ----------------------------------
+# On Sonnet 5.5 the "For a full pass" list lowered how often the agent measured a
+# stated budget. Two candidate fixes, each applied to the adopted file.
+SCOPE_OLD = "For a full pass:\n"
+SCOPE_NEW = ("A full pass is for a question or a decision. A requested code change is carried out, with its\n"
+             "checks, not turned into a study. For a full pass:\n")
+TRIGGER_OLD = ("components or repositories, affects data integrity or security, has a stated\n"
+               "performance budget, or the user explicitly asks for depth.")
+TRIGGER_NEW = ("components or repositories, affects data integrity or security, or the user\n"
+               "explicitly asks for depth.")
+_adopted = CANDIDATE["edits"]
+ANALYSIS_ARMS = [
+    {"name": "adopted", "global": "full", "skills": POST, "edits": _adopted},
+    {"name": "full-pass-scoped", "global": "full", "skills": POST, "edits": _adopted + [(SCOPE_OLD, SCOPE_NEW)]},
+    {"name": "budget-not-a-trigger", "global": "full", "skills": POST, "edits": _adopted + [(TRIGGER_OLD, TRIGGER_NEW)]},
+]
+for _base in ("perf-budget", "full-pass"):
+    _scenario = next(s for s in SCENARIOS if s["id"] == _base)
+    SCENARIOS.append({**_scenario, "id": f"{_base}-analysis-wording", "reference": "adopted", "arms": ANALYSIS_ARMS,
+                      "unit": "Analysis depth: wording that stops it suppressing the performance-budget rule"})
