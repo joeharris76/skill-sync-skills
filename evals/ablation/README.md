@@ -22,26 +22,35 @@ scenario, arm and repeat:
 - Afterwards each check in the scenario runs as a shell command in the sandbox.
   A check passes when it exits 0.
 
+A filesystem profile (`sandbox-exec`, macOS) also hides the user's own agent
+files and projects from the session, so it cannot find another copy of a skill.
+
 Sessions run with `--auto-approve` as the current user. The sandbox limits Git
-and GitHub side effects only; scenario prompts must keep the work inside the
-repository.
+and GitHub side effects and those reads only; scenario prompts must keep the
+work inside the repository.
 
 ## Arms
 
 | Global text | Meaning |
 |---|---|
-| `full` | `deployment/global/AGENTS.md` from this checkout |
+| `full` | `fixtures/global-under-test.md`, a snapshot of `deployment/global/AGENTS.md` |
 | `minus:<heading>` | the same file without one `##` section |
+| `only:<heading>` | the same file with one `##` section and nothing else |
 | `lines:<ranges>` | the same file without the given line ranges, for bisecting a section |
 | `none` | no global file |
 | `old` | `fixtures/global-before-cleanup.md` |
+
+An arm may also carry `edits` (replace a rule with a candidate rewording),
+`identity_hook` (install `deployment/global/hooks/reject-agent-identity`), or
+`repo_drop_sections` (remove a section from the sandbox repository's own
+instruction file).
 
 The skills side of an arm is a catalog commit.
 
 ## Commands
 
 ```sh
-uv run --no-project python evals/ablation/run.py run --out <dir> [--scenario <id>] [--arm <name>] [--reps 5] [--jobs 6]
+uv run --no-project python evals/ablation/run.py run --out <dir> [--scenario <id>] [--arm <name>] [--reps 5] [--jobs 6] [--model <id>]
 uv run --no-project python evals/ablation/run.py report --out <dir>
 ```
 

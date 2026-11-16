@@ -67,7 +67,8 @@ def global_text(spec: str) -> str | None:
         return None
     if spec == "old":
         return (HERE / "fixtures" / "global-before-cleanup.md").read_text()
-    full = (CATALOG / "deployment" / "global" / "AGENTS.md").read_text()
+    # A snapshot, not the live file: line-range arms and past results stay valid when the file changes.
+    full = (HERE / "fixtures" / "global-under-test.md").read_text()
     if spec == "full":
         return full
     kind, _, arg = spec.partition(":")
@@ -125,6 +126,7 @@ def prepare_sandbox_root() -> None:
     """
     SANDBOX_ROOT.mkdir(parents=True, exist_ok=True)
     shutil.copytree(HERE / "shims", SANDBOX_ROOT / "shims", dirs_exist_ok=True)
+    shutil.copytree(CATALOG / "deployment" / "global" / "hooks", SANDBOX_ROOT / "hooks", dirs_exist_ok=True)
     home = Path.home()
     hidden = ["Developer", ".agents", ".claude", ".codex", ".gemini", ".tractable", ".skill-sync-deployment",
               "Documents", "Desktop"]
@@ -133,8 +135,7 @@ def prepare_sandbox_root() -> None:
         + "".join(f'  (subpath "{home / name}")\n' for name in hidden) + ")\n")
 
 
-
-def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path) -> dict:
+def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, model: str = MODEL) -> dict:
     result_path = out / "results" / f"{scenario['id']}__{arm['name']}__{rep}.json"
     if result_path.exists():
         return json.loads(result_path.read_text())
@@ -144,14 +145,25 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path) -> dict
     (run / "gh").mkdir()
     (run / "gitconfig").write_text(
         "[user]\n\tname = Joe Harris\n\temail = joeharris76@gmail.com\n[init]\n\tdefaultBranch = main\n"
-        "[advice]\n\tdetachedHead = false\n")
+        "[advice]\n\tdetachedHead = false\n"
+        + (f'[hook "reject-agent-identity"]\n\tevent = pre-commit\n\tcommand = {SANDBOX_ROOT}/hooks/reject-agent-identity\n'
+           if arm.get("identity_hook") else ""))
     env = dict(os.environ, RUN=str(run), GIT_CONFIG_GLOBAL=str(run / "gitconfig"), GIT_CONFIG_NOSYSTEM="1",
                PATH=f"{SANDBOX_ROOT / 'shims'}:{os.environ['PATH']}", GH_SHIM_LOG=str(run / "gh.log"),
                GH_CANNED=str(run / "gh"), GH_TOKEN="sandbox", GH_CONFIG_DIR=str(run / "ghcfg"),
-               CMDS=str(run / "cmds.txt"), FINAL=str(run / "final.txt"))
-    setup = (HERE / "base_setup.sh").read_text() + "\n" + scenario.get("setup", "")
+               CMDS=str(run / "cmds.txt"), FINAL=str(run / "final.txt"), HARNESS=str(HERE), CACHE=str(cache))
+    setup = (HERE / scenario.get("base_setup", "base_setup.sh")).read_text() + "\n" + scenario.get("setup", "")
     subprocess.run(["bash", "-euo", "pipefail", "-c", setup], cwd=repo, env=env, check=True, capture_output=True)
+    for path, heading in arm.get("repo_drop_sections", []):  # ablate a repository's own instruction file
+        target = repo / path
+        target.write_text(drop_section(target.read_text(), heading))
+        git("commit", "-q", "-am", "docs: update agent guide", cwd=repo)
+        git("push", "-q", "origin", "HEAD", cwd=repo)
     text = global_text(arm["global"])
+    for old, new in arm.get("edits", []):  # a reworded rule, to test before changing the real file
+        if text is None or old not in text:
+            raise SystemExit(f"arm {arm['name']}: text to replace not found")
+        text = text.replace(old, new)
     if text is not None:
         (repo / "GLOBAL.md").write_text(text)
         with (repo / ".git" / "info" / "exclude").open("a") as fh:
@@ -164,7 +176,7 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path) -> dict
         + "".join(f"  - {p}\n" for p in DISABLED_PROVIDERS)
         + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache)}\n")
     cmd = ["sandbox-exec", "-f", str(SANDBOX_ROOT / "deny.sb"),
-           "omp", "-p", "--mode", "json", "--model", MODEL, "--config", str(overlay), "--cwd", str(repo),
+           "omp", "-p", "--mode", "json", "--model", model, "--config", str(overlay), "--cwd", str(repo),
            "--no-session", "--no-title", "--auto-approve", "--max-time", "900", "--max-cost", "3", scenario["prompt"]]
     proc = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=1200)
     (run / "out.jsonl").write_text(proc.stdout)
@@ -185,7 +197,8 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path) -> dict
         metrics[name] = float(raw) if re.fullmatch(r"-?\d+(\.\d+)?", raw) else None
     cost = sum(((ev.get("message") or {}).get("usage") or {}).get("cost", {}).get("total", 0)
                for ev in events if ev.get("type") == "message_end")
-    result = {"scenario": scenario["id"], "arm": arm["name"], "rep": rep, "run": str(run), "exit": proc.returncode,
+    result = {"scenario": scenario["id"], "arm": arm["name"], "rep": rep, "model": model, "run": str(run),
+              "exit": proc.returncode,
               "checks": checks, "metrics": metrics, "cost": round(cost, 4),
               "tool_calls": sum(ev.get("type") == "tool_execution_start" for ev in events),
               "skills_read": sorted(set(re.findall(r"skill://([\w-]+)", proc.stdout)))}
@@ -255,6 +268,7 @@ def main() -> None:
     ap.add_argument("--arm", action="append", help="limit to these arm names")
     ap.add_argument("--reps", type=int, default=5)
     ap.add_argument("--jobs", type=int, default=6)
+    ap.add_argument("--model", default=MODEL, help="use a separate --out directory per model")
     args = ap.parse_args()
     if args.action == "report":
         report(args.out)
@@ -267,7 +281,8 @@ def main() -> None:
         skills_dir(rev, cache)
     print(f"{len(jobs)} sessions", flush=True)
     with cf.ThreadPoolExecutor(args.jobs) as pool:
-        futures = {pool.submit(run_one, s, a, rep, args.out, cache): (s["id"], a["name"], rep) for s, a, rep in jobs}
+        futures = {pool.submit(run_one, s, a, rep, args.out, cache, args.model): (s["id"], a["name"], rep)
+                   for s, a, rep in jobs}
         for fut in cf.as_completed(futures):
             try:
                 r = fut.result()
