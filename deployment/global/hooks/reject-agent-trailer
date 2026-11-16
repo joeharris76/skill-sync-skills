@@ -1,0 +1,36 @@
+#!/bin/sh
+# commit-msg hook: refuse a commit message that credits an AI agent or its
+# vendor, as a Co-Authored-By trailer, a session trailer, or a "Generated with"
+# line. Companion to reject-agent-identity, which checks author and committer.
+#
+# Install once, for every repository (needs Git 2.54 or later):
+#   git config --global hook.reject-agent-trailer.command ~/.agents/hooks/reject-agent-trailer
+#   git config --global hook.reject-agent-trailer.event commit-msg
+# A config-defined hook runs as well as a repository's own hooks. It runs for
+# `git commit` only: a tool that builds commits another way does not run it.
+#
+# When a task really does ask for such a trailer, allow that one commit with
+#   ALLOW_AGENT_IDENTITY=1 git commit ...
+
+[ "${ALLOW_AGENT_IDENTITY:-}" = "1" ] && exit 0
+
+message_file=${1:-}
+[ -n "$message_file" ] && [ -f "$message_file" ] || exit 0
+
+agents='chatgpt|claude|codex|copilot|cursor|cursor agent|devin|gemini|openai|aider|jules|windsurf'
+vendors='@(anthropic|openai|cursor|cognition|codeium)\.(com|ai|sh)>'
+
+found=$(grep -v '^[ 	]*#' "$message_file" | grep -inE \
+  -e "^[ 	]*co-authored-by:.*($vendors)" \
+  -e "^[ 	]*co-authored-by:[ 	]*($agents)([ 	]+[a-z0-9.]+)*[ 	]*<" \
+  -e "^[ 	]*($agents)-session:" \
+  -e "generated with \[?(claude code|codex|cursor|copilot|gemini)" || true)
+
+[ -z "$found" ] && exit 0
+
+{
+  echo "reject-agent-trailer: the commit message credits an agent:"
+  printf '%s\n' "$found" | sed 's/^/  /'
+  echo "Remove those lines. A tool's habit of adding them is not authorization."
+} >&2
+exit 1
