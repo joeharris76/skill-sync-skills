@@ -15,3 +15,8 @@ Use `mcp__letterops__pull` for a tracked `file_path`, remote `post_id` plus
 `output_path`, or `pull_all: true`. Dry-run first. If the dry-run changes
 `_blog/published/`, stop for explicit review; never execute that pull without
 it. Use `fetch` when only state refresh is needed. Commit pull changes.
+
+To link a remote post to a local file that already exists, pull with
+`post_id`, `output_path` and `adopt_only: true`. It registers the post against
+the file without overwriting the body, so prefer it to a pull with `force`
+whenever the local text is the one to keep.
