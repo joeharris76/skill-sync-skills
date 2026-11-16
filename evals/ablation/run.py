@@ -174,13 +174,23 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, model: 
     overlay.write_text(
         "contextFiles:\n  extra:\n    - GLOBAL.md\ndisabledProviders:\n"
         + "".join(f"  - {p}\n" for p in DISABLED_PROVIDERS)
-        + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache)}\n")
+        + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache)}\n"
+        # The user's config may fall back to another model on a provider error; a session must not.
+        + "retry:\n  fallbackChains: {}\n  usageAwareFallback: false\n")
     cmd = ["sandbox-exec", "-f", str(SANDBOX_ROOT / "deny.sb"),
            "omp", "-p", "--mode", "json", "--model", model, "--config", str(overlay), "--cwd", str(repo),
            "--no-session", "--no-title", "--auto-approve", "--max-time", "900", "--max-cost", "3", scenario["prompt"]]
     proc = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=1200)
     (run / "out.jsonl").write_text(proc.stdout)
     events = [json.loads(line) for line in proc.stdout.splitlines() if line.startswith("{")]
+    if proc.returncode != 0 or not any(ev.get("type") == "agent_end" for ev in events):
+        # A provider error or rate limit is not a behaviour result; leave no result file so a rerun retries it.
+        raise RuntimeError(f"session failed (exit {proc.returncode}): {proc.stderr.strip()[-200:]}")
+    wanted = model.split("/", 1)[-1]
+    answered = {(ev.get("message") or {}).get("model") for ev in events
+                if ev.get("type") == "message_end" and (ev.get("message") or {}).get("role") == "assistant"}
+    if answered - {wanted}:
+        raise RuntimeError(f"session answered by {sorted(answered)}, not {wanted}")
     (run / "cmds.txt").write_text(bash_commands(events))
     (run / "final.txt").write_text(final_text(events))
     kept = out / "transcripts" / result_path.stem
