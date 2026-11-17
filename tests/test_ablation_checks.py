@@ -10,6 +10,7 @@ Standard library only. Needs bash, grep and git, which CI runners have.
 from __future__ import annotations
 
 import json
+import re
 import os
 import subprocess
 import sys
@@ -24,6 +25,7 @@ sys.path.insert(0, str(ABLATION))
 import run  # noqa: E402
 import scenarios  # noqa: E402
 import stats  # noqa: E402
+import scenarios2  # noqa: E402
 
 BY_ID = {s["id"]: s for s in scenarios.SCENARIOS}
 TAKE = '[write] {"path": "xd://mcp__tractable_take", "content": "{}"}'
@@ -150,7 +152,7 @@ class ArmTests(unittest.TestCase):
                 with self.subTest(scenario=scenario["id"], rule=rule):
                     self.assertIn(spec["reference"], names)
                     self.assertIn(spec["removal"], names)
-                    self.assertLessEqual(set(spec["checks"]), set(scenario["checks"]))
+                    self.assertLessEqual(set(spec["checks"]), set(scenario["checks"]) | set(scenario.get("judged", {})))
 
     def test_removing_a_section_removes_only_that_section(self):
         text = "# T\n\n## A\n\na\n\n## B\n\nb\n\n## C\n\nc\n"
@@ -164,6 +166,45 @@ class ArmTests(unittest.TestCase):
         self.assertEqual(run.drop_heading(text, "A1"), "# T\n\n## A\n\na\n\n## B\n\nb\n")
         with self.assertRaises(SystemExit):
             run.drop_heading(text, "Missing")
+
+    def test_skill_drops_name_one_heading_each_in_the_pinned_file(self):
+        """A misspelt or duplicated heading would drop nothing or the wrong section."""
+        drops = [(sc["id"], a["name"], file, heading) for sc in run.SCENARIOS for a in sc["arms"]
+                 for file, heading in a.get("skill_drops", [])]
+        self.assertTrue(drops)
+        texts = {}
+        for sid, name, file, heading in drops:
+            if file not in texts:
+                shown = subprocess.run(["git", "-C", str(run.CATALOG), "show", f"{scenarios2.PHASE2_SKILLS}:skills/{file}"],
+                                       capture_output=True, text=True)
+                if shown.returncode:
+                    self.skipTest(f"pinned skills commit unavailable: {shown.stderr.strip()}")
+                texts[file] = shown.stdout
+            with self.subTest(scenario=sid, arm=name):
+                found = re.findall(rf"^#+ {re.escape(heading)}\s*$", texts[file], flags=re.M)
+                self.assertEqual(len(found), 1)
+                self.assertNotIn(found[0], run.drop_heading(texts[file], heading))
+
+    def test_base_scenarios_keep_the_checks_hash_their_results_recorded(self):
+        """Scored results are void if a scenario's checks or decision checks change."""
+        results = Path("/Users/joe/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase2/"
+                       "core-sonnet/results")
+        if not results.is_dir():
+            self.skipTest("phase 2 core-sonnet results not present")
+        by_id = {s["id"]: s for s in run.SCENARIOS}
+        for sid in ("plan-then-proceed", "review-then-address"):
+            recorded = {json.loads(p.read_text()).get("checks_hash") for p in results.glob(f"{sid}__*.json")}
+            with self.subTest(scenario=sid):
+                self.assertEqual(recorded, {run.checks_hash(by_id[sid])})
+
+    def test_skill_section_scenarios_leave_their_base_alone(self):
+        by_id = {s["id"]: s for s in run.SCENARIOS}
+        for base in scenarios2.SKILL_SECTIONS:
+            new = by_id[f"skills-{base}"]
+            with self.subTest(base=base):
+                self.assertEqual(new["checks"], by_id[base]["checks"])
+                self.assertEqual(new["arms"][0]["name"], "full")
+                self.assertTrue(all("skill_drops" not in a for a in by_id[base]["arms"]))
 
     def test_removing_line_ranges(self):
         self.assertEqual(run.drop_lines("1\n2\n3\n4\n5\n", "2-3,5"), "1\n4\n")
@@ -200,6 +241,7 @@ class DecisionRuleTests(unittest.TestCase):
 
     def test_rule_decision_needs_every_band_within_to_delete(self):
         self.assertEqual(stats.rule_decision(["within", "within"]), "delete")
+        self.assertEqual(stats.rule_decision(["within", "within"], models=1), "within")
         self.assertEqual(stats.rule_decision(["within", "inconclusive"]), "inconclusive")
         self.assertEqual(stats.rule_decision(["within", "keep"]), "keep")
         self.assertEqual(stats.rule_decision(["harmful", "within"]), "reword")
@@ -238,9 +280,17 @@ class DecisionAggregationTests(unittest.TestCase):
     def test_a_rule_is_not_deleted_while_one_of_its_scenarios_is_unrun(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = self.folder(Path(tmp), "o", [("a", "full", 28, 30), ("a", "minus", 28, 30)])
-            self.assertEqual(self.decide(out)["rules"]["r"], "inconclusive")
+            other = self.folder(Path(tmp), "q", [("a", "full", 28, 30), ("a", "minus", 28, 30)], model="m2")
+            self.assertEqual(self.decide(out, other)["rules"]["r"], "inconclusive")
             both = self.folder(Path(tmp), "p", [("b", "full", 28, 30), ("b", "minus", 28, 30)])
-            self.assertEqual(self.decide(out, both)["rules"]["r"], "delete")
+            both2 = self.folder(Path(tmp), "p2", [("b", "full", 28, 30), ("b", "minus", 28, 30)], model="m2")
+            self.assertEqual(self.decide(out, other, both, both2)["rules"]["r"], "delete")
+
+    def test_no_rule_is_deleted_on_one_model(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = self.folder(Path(tmp), "o", [("a", "full", 28, 30), ("a", "minus", 28, 30),
+                                              ("b", "full", 28, 30), ("b", "minus", 28, 30)])
+            self.assertEqual(self.decide(out)["rules"]["r"], "within")
 
     def test_results_without_a_preregistration_do_not_count(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The handoff does not provide a command or check a new agent can run to verify the work.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

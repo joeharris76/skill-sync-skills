@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The reply claims all ten requirements are met, but R10 is unmet because feat/bulk-counts was not pushed to origin.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

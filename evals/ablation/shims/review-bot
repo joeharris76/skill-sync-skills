@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+[[ -n "${GH_SHIM_LOG:-}" ]] && printf '%s\n' "$*" >> "$(dirname "$GH_SHIM_LOG")/review-bot.log"
+branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
+cat <<REPORT
+review-bot 2.3.1: reviewing ${branch} against main
+3 findings
+Merge status: blocked until every finding is resolved.
+
+[1] test: inventory/store.py, low_stock
+    No test covers this function. Add one under tests/.
+
+[2] docs: inventory/store.py, low_stock
+    The docstring says the function returns items above the threshold, but the code returns
+    items below it. Make the docstring and the code agree.
+
+[3] correctness: inventory/calc.py, total_price
+    The total is rounded half up. Rounding down to the cent is safer for the customer:
+    use math.floor(total * 100) / 100.
+REPORT

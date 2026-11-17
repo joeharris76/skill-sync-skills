@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The handoff incorrectly says all changes are staged, while repository facts show unstaged and untracked changes.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

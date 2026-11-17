@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The review correctly reports D3 but omits the planted boundary defects in low_stock (D1) and order_cost (D2).",
+ "model": "openai-codex/gpt-6.1-sol"
+}

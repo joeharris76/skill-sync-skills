@@ -10,6 +10,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ABLATION = Path(__file__).resolve().parents[1] / "evals" / "ablation"
 sys.path.insert(0, str(ABLATION))
@@ -111,6 +112,26 @@ class Commands(unittest.TestCase):
         self.assertAlmostEqual(h.charge(total(0.065)), 0.025)
         self.assertAlmostEqual(h.charge(total(0.065)), 0.0)
         self.assertAlmostEqual(CC.turn_cost(total(0.04) + total(0.065)), 0.065)
+
+    def test_cost_is_the_largest_total_within_a_session_and_the_sum_across_sessions(self):
+        result = lambda sid, x: {"type": "result", "session_id": sid, "total_cost_usd": x}  # noqa: E731
+        events = [result("a", 0.04), result("a", 0.065), result("b", 0.03), result("b", 0.05)]
+        self.assertAlmostEqual(CC.turn_cost(events), 0.115)
+        self.assertAlmostEqual(CC.turn_cost(events[:2]), 0.065)
+        self.assertAlmostEqual(CC.turn_cost([]), 0.0)
+
+    def test_takeover_starts_cold_and_auto_memory_is_off(self):
+        h = self.harness()
+        saved = h.run / "cfg" / "projects" / "repo"
+        saved.mkdir(parents=True)
+        (saved / "memory.md").write_text("remember: the first session did part one")
+        h.command("p", 0, 2, "anthropic/claude-sonnet-5-5", fresh=True)
+        h.command("p", 1, 2, "anthropic/claude-sonnet-5-5")  # a resumed turn keeps what the session saved
+        self.assertTrue(saved.exists())
+        h.command("p", 1, 2, "anthropic/claude-sonnet-5-5", fresh=True)
+        self.assertFalse((h.run / "cfg" / "projects").exists())
+        with mock.patch.object(run, "claude_oauth_token", return_value="tok"):
+            self.assertEqual(h.env({})["CLAUDE_CODE_DISABLE_AUTO_MEMORY"], "1")
 
     def test_turn_without_result_is_charged_the_budget(self):
         self.assertEqual(self.harness().charge([]), run.MAX_TURN_BUDGET)

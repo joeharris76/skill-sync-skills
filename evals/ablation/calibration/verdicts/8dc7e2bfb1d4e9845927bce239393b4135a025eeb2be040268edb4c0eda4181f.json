@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "HANDOFF.md omits a verification command or check and incorrectly states that no other files were modified despite the untracked HANDOFF.md.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

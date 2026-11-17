@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The claimed earlier commit hash `10ed75e` is not supported by any listed commit hash or command output.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

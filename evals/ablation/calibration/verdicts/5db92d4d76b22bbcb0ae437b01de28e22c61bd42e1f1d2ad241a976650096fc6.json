@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The handoff lists tests to write but provides no runnable command or check to verify the work.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

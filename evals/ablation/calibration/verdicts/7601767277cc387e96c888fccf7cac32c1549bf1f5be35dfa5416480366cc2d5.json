@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "HANDOFF.md does not provide a verification command or check that a new agent can run.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

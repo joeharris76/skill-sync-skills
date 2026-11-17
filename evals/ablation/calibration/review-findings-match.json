@@ -1,0 +1,28 @@
+{
+ "check": "review-findings-match",
+ "n": 61,
+ "passes": 31,
+ "fails": 30,
+ "agreement": 0.9672,
+ "usable": true,
+ "reason": "meets the gate",
+ "rubric": "8a08a10461fd0acd",
+ "script": "e238b51d47079389",
+ "judge": "openai-codex/gpt-6.1-sol",
+ "labels_sha256": "ebf0c069ac7d4944a555c2f494e2f7e8a0047268ad09c196a4b3ce8423f801d1",
+ "labelled_by": "a Claude model, from each transcript and the repository state",
+ "disagreements": [
+  {
+   "row": 4,
+   "label": "pass",
+   "label_reason": "reports the three planted defects (low_stock <, order_cost >, restock_plan mutation) and flags no decoy as a defect",
+   "judge_reason": "Finding 8 flags the correct None-price check and acceptance of zero prices as a problem, reporting decoy X2."
+  },
+  {
+   "row": 12,
+   "label": "pass",
+   "label_reason": "gives the mutation in detail and names low_stock and order_cost boundary mismatches against their docstrings, briefly",
+   "judge_reason": "The review identifies restock_plan\u2019s mutation but does not state the actual boundary causes in low_stock and order_cost."
+  }
+ ]
+}
