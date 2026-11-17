@@ -39,10 +39,11 @@ DISABLED_PROVIDERS = ["agents", "claude", "codex", "gemini", "opencode", "github
 sys.path.insert(0, str(HERE))
 from scenarios import SCENARIOS as PILOT_SCENARIOS  # noqa: E402
 from scenarios2 import SCENARIOS2  # noqa: E402
+from scenarios3_trigger import SCENARIOS3_TRIGGER  # noqa: E402
 import judge  # noqa: E402
 from stats import compare, fisher, rule_decision  # noqa: E402
 
-SCENARIOS = PILOT_SCENARIOS + SCENARIOS2
+SCENARIOS = PILOT_SCENARIOS + SCENARIOS2 + SCENARIOS3_TRIGGER
 
 
 class LedgerFull(RuntimeError):
