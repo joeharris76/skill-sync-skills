@@ -290,6 +290,15 @@
       "status": "open",
       "title": "Replay real review requests"
     },
+    "eval2-repo-files": {
+      "claim": null,
+      "needs": [
+        "eval2-harness-replay"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Ablate BenchBox AGENTS.md sections in replays of real BenchBox sessions"
+    },
     "eval2-scripted-core": {
       "claim": null,
       "needs": [
