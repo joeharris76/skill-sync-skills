@@ -222,6 +222,13 @@
       "status": "done",
       "title": "Select the imported skills in the global deployment and apply it"
     },
+    "eval2-loading-map": {
+      "claim": null,
+      "needs": [],
+      "priority": "high",
+      "status": "open",
+      "title": "Map which instruction text each harness and role actually receives"
+    },
     "eval2-pilot-report-gpt-results": {
       "claim": null,
       "needs": [],
