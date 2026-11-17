@@ -275,17 +275,12 @@
       "title": "Extend the ablation harness to multi-turn runs with pinned baselines, pre-registration and a spend ledger"
     },
     "eval2-harness-replay": {
-      "claim": {
-        "expires_at": "2026-11-18T16:27:03Z",
-        "generation": "f8c8acafa1174af4a3d06adc40cb1a34",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:5243adc37b46b1197b4307b3"
-      },
+      "claim": null,
       "needs": [
         "eval2-harness-multiturn"
       ],
       "priority": "high",
-      "status": "active",
+      "status": "done",
       "title": "Build a replay runner that resumes real sessions at a chosen turn under each arm"
     },
     "eval2-loading-map": {
