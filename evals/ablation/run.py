@@ -205,10 +205,31 @@ def global_text(spec: str, fixture: str = "global-under-test.md") -> str | None:
     raise SystemExit(f"unknown global arm {spec!r}")
 
 
-def skills_dir(rev: str, cache: Path, descriptions: dict[str, str] | None = None) -> Path:
-    """Export the catalog's skills at one revision, once; optionally with reworded descriptions."""
-    descriptions = descriptions or {}
-    tag = hashlib.sha256(json.dumps(descriptions, sort_keys=True).encode()).hexdigest()[:8] if descriptions else ""
+def drop_heading(text: str, heading: str) -> str:
+    """Remove the section under a Markdown heading of any level, up to the next heading of the same or a
+    higher level."""
+    out, level, found = [], 0, False
+    for line in text.splitlines(keepends=True):
+        m = re.match(r"^(#+) (.*?)\s*$", line)
+        if m and level and len(m.group(1)) <= level:
+            level = 0
+        if m and not level and m.group(2) == heading and not found:
+            level, found = len(m.group(1)), True
+        if not level:
+            out.append(line)
+    if not found:
+        raise SystemExit(f"no heading {heading!r}")
+    return "".join(out)
+
+
+def skills_dir(rev: str, cache: Path, descriptions: dict[str, str] | None = None,
+               drops: list[list[str]] | None = None) -> Path:
+    """Export the catalog's skills at one revision, once; optionally with reworded descriptions or with
+    sections removed. ``drops`` lists [file under skills/, heading], e.g.
+    ["shared-change-framework/SKILL.md", "4. Branch, commit, and PR workflow"]."""
+    descriptions, drops = descriptions or {}, drops or []
+    changes = {"descriptions": descriptions, "drops": drops} if drops else descriptions
+    tag = hashlib.sha256(json.dumps(changes, sort_keys=True).encode()).hexdigest()[:8] if changes else ""
     dest = cache / "skills" / (rev + tag)
     if not dest.exists():
         staging = cache / "skills" / f".{rev}{tag}.{uuid.uuid4().hex[:8]}"
@@ -219,6 +240,9 @@ def skills_dir(rev: str, cache: Path, descriptions: dict[str, str] | None = None
             path = staging / "skills" / skill / "SKILL.md"
             path.write_text(re.sub(r"^description:.*$", lambda _: f"description: {json.dumps(text)}",
                                    path.read_text(), count=1, flags=re.M))
+        for file, heading in drops:
+            path = staging / "skills" / file
+            path.write_text(drop_heading(path.read_text(), heading))
         staging.rename(dest)
     return dest / "skills"
 
@@ -307,7 +331,7 @@ class Omp:
         overlay.write_text(
             "contextFiles:\n  extra:\n    - GLOBAL.md\ndisabledProviders:\n"
             + "".join(f"  - {p}\n" for p in DISABLED_PROVIDERS)
-            + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache, arm.get('descriptions'))}\n"
+            + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache, arm.get('descriptions'), arm.get('skill_drops'))}\n"
             # The user's config falls back to another model on a provider error; a session must not. An empty
             # fallbackChains map merges into the user's chains rather than replacing them, so switch fallback off.
             + "retry:\n  modelFallback: false\n  usageAwareFallback: false\n")
@@ -435,7 +459,8 @@ class ClaudeCode:
         config.mkdir()
         if text is not None:
             (config / "CLAUDE.md").write_text(text)
-        shutil.copytree(skills_dir(arm["skills"], cache, arm.get("descriptions")), self.repo / ".claude" / "skills")
+        shutil.copytree(skills_dir(arm["skills"], cache, arm.get("descriptions"), arm.get("skill_drops")),
+                        self.repo / ".claude" / "skills")
         excluded = [".claude/"]
         if (self.repo / "AGENTS.md").exists() and not (self.repo / "CLAUDE.md").exists():
             # omp reads the repository's AGENTS.md itself; Claude Code reads CLAUDE.md, so point it there.
@@ -882,8 +907,9 @@ def main() -> None:
     if args.harness == "claude-code":
         claude_oauth_token()  # a missing login fails here, not in a worker thread
     pin_baseline(out, baseline(args.model, args.smoke, args.harness))
-    for rev, descriptions in {(a["skills"], json.dumps(a.get("descriptions"))) for _, a, _ in jobs}:
-        skills_dir(rev, cache, json.loads(descriptions))
+    for rev, descriptions, drops in {(a["skills"], json.dumps(a.get("descriptions")), json.dumps(a.get("skill_drops")))
+                                     for _, a, _ in jobs}:
+        skills_dir(rev, cache, json.loads(descriptions), json.loads(drops))
     print(f"{len(jobs)} sessions", flush=True)
     with cf.ThreadPoolExecutor(args.jobs) as pool:
         futures = {pool.submit(run_one, s, a, rep, out, cache, ledger, args.model, args.smoke, args.harness):
