@@ -53,6 +53,9 @@ When subagents are available, delegate bounded read-heavy exploration or
 planning when the search space is broad or unknown and a summary is sufficient.
 Work directly when the relevant file or symbol is already known. Avoid parallel
 write delegation when coordination or conflict risk outweighs the benefit.
+When you delegate, put the rules the subagent needs into its brief: what it may
+change, whether it may commit or publish, how to verify its work, and the
+commit identity rule. Subagents do not receive this file.
 
 ## Python Tooling
 
