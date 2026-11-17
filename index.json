@@ -432,6 +432,16 @@
       "status": "open",
       "title": "Map the unread todo references into the phase 3 section map"
     },
+    "p3-report": {
+      "claim": null,
+      "needs": [
+        "p3-apply",
+        "p3-trigger-eval"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Report phase 3 results"
+    },
     "p3-scored-runs": {
       "claim": null,
       "needs": [
