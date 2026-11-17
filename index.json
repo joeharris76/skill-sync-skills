@@ -423,6 +423,16 @@
       "status": "open",
       "title": "Map the unread todo references into the phase 3 section map"
     },
+    "p3-scored-runs": {
+      "claim": null,
+      "needs": [
+        "p3-dial-pilot",
+        "p3-sol-capacity"
+      ],
+      "priority": "medium-high",
+      "status": "open",
+      "title": "Run the three-arm families on every counting model"
+    },
     "p3-sol-capacity": {
       "claim": null,
       "needs": [],
