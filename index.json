@@ -440,6 +440,15 @@
       "status": "open",
       "title": "Measure GPT Sol sessions per usage window and recheck counting models"
     },
+    "p3-splits": {
+      "claim": null,
+      "needs": [
+        "p3-scored-runs"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Split families whose candidate group matters into single sections"
+    },
     "require-skillspector-check": {
       "claim": null,
       "needs": [
