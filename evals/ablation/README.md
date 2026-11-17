@@ -147,6 +147,15 @@ each text must occur exactly once in the exported file, else the run stops
 before spending and names the arm and file. Both reach every place the skills
 directory is built, the omp, Claude Code and replay harnesses alike.
 
+A scenario may set `checks_follow_work: true` when its checks read the working
+tree. An agent sometimes commits on a branch and then switches back to where it
+started; with the flag, if the repository is back on `$BASE` with a clean tree,
+the harness checks out the newest commit that `$BASE` does not contain
+(branches, remote branches and tags; stashes excluded) before the checks run,
+and records it as `followed_commit`. Checks listed in `checks_at_rest` run
+first, on the repository as the agent left it, for checks about where the
+agent left it. Both fields count in the checks hash only when set.
+
 The skills side of an arm is a catalog commit. An arm's `fixture` names the
 snapshot that `full` stands for: the pilot used `global-under-test.md`; the
 deeper phase uses `global-phase2.md`, the global file as deployed when it began
