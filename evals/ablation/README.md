@@ -140,6 +140,13 @@ An arm may also carry `edits` (replace a rule with a candidate rewording),
 `repo_drop_sections` (remove a section from the sandbox repository's own
 instruction file).
 
+Skill text can be ablated in two ways. `skill_drops` lists `[file under skills/,
+heading]` pairs and removes that section. `skill_cuts` lists `[file under skills/,
+exact text]` pairs and removes that span; it is applied after `skill_drops`, and
+each text must occur exactly once in the exported file, else the run stops
+before spending and names the arm and file. Both reach every place the skills
+directory is built, the omp, Claude Code and replay harnesses alike.
+
 The skills side of an arm is a catalog commit. An arm's `fixture` names the
 snapshot that `full` stands for: the pilot used `global-under-test.md`; the
 deeper phase uses `global-phase2.md`, the global file as deployed when it began
@@ -326,12 +333,17 @@ agent's Bash tool, to read `~/.claude.json` and to run
 ## Commands
 
 ```sh
-uv run --no-project python evals/ablation/run.py run --out <dir> [--scenario <id>] [--arm <name>] [--reps 30] [--jobs 6] [--model <id>] [--smoke] [--ledger <file>] [--harness omp|claude-code]
+uv run --no-project python evals/ablation/run.py run --out <dir> [--scenario <id>] [--arm <name>] [--reps 30] [--jobs 6] [--model <id>] [--smoke] [--seed <n>] [--ceiling <usd>] [--ledger <file>] [--harness omp|claude-code]
 uv run --no-project python evals/ablation/run.py report --out <dir> [--out <dir> ...]
 ```
 
 Results are one JSON file per session under `<dir>/results/`; a finished
-session is not run again. The report prints pass counts per check and arm, and
+session is not run again. The scheduler shuffles the (scenario, arm, rep) jobs
+so drift and usage cutoffs hit all arms alike. `--seed` fixes the shuffle; by
+default it is derived from the time and printed. Every seed used is appended to
+`<dir>/seeds.json`. Each result records `skills_read` (skills loaded) and
+`references_read` (files named in tool-call arguments under `skills/<name>/references/`, as
+`<name>/references/<file>`). The report prints pass counts per check and arm, and
 a two-sided Fisher exact p-value against the scenario's reference arm when it
 is below 0.1.
 
@@ -349,7 +361,7 @@ is below 0.1.
 - **Spend ledger.** `ledger.json` next to `--out` (or `--ledger`) sums the cost
   of every turn, failed and timed-out turns included, across concurrent runs.
   Before each turn the runner refuses Claude-provider work once the total
-  reaches 800 USD, so concurrent turns can overshoot by at most their own
+  reaches the ceiling (800 USD, or `--ceiling`), so concurrent turns can overshoot by at most their own
   cost. Other providers are counted but not capped.
 - **Model.** A session answered by any model other than `--model` is
   discarded, as is a failed one.
@@ -392,3 +404,23 @@ detects 75% against 25% with power about 0.9 for one check, less across
 several. A scenario where every arm passes says the text was not needed for
 that task with that model; it does not say the text is never needed. A
 scenario only tests a rule if the task tempts the failure the rule prevents.
+
+## Phase 3 bands
+
+`stats.phase3_tests` computes raw p-values per check from stratified tables (one
+`(passes, n)` per variant, arms in the same order); `stats.assign_bands` takes
+every comparison at once (family x check x model), applies one Holm correction
+(alpha 0.05) over all of their tests, and assigns final bands.
+`phase3_band(full, minus_skill, minus_candidates, margin)` is the two combined
+for one family on one model; it corrects only over that call, so use
+`assign_bands` for the decision. The tests are a Mantel-Haenszel weighted risk
+difference with a normal approximation (Wald-type, in the CMH family), not an
+exact test: an exact conditional test fixes an odds ratio and cannot test a
+margin on the risk-difference scale. Bands are exclusive, checked in this order:
+
+- `insensitive`: minus-skill does not show a drop of at least the margin
+  against full; the check says nothing about the candidates.
+- `keep`: sensitive, and minus-candidates drops at least the margin.
+- `harmful`: sensitive, and minus-candidates rises at least the margin.
+- `equivalent`: sensitive, and TOST puts minus-candidates within ±margin of full.
+- `inconclusive`: sensitive, and none of the above.

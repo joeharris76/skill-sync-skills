@@ -367,7 +367,7 @@ def resolve_commit(cache: Path, short: str, not_after: datetime) -> str:
         full = lookup()
     if full is None:
         raise Unrebuildable(f"commit {short} not in the remote's branches or pull requests")
-    stamp = datetime.fromisoformat(git_out("show", "-s", "--format=%cI", full, cwd=cache).strip())
+    stamp = datetime.fromisoformat(git_out("show", "-s", "--format=%cI", full, cwd=cache).strip().replace("Z", "+00:00"))
     if stamp > not_after:
         raise Unrebuildable(f"commit {short} is dated {stamp.isoformat()}, after the turn")
     return full
@@ -678,7 +678,7 @@ def replay_one(session: Path, turn: int, arm: dict, out: Path, cache_root: Path,
         overlay.write_text(
             "contextFiles:\n  extra:\n    - GLOBAL.md\ndisabledProviders:\n"
             + "".join(f"  - {p}\n" for p in DISABLED_PROVIDERS)
-            + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache_root, arm.get('descriptions'), arm.get('skill_drops'))}\n"
+            + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache_root, arm.get('descriptions'), arm.get('skill_drops'), arm.get('skill_cuts'), arm.get('name', ''))}\n"
             + "retry:\n  fallbackChains: {}\n  usageAwareFallback: false\n")
         profile = run / "deny.sb"
         profile.write_text(deny_profile((SANDBOX_ROOT / "deny.sb").read_text(), original_repo, session, cache_root))
