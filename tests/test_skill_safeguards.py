@@ -54,6 +54,11 @@ SAFEGUARDS = [
     ("deployment/global/AGENTS.md",
      "Performance budgets are measured. Measured: three models skip it without this bullet.",
      ["measure stated performance budgets before and after relevant changes"]),
+    ("deployment/global/AGENTS.md",
+     "Rules reach a subagent only through its brief. Measured: Sonnet subagents committed under the agent identity "
+     "in 0 of 30 sessions with this sentence, 14 of 30 without.",
+     ["put the rules the subagent needs into its brief",
+      "subagents do not receive this file"]),
 ]
 
 
