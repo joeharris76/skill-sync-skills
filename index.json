@@ -291,15 +291,10 @@
       "title": "Map which instruction text each harness and role actually receives"
     },
     "eval2-outcomes": {
-      "claim": {
-        "expires_at": "2026-11-18T14:24:12Z",
-        "generation": "601403c01706491b8a777dd9c5606d6f",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:5243adc37b46b1197b4307b3"
-      },
+      "claim": null,
       "needs": [],
       "priority": "medium",
-      "status": "active",
+      "status": "done",
       "title": "Classify closed-unmerged PRs and reverts by cause"
     },
     "eval2-pilot-report-gpt-results": {
