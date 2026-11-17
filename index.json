@@ -305,18 +305,13 @@
       "title": "Add the GPT results to the pilot report"
     },
     "eval2-replay-corrections": {
-      "claim": {
-        "expires_at": "2026-11-18T18:39:42Z",
-        "generation": "7b19ddff13a04bbab2127b8a3e99930b",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783"
-      },
+      "claim": null,
       "needs": [
         "eval2-harness-replay",
         "eval2-harness-judged-checks"
       ],
       "priority": "high",
-      "status": "active",
+      "status": "done",
       "title": "Replay real turns that drew a correction"
     },
     "eval2-replay-reviews": {
