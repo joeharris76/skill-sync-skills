@@ -1,0 +1,24 @@
+{
+  "acceptance": [
+    "Arm field removes exact text spans from skill files (each span found exactly once, else SystemExit), including cross-references; unit tests",
+    "Arm and variant order shuffled per batch; result records skill and reference reads",
+    "stats.py: one-sided stratified exact tests (CMH) and TOST at a margin, Holm across family x check x model, exclusive bands keep/harmful/equivalent/insensitive/inconclusive; unit tests on fixed tables incl. an insensitive and an equivalence case",
+    "Separate phase ledger with its own ceiling",
+    "No existing checks_hash changes; PR merged"
+  ],
+  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.",
+  "description": "Phase 3 step 3. drop_heading cannot remove bullet-level rules; arms run sequentially; stats.py has no TOST or insensitive band.",
+  "links": [
+    "~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783",
+      "at": "2026-11-17T21:09:53Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "7ac2c86ccc3b4d66bc7bd0fa630dd2d4",
+      "session_id": "b0e22510b3ae4ab38c30015d036c9db6"
+    }
+  ]
+}

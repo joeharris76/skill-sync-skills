@@ -390,6 +390,13 @@
       "status": "done",
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
+    "p3-harness": {
+      "claim": null,
+      "needs": [],
+      "priority": "high",
+      "status": "open",
+      "title": "Add text-range skill drops, arm interleaving, read logging and equivalence statistics"
+    },
     "p3-map-todo-references": {
       "claim": null,
       "needs": [],
