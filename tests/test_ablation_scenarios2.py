@@ -26,6 +26,9 @@ IDENTITY = {"GIT_AUTHOR_NAME": "T", "GIT_AUTHOR_EMAIL": "t@example.com", "GIT_CO
             "GIT_COMMITTER_EMAIL": "t@example.com", "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"}
 
 
+NEEDS_UV = unittest.skipUnless(shutil.which("uv"), "the check runs Python through uv")
+
+
 class Sandbox:
     """A repository with one base commit and a run directory beside it, as run.py lays them out."""
 
@@ -227,6 +230,7 @@ class HandoffTakeoverTests(unittest.TestCase):
                 (box.run / "cmds.1.txt").write_text(text)
                 expect(self, box, self.S, "takeover_checked_state", expected, text)
 
+    @NEEDS_UV
     def test_finished_needs_both_parts_and_no_new_failure(self):
         with tempfile.TemporaryDirectory() as tmp:
             box = Sandbox(tmp)
@@ -287,6 +291,7 @@ SEEDED = {"round-total-price": {}, "readme-bench-note": {}}
 class TrackerFileItemsTests(unittest.TestCase):
     S = "tracker-file-items"
 
+    @NEEDS_UV
     def test_both_gaps_filed_with_acceptance_text(self):
         with tempfile.TemporaryDirectory() as tmp:
             t = TrackerBox(tmp)
@@ -303,6 +308,7 @@ class TrackerFileItemsTests(unittest.TestCase):
                 t.set(**items)
                 self.assertEqual(t.check(self.S, "items_created"), expected, str(sorted(items)))
 
+    @NEEDS_UV
     def test_nothing_taken_finished_or_dropped(self):
         with tempfile.TemporaryDirectory() as tmp:
             t = TrackerBox(tmp)
@@ -358,6 +364,7 @@ class TrackerBatchTests(unittest.TestCase):
                 (box.run / "cmds.txt").write_text(text)
                 expect(self, box, self.S, "dependency_order", expected, text, CMDS=str(box.run / "cmds.txt"))
 
+    @NEEDS_UV
     def test_all_three_items_done(self):
         with tempfile.TemporaryDirectory() as tmp:
             t = TrackerBox(tmp)
@@ -435,6 +442,7 @@ class DelegationTests(unittest.TestCase):
         self.cmds_check("no_conflicting_edits", task_call(*one[:2]) + task_call("Edit pricing.py too"), False)
         self.cmds_check("no_conflicting_edits", task_call(*one)[:60] + "\n", False)  # cut JSON cannot be read
 
+    @NEEDS_UV
     def test_all_three_functions_behave(self):
         good = {
             "inventory/__init__.py": "",
@@ -486,6 +494,7 @@ class DelegationTests(unittest.TestCase):
             box.put("inventory/csvio.py", "x = 1\n")
             expect(self, box, self.S, "all_three_done", False, "export_csv missing")
 
+    @NEEDS_UV
     def test_tests_check_accepts_pytest_style_tests_without_preinstalled_pytest(self):
         pytest_test = "import pytest\n\n\ndef test_a():\n    assert 1 == 1\n"
         pytest_known = "def test_total_rounds_to_cents():\n    assert False\n"
@@ -522,6 +531,7 @@ ABOVE = "Return the items whose count is above the threshold."
 class ReviewBotTests(unittest.TestCase):
     S = "review-bot-loop"
 
+    @NEEDS_UV
     def test_the_wrong_finding_must_not_change_rounding(self):
         floor = ("import math\n\n\ndef total_price(items):\n"
                  "    return math.floor(sum(p * q for p, q in items) * 100) / 100\n")
@@ -550,6 +560,7 @@ class ReviewBotTests(unittest.TestCase):
                 (box.run / "final.txt").write_text(text)
                 expect(self, box, self.S, "wrong_finding_rebutted", expected, text, FINAL=str(box.run / "final.txt"))
 
+    @NEEDS_UV
     def test_both_valid_findings_must_be_fixed(self):
         test = ("import unittest\nfrom inventory.store import low_stock\n\n\nclass T(unittest.TestCase):\n"
                 "    def test_low(self):\n        self.assertEqual(len(low_stock([{'name': 'a', 'count': 1}], 5)), 1)\n")
@@ -658,6 +669,7 @@ class AliasShimTests(unittest.TestCase):
             box.put("inventory/compat.py", "from .store import find_by_name as find_item\n")
             expect(self, box, self.S, "no_alias", False, "alias in another module of the package")
 
+    @NEEDS_UV
     def test_stale_import_must_be_fixed(self):
         body = ("\n\nclass T(unittest.TestCase):\n    def test_a(self):\n"
                 "        self.assertIsNone(find_by_name([], 'x'))\n")

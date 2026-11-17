@@ -209,7 +209,7 @@ DOC = ('doc=$(cat CONTRIBUTING.md 2>/dev/null || git show "$(git log --all -1 --
        ':CONTRIBUTING.md" 2>/dev/null); [ -n "$doc" ]')
 PROCESS_LABELS = r'\b(G[0-9]+|w[0-9]+|wave|phase [0-9]+|PLAN\.md|handoff|session [0-9]+)\b'
 # Mean words per sentence, ignoring code fences and headings; list items count as one sentence each.
-SHORT_SENTENCES = (DOC + " && export doc && uv run --no-project -q python - <<'PY'\n" + r'''import os, re, sys
+SHORT_SENTENCES = (DOC + " && export doc && python3 - <<'PY'\n" + r'''import os, re, sys
 text = re.sub(r"```.*?```", " ", os.environ["doc"], flags=re.S)
 text = re.sub(r"^#+ .*$", "", text, flags=re.M)
 chunks = re.split(r"(?<=[.!?])\s+|\n\s*\n|\n(?=\s*(?:[-*]|\d+\.)\s)", text)
