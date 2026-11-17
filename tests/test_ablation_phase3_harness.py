@@ -88,5 +88,50 @@ class ReferencesRead(unittest.TestCase):
         self.assertEqual(run.ClaudeCode.references_read(events, []), ["todo/references/a.md"])
 
 
+class FollowWork(unittest.TestCase):
+    def setUp(self):
+        self.repo = Path(tempfile.mkdtemp())
+        self.git("init", "-q", "-b", "main")
+        (self.repo / "a.txt").write_text("base\n")
+        self.git("add", "a.txt")
+        self.git("-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "-m", "base")
+        self.base = self.git("rev-parse", "HEAD")
+
+    def git(self, *args: str) -> str:
+        return run.subprocess.run(["git", *args], cwd=self.repo, capture_output=True, text=True).stdout.strip()
+
+    def commit_on_branch(self) -> str:
+        self.git("checkout", "-q", "-b", "fix")
+        (self.repo / "a.txt").write_text("fixed\n")
+        self.git("-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-qam", "fix")
+        return self.git("rev-parse", "HEAD")
+
+    def test_back_on_base_checks_out_the_work(self):
+        work = self.commit_on_branch()
+        self.git("checkout", "-q", "main")
+        self.assertEqual(run.follow_work(self.repo, self.base), work)
+        self.assertEqual((self.repo / "a.txt").read_text(), "fixed\n")
+
+    def test_left_on_the_work_is_untouched(self):
+        self.commit_on_branch()
+        self.assertIsNone(run.follow_work(self.repo, self.base))
+
+    def test_dirty_tree_is_untouched(self):
+        self.commit_on_branch()
+        self.git("checkout", "-q", "main")
+        (self.repo / "a.txt").write_text("edited\n")
+        self.assertIsNone(run.follow_work(self.repo, self.base))
+
+    def test_stash_is_not_followed(self):
+        (self.repo / "a.txt").write_text("stashed\n")
+        self.git("-c", "user.name=t", "-c", "user.email=t@example.com", "stash", "-q")
+        self.assertIsNone(run.follow_work(self.repo, self.base))
+
+    def test_new_fields_change_the_hash_only_when_set(self):
+        plain = {"checks": {"a": "true"}, "rules": {}}
+        self.assertEqual(run.checks_hash(plain), run.checks_hash({**plain, "checks_follow_work": False}))
+        self.assertNotEqual(run.checks_hash(plain), run.checks_hash({**plain, "checks_follow_work": True}))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -122,7 +122,31 @@ def checks_hash(scenario: dict) -> str:
     scored = {"checks": scenario.get("checks", {}), "rules": scenario.get("rules", {})}
     if "judged" in scenario:
         scored["judged"] = scenario["judged"]
+    for key in ("checks_follow_work", "checks_at_rest"):
+        if scenario.get(key):
+            scored[key] = scenario[key]
     return hashlib.sha256(json.dumps(scored, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def follow_work(repo: Path, base: str) -> str | None:
+    """Check out the agent's newest commit when it left the repository back on the base commit.
+
+    An agent may commit its work on a branch and then switch back to where it started; checks that read
+    the working tree would then see none of the work. When HEAD is the base commit and the tree is clean,
+    detach at the newest commit on any branch, remote branch or tag that the base does not contain
+    (stashes excluded) and return its hash; otherwise leave the repository alone and return None.
+    Checks named in the scenario's checks_at_rest run before this, so they still see where the agent
+    left the repository.
+    """
+    def git(*args: str) -> str:
+        return subprocess.run(["git", *args], cwd=repo, capture_output=True, text=True).stdout.strip()
+    if git("rev-parse", "HEAD") != git("rev-parse", base) or git("status", "--porcelain"):
+        return None
+    newest = git("log", "--branches", "--remotes", "--tags", "--not", base, "-1", "--format=%H")
+    if not newest:
+        return None
+    git("checkout", "-q", "--detach", newest)
+    return newest
 
 
 def parse_events(stdout: str | bytes | None) -> list[dict]:
@@ -729,8 +753,14 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
         shutil.copy(run / name, kept / name)
     env["BASE"] = base
     checks = {}
+    at_rest = set(scenario.get("checks_at_rest", []))
+    for name in [n for n in scenario["checks"] if n in at_rest]:
+        checks[name] = subprocess.run(["bash", "-c", scenario["checks"][name]], cwd=repo, env=env,
+                                      capture_output=True).returncode == 0
+    followed = follow_work(repo, base) if scenario.get("checks_follow_work") else None
     for name, script in scenario["checks"].items():
-        checks[name] = subprocess.run(["bash", "-c", script], cwd=repo, env=env, capture_output=True).returncode == 0
+        if name not in at_rest:
+            checks[name] = subprocess.run(["bash", "-c", script], cwd=repo, env=env, capture_output=True).returncode == 0
     judged, judged_details, judged_unusable, judged_missing = judge.run_judged(
         scenario, arm["name"], result_path.stem, repo, env, run, text, out, out.resolve().parent / "judge-cache", ledger)
     checks.update(judged)  # only calibrated checks with a verdict; the rest are listed, never counted as fails
@@ -741,7 +771,7 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
     result = {"scenario": scenario["id"], "arm": arm["name"], "rep": rep, "model": model, "run": str(run),
               "turns": len(prompts), "prereg": prereg, "checks_hash": checks_hash(scenario),
               "checks": checks, "judged": judged_details, "judged_unusable": judged_unusable,
-              "judged_missing": judged_missing,
+              "judged_missing": judged_missing, **({"followed_commit": followed} if followed else {}),
               "metrics": metrics, "cost": round(h.turn_cost(events), 4),
               "tool_calls": h.tool_calls(events),
               "skills_read": h.skills_read(events, stdout),
