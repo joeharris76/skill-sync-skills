@@ -609,6 +609,15 @@ class RemovalBookkeepingTests(unittest.TestCase):
                                         cwd=box.repo, env=box.env).returncode == 0
                 self.assertEqual(merged, dial == "off", (v, dial))
 
+    def test_the_removal_item_asks_for_nothing_the_base_repository_cannot_give(self):
+        """The base repository has one failing test, so a "tests pass" criterion made careful agents refuse to
+        close the item in the control (3/10, 2/10, 8/9 passed)."""
+        for v in (1, 2, 3):
+            box = live(self, f"{F3}--v{v}--off")
+            text = box.agent_tracker(["show_item", {"id": m.F3_DOMAINS[v]["removal"], "field": "acceptance"}])[0]["data"]["window"]
+            self.assertNotIn("test", text.lower(), v)
+            self.assertIn("nothing in the repository still uses it", text)
+
     def test_the_callers_are_in_the_repository(self):
         for v, path in ((1, "scripts/nightly.sh"), (2, "scripts/accountant.sh"), (3, "scripts/restock.sh")):
             self.assertTrue((live(self, f"{F3}--v{v}--d1").repo / path).exists(), path)
