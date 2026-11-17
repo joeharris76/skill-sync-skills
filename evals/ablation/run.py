@@ -113,7 +113,9 @@ def pin_baseline(out: Path, current: dict) -> None:
 
 
 def checks_hash(scenario: dict) -> str:
-    return hashlib.sha256(json.dumps(scenario.get("checks", {}), sort_keys=True).encode()).hexdigest()[:16]
+    """Hash of what scores a session: the check scripts and which checks each rule's decision uses."""
+    scored = {"checks": scenario.get("checks", {}), "rules": scenario.get("rules", {})}
+    return hashlib.sha256(json.dumps(scored, sort_keys=True).encode()).hexdigest()[:16]
 
 
 def parse_events(stdout: str | bytes | None) -> list[dict]:
@@ -293,8 +295,9 @@ class Omp:
             "contextFiles:\n  extra:\n    - GLOBAL.md\ndisabledProviders:\n"
             + "".join(f"  - {p}\n" for p in DISABLED_PROVIDERS)
             + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache, arm.get('descriptions'))}\n"
-            # The user's config may fall back to another model on a provider error; a session must not.
-            + "retry:\n  fallbackChains: {}\n  usageAwareFallback: false\n")
+            # The user's config falls back to another model on a provider error; a session must not. An empty
+            # fallbackChains map merges into the user's chains rather than replacing them, so switch fallback off.
+            + "retry:\n  modelFallback: false\n  usageAwareFallback: false\n")
 
     def command(self, prompt: str, turn: int, turns: int, model: str) -> list[str]:
         session = (["--no-session"] if turns == 1
@@ -609,6 +612,7 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
             events.extend(turn_events)
             # $RUN/final.<turn>.txt is the agent's last message of that turn; $FINAL is the last turn's.
             (run / f"final.{turn}.txt").write_text(h.final_text(turn_events))
+            snapshot(repo, run, base, env, turn)
     finally:
         h.cleanup()
     (run / "out.jsonl").write_text("".join(stdout))
@@ -616,7 +620,8 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
     (run / "final.txt").write_text((run / f"final.{len(prompts) - 1}.txt").read_text())
     kept = out / "transcripts" / result_path.stem
     kept.mkdir(parents=True, exist_ok=True)
-    for name in ["out.jsonl", "cmds.txt", "final.txt"] + [f"final.{t}.txt" for t in range(len(prompts))]:
+    for name in (["out.jsonl", "cmds.txt", "final.txt"] + [f"final.{t}.txt" for t in range(len(prompts))]
+                 + [f"state.{t}.txt" for t in range(len(prompts))]):
         shutil.copy(run / name, kept / name)
     env["BASE"] = base
     checks = {}
@@ -635,6 +640,20 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
     result_path.parent.mkdir(parents=True, exist_ok=True)
     result_path.write_text(json.dumps(result, indent=1))
     return result
+
+
+def snapshot(repo: Path, run: Path, base: str, env: dict, turn: int) -> None:
+    """Record the repository state after a turn in $RUN/state.<turn>.txt, for checks on earlier turns.
+
+    Lines: dirty=<changed paths in the tree>, commits=<new commits on any ref>, pushed=<new commits on the
+    sandbox remote>, prs=<pr create calls>. Counts only.
+    """
+    script = ('echo "dirty=$(git status --porcelain | wc -l | tr -d " ")"; '
+              'echo "commits=$(git rev-list --all --not "$BASE" | wc -l | tr -d " ")"; '
+              'echo "pushed=$(git --git-dir="$RUN/remote.git" rev-list --all --not "$BASE" 2>/dev/null | wc -l | tr -d " ")"; '
+              'echo "prs=$(cat "$GH_SHIM_LOG" 2>/dev/null | grep -c "^pr create")"')
+    out = subprocess.run(["bash", "-c", script], cwd=repo, env=dict(env, BASE=base), capture_output=True, text=True)
+    (run / f"state.{turn}.txt").write_text(out.stdout)
 
 
 def load_results(out: Path) -> tuple[dict[tuple[str, str], list[dict]], int]:
