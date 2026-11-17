@@ -717,11 +717,12 @@ def decisions(outs: list[Path]) -> dict:
         if sc.get("experiment"):
             for rule, spec in rule_specs(sc).items():
                 by_rule.setdefault(rule, []).append((sc, spec))
-    bands, rules = [], {}
+    bands, rules, models = [], {}, {}
     for rule, targets in by_rule.items():
         ids = {sc["id"] for sc, _ in targets}
         tested = sorted({(model, harness) for (sid, model, harness), arms in pooled.items()
                          if sid in ids and any(arms.values())})
+        models[rule] = len({model for model, _ in tested})
         for model, harness in tested:
             for sc, spec in targets:
                 arms = pooled.get((sc["id"], model, harness), {})
@@ -734,7 +735,7 @@ def decisions(outs: list[Path]) -> dict:
                                       for name in spec["checks"]})
                 bands.append({"rule": rule, "scenario": sc["id"], "model": model, "harness": harness, **result})
                 rules.setdefault(rule, []).append(result["band"])
-    return {"bands": bands, "rules": {rule: rule_decision(b) for rule, b in rules.items()}}
+    return {"bands": bands, "rules": {rule: rule_decision(b, models[rule]) for rule, b in rules.items()}}
 
 
 def report(outs: list[Path]) -> None:

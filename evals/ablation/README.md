@@ -164,10 +164,12 @@ applies the decision rule in `stats.py`, fixed before any scored run:
 `report` pools results per scenario, model and harness across the folders it
 is given, so a rerun adds sessions rather than a second test. A rule is
 `keep` if any band is keep, `delete` only if every scenario that targets it,
-on every model tested, is `within`, `reword` if a band is harmful, `conflict`
-if one keeps and another is harmful, and otherwise `inconclusive`. Folders
-must share one instruction snapshot. Results whose pre-registration or check
-scripts changed after they ran are dropped.
+on every model tested, is `within` and at least two models were tested
+(`within` alone means a deletion candidate that needs another model),
+`reword` if a band is harmful, `conflict` if one keeps and another is harmful,
+and otherwise `inconclusive`. Folders must share one instruction snapshot.
+Results whose pre-registration or check scripts changed after they ran are
+dropped.
 
 Every check is written so that a pass is the wanted behaviour. A rule with
 two opposite failure modes (acting without approval, stopping early) gets one
