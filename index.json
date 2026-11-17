@@ -250,17 +250,12 @@
       "title": "Publish the phase results and close the instruction-cleanup verification"
     },
     "eval2-harness-claude-code": {
-      "claim": {
-        "expires_at": "2026-11-18T14:32:36Z",
-        "generation": "3afd3026a60245819b8a58e5d9062688",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:5243adc37b46b1197b4307b3"
-      },
+      "claim": null,
       "needs": [
         "eval2-harness-multiturn"
       ],
       "priority": "medium-high",
-      "status": "active",
+      "status": "done",
       "title": "Add a Claude Code headless runner for replication"
     },
     "eval2-harness-judged-checks": {
