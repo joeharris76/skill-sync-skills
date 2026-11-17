@@ -158,6 +158,13 @@ class ArmTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             run.drop_section(text, "Missing")
 
+    def test_removing_a_skill_heading_removes_its_subsections_only(self):
+        text = "# T\n\n## A\n\na\n\n### A1\n\nx\n\n## B\n\nb\n"
+        self.assertEqual(run.drop_heading(text, "A"), "# T\n\n## B\n\nb\n")
+        self.assertEqual(run.drop_heading(text, "A1"), "# T\n\n## A\n\na\n\n## B\n\nb\n")
+        with self.assertRaises(SystemExit):
+            run.drop_heading(text, "Missing")
+
     def test_removing_line_ranges(self):
         self.assertEqual(run.drop_lines("1\n2\n3\n4\n5\n", "2-3,5"), "1\n4\n")
 
