@@ -29,6 +29,101 @@ Sessions run with `--auto-approve` as the current user. The sandbox limits Git
 and GitHub side effects and those reads only; scenario prompts must keep the
 work inside the repository.
 
+## Replaying real turns
+
+`replay.py` reruns one real user message from a recorded omp session under an
+arm, with the session's own history in front of it:
+
+```sh
+uv run --no-project python evals/ablation/replay.py list --session <session.jsonl>
+uv run --no-project python evals/ablation/replay.py run --out <dir> --session <session.jsonl> --turn 3 --turn 5 \
+    [--global full|none|minus:<heading>|...] [--skills <rev>] [--check-file checks.json] [--smoke]
+```
+
+Turns count the session's user messages from 0; `list` shows which ones can be
+rebuilt. A replay copies the session file into a new sandbox, cuts it just
+before the chosen message, rewrites the recorded working directory and every
+absolute path under the original repository to the sandbox repository (sibling
+directories such as `<repo>.wt-x` are left alone), and resumes the copy with
+`omp --resume` under the usual overlay, the deny profile and the arm's text.
+The profile also hides `~/.omp/agent/sessions`, which holds the later turns.
+The original session file and repository are never written; each result
+records a status, tracked-file modification-time and session-file hash of the
+originals from before and after (`replay.isolation`).
+
+The repository is rebuilt from a local bare cache of the GitHub remote under
+`/tmp/omp-ablation/cache/` (read-only to the session), never from the user's
+clone. Its top level comes from `git rev-parse --show-toplevel`; a session
+recorded in a subdirectory resumes in the same subdirectory. Each run gets a
+private local `origin`, pushes to GitHub URLs are rewritten to an invalid
+address, `SSH_AUTH_SOCK` is unset, and the deny profile hides `~/.ssh`, the
+original repository and the folder holding the original session file.
+
+A derived commit is read from the session itself and never guessed or taken
+from timestamps (a pinned one is chosen by you; see below). Only two kinds of bash call count as showing HEAD, and only when
+they ran inside the repository: `git rev-parse [--short] HEAD`, and `git log`
+with nothing but `-N`, `-n N`, `--oneline`, `--format` and `--no-decorate`,
+optionally piped to `head`. Anything that may have moved HEAD or changed the
+working tree afterwards clears the commit: a HEAD-moving git command (commit,
+pull, checkout, merge, reset, `gh pr merge`, ...) that ran in the repository,
+ran where the directory cannot be told, or names the repository anywhere; any
+`edit`, `write` or `ast_edit` whose path (read from the `edit` header, relative
+to the session directory) lies inside the repository or cannot be read; and any
+tool that may run commands (`task`, `eval`, `exec`, MCP tools, ...). Only
+read-only tools (`read`, `grep`, `glob`, `find`, `web_search`, `todo`, `ask`,
+`wait`) leave it alone. If no commit is left, or it is missing from the remote
+or newer than the turn, the turn is counted as unrebuildable
+(`<dir>/unrebuildable/`) and skipped. This is strict: very few real turns
+qualify. Edits made by shell commands (`sed -i`, redirects) are not detected,
+and uncommitted work is not restored, so a replay tests the committed state.
+Earlier turns of the history were produced under the old text, and only the
+next turn is tested.
+
+**Derived or pinned commit.** By default the commit is derived as above and
+each result records `commit_source: "derived"`. When derivation refuses a turn,
+pin the commit yourself: `replay.py run ... --commit <sha> --commit-evidence
+"<why this is the state at the turn>"`. The result then records `commit_source:
+"pinned"` and the evidence text, and a pinned commit dated after the turn is
+refused. `replay.py locate --session F [--turn N]` proposes a commit without
+applying it: it takes the last branch the session's own output names (`On
+branch`, `git status -sb`, `git branch --show-current`, a commit summary line,
+`checkout -b`, `worktree add -b`) or, failing that kind of output, the name of
+a `<repo>.wt-<name>` worktree directory a command ran in. Output of a command
+that changes directory after its start or uses `git -C` is ignored, and branch
+output from a sibling worktree counts only when the session's own directory is
+that worktree. It refreshes the bare cache with every branch and every pull
+request head (`refs/pull/N/head`), and returns the last commit dated at or
+before the turn on the branch and on each pull request whose head branch name
+(from `gh pr list`) equals it; a worktree directory name is matched against the
+branch name with `/` replaced by `-`, or without its first path segment. It
+prints the candidate, branch, ref, commit time and turn time, and no candidate
+when the refs disagree or nothing is found. A candidate is a proposal to
+review, not evidence. In both modes work that was not committed at the turn is
+lost: a replay tests the committed state, not the working tree.
+
+**Compaction.** A compaction entry holds a block signed over its content;
+rewriting a path inside it makes the Anthropic API reject the history (400,
+"`compaction` block `content` does not match its `signature`"), after which omp
+falls back to another model. The rewrite therefore leaves `preserveData.anthropicCompaction`
+untouched, and histories with remote (Anthropic and OpenAI), snapcompact, soft
+and handoff compactions replay on Sonnet without fallback. The summary the
+block carries still names the original repository path, which the session
+cannot read.
+
+Cost is added to the shared spend ledger for every turn, including failed ones;
+omp counts the cost already recorded in the session against `--max-cost`, so the
+cap is that plus 2 USD. An answer from another model is refused. Results use the
+same JSON as `run.py` (scenario `replay-<first 8 of the session id>-<turn>`, one
+turn, checks from `--check` or `--check-file`, run in the sandbox repository
+with `$FINAL`, `$CMDS`, `$RUN` and `$BASE` set) so `report` can pool them. The
+agent's last message and tool calls are kept under `transcripts/`; the sandbox,
+which holds real session text, is deleted when the run ends, success or not.
+
+Claude Code and Codex sessions are not supported: `omp --from-claude` opens an
+interactive picker and exits (status 129) without a terminal, so it cannot
+import a file in a headless run. Convert such a session to an omp session file
+first.
+
 ## Arms
 
 | Global text | Meaning |
