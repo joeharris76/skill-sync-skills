@@ -325,13 +325,18 @@
       "title": "Replay real review requests"
     },
     "eval2-repo-files": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-18T19:36:16Z",
+        "generation": "426371b7293b46e4a80bab97f307bf60",
+        "renewals": 0,
+        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783"
+      },
       "needs": [
         "eval2-harness-replay",
         "eval2-skill-sections"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "active",
       "title": "Ablate BenchBox AGENTS.md sections in replays of real BenchBox sessions"
     },
     "eval2-scripted-core": {
