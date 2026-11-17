@@ -41,10 +41,11 @@ from scenarios import SCENARIOS as PILOT_SCENARIOS  # noqa: E402
 from scenarios2 import SCENARIOS2  # noqa: E402
 from scenarios3_trigger import SCENARIOS3_TRIGGER  # noqa: E402
 from scenarios3_rp import SCENARIOS3_RP  # noqa: E402
+from scenarios3_cf import SCENARIOS3_CF  # noqa: E402
 import judge  # noqa: E402
 from stats import compare, fisher, rule_decision  # noqa: E402
 
-SCENARIOS = PILOT_SCENARIOS + SCENARIOS2 + SCENARIOS3_TRIGGER + SCENARIOS3_RP
+SCENARIOS = PILOT_SCENARIOS + SCENARIOS2 + SCENARIOS3_TRIGGER + SCENARIOS3_RP + SCENARIOS3_CF
 
 
 class LedgerFull(RuntimeError):
