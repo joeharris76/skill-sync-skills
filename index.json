@@ -222,6 +222,15 @@
       "status": "done",
       "title": "Select the imported skills in the global deployment and apply it"
     },
+    "eval2-harness-judged-checks": {
+      "claim": null,
+      "needs": [
+        "eval2-harness-multiturn"
+      ],
+      "priority": "high",
+      "status": "open",
+      "title": "Add calibrated judged checks for claims a shell check cannot test"
+    },
     "eval2-harness-multiturn": {
       "claim": null,
       "needs": [],

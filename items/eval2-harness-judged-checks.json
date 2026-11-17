@@ -1,0 +1,23 @@
+{
+  "acceptance": [
+    "A judged-check interface in the harness: rubric text, input (transcript excerpt plus repository facts), binary verdict with a one-line reason, cached by transcript hash.",
+    "For each judged check (status-accuracy, handoff-complete, completion-claim-true, review-findings-match): a calibration file with 40 to 60 labelled transcripts containing both passes and fails (at least 15 of each), and a measured judge agreement figure.",
+    "A check with agreement below 90% is marked unusable in the harness and any scenario relying on it is redesigned with shell checks or dropped, recorded in the pre-registration.",
+    "Results state that labels come from a Claude model."
+  ],
+  "context": "Calibration transcripts come from smoke runs of the scenarios that use the check, not from scored runs. Guardrail: the judge never sees the arm name. Judge calls count against the ChatGPT usage window; budget about 250 judge calls for calibration.\n\nShared guardrails for the deeper eval phase (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/prompt-audit-and-phase-2-plan.md):\n- Agents under test run only inside /tmp/omp-ablation sandboxes under the sandbox-exec deny profile; no run may write to a real clone, ~/.agents, ~/.omp or ~/.claude.\n- Every run uses the pinned baseline (instruction snapshot, catalog commit, omp and Claude Code versions, model ids) recorded in its results; a change to any of them reruns the affected arms.\n- Every experiment has a pre-registration file committed before its first scored run: hypothesis, rule, arms, checks, sample size, decision. Changing it after scored runs voids those runs.\n- Decision rule: keep or reword needs a 30-point gap at p < 0.01 after Holm correction; delete needs the removal arm within 10 points on every check, scenario and model tested at 30 or more sessions per arm; anything else is inconclusive and is not acted on.\n- Spend ledger: the runner sums Claude-provider cost per session and refuses new sessions once the phase total reaches 800 USD; GPT runs are tracked separately against ChatGPT usage windows.\n- The runner refuses failed sessions and sessions answered by a model other than the one requested; refused sessions do not count toward n.\n- Real session text copied for replay lives only in /tmp sandboxes deleted after each run; committed results hold counts and short anonymized quotes only. Classified prompt data stays in prompt-audit-data/.\n- Never edit vendored skills (retro, writing-for-agents, memex-search/SKILL.md). Out of scope: memex upstream, omnigent, sqlglot, bossmode, Muse, Gemini.\n- Repository writes follow change-framework: worktree, Joe Harris identity, explicit staging, Conventional Commits, no --no-verify, draft PR, squash merge after checks. BenchBox uses only its make worktree-create / agent-write-preflight / pr-preflight / pr-open / pr-arm flow.\n- Commit messages, PR bodies and committed results contain no session or process labels (no phase, step, S-number or R-number labels in commit subjects or rule text); results files may name scenarios by their scenario id.",
+  "description": "Status accuracy, handoff completeness, completion claims and review-finding matches need judgement. Each judged check gets a calibration set of 40 to 60 transcripts labelled by the leading agent from transcript plus repository state, and is used only if a judge from another provider (gpt-6.1-sol via openai-codex) agrees with those labels on at least 90%.",
+  "links": [
+    "evals/ablation/run.py"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:5243adc37b46b1197b4307b3",
+      "at": "2026-11-17T13:58:33Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "d32fdf09e7294f35aefba5513d869ddf",
+      "session_id": "f6c81dcc36cf4dc18d86d569e2745e79"
+    }
+  ]
+}
