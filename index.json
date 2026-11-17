@@ -223,12 +223,7 @@
       "title": "Select the imported skills in the global deployment and apply it"
     },
     "eval2-apply-decisions": {
-      "claim": {
-        "expires_at": "2026-11-18T19:36:22Z",
-        "generation": "461fd4342c58463dbb54faf689712e3a",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783"
-      },
+      "claim": null,
       "needs": [
         "eval2-scripted-core",
         "eval2-scripted-extended",
@@ -240,7 +235,7 @@
         "eval2-harness-claude-code"
       ],
       "priority": "high",
-      "status": "active",
+      "status": "done",
       "title": "Replicate and apply the phase decisions"
     },
     "eval2-final-report": {
