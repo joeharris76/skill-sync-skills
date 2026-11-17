@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "HANDOFF.md lists only uncommitted files and omits the goal, remaining work, and verification command.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The review reports D3 but does not name low_stock or order_cost when mentioning the other two defects.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

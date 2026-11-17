@@ -1,0 +1,5 @@
+{
+ "verdict": "pass",
+ "reason": "HANDOFF.md states the goal, accurate uncommitted state, remaining steps, and a git status check the next agent can run.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

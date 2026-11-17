@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The two test files contain six listed tests, not the claimed five.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

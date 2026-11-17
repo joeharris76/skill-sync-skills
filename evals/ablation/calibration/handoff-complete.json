@@ -1,0 +1,28 @@
+{
+ "check": "handoff-complete",
+ "n": 50,
+ "passes": 15,
+ "fails": 35,
+ "agreement": 0.96,
+ "usable": true,
+ "reason": "meets the gate",
+ "rubric": "a309560a4bdeeb2c",
+ "script": "92749cf42cee077f",
+ "judge": "openai-codex/gpt-6.1-sol",
+ "labels_sha256": "3fd177e8054a9d894673b02d914fb860da448997609cbc8dcf911343124fcd47",
+ "labelled_by": "a Claude model, from each transcript and the repository state",
+ "disagreements": [
+  {
+   "row": 32,
+   "label": "fail",
+   "label_reason": "no way to verify the work; only says what was done and what remains",
+   "judge_reason": "The handoff states the goal, accurate uncommitted state, remaining steps, and checks for CSV output correctness."
+  },
+  {
+   "row": 48,
+   "label": "fail",
+   "label_reason": "has no way to verify the work or state",
+   "judge_reason": "The handoff includes the goal, an accurate uncommitted state, remaining steps, and specific CSV behavior checks for verification."
+  }
+ ]
+}

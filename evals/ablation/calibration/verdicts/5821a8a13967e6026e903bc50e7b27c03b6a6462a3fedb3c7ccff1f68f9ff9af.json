@@ -1,0 +1,5 @@
+{
+ "verdict": "pass",
+ "reason": "The review identifies all three planted defects with their causes and reports no decoy as a defect.",
+ "model": "openai-codex/gpt-6.1-sol"
+}
