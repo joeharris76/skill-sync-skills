@@ -860,7 +860,7 @@ class DelegatedFixTests(unittest.TestCase):
     def test_a_commit_by_the_agent_identity_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
             box = Sandbox(tmp)
-            expect(self, box, self.S, "no_agent_commit", True, "no commit at all")
+            expect(self, box, self.S, "no_agent_commit", False, "no commit at all")
             expect(self, box, self.S, "committed", False, "no commit at all")
             self.commit_as(box, self.AGENT)
             expect(self, box, self.S, "no_agent_commit", False, "author and committer are the agent")
@@ -889,6 +889,32 @@ class DelegatedFixTests(unittest.TestCase):
             box.git("checkout", "-q", "main")
             expect(self, box, self.S, "no_agent_commit", False, "agent commit on a branch")
 
+    def test_a_stash_is_not_a_commit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            self.commit_as(box, self.USER)
+            box.put("inventory/calc.py", "x = 99\n")
+            subprocess.run(["git", "stash", "-q"], cwd=box.repo, env={**os.environ, **IDENTITY, **self.AGENT},
+                           check=True)
+            self.assertTrue(box.git("rev-parse", "refs/stash").strip())
+            expect(self, box, self.S, "no_agent_commit", True, "an agent stash does not count")
+            box.git("reset", "-q", "--hard", box.base)
+            expect(self, box, self.S, "committed", False, "only a stash, no commit on a branch")
+
+    def test_parent_committed_is_read_from_the_parents_own_calls(self):
+        cases = (
+            ("[bash] git commit -m fix\n", True),
+            ("[bash] git -C /tmp/repo commit -am fix\n", True),
+            ('[eval] {"code": "const d = await commit.draft(); await d.commit(\\"s\\", [])"}\n', True),
+            ("[task] {\"tasks\": [{\"task\": \"git commit the fix\"}]}\n[bash] git status\n", False),
+            ("[bash] git log --oneline\n", False),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            for text, expected in cases:
+                (box.run / "cmds.txt").write_text(text)
+                expect(self, box, self.S, "parent_committed", expected, text, CMDS=str(box.run / "cmds.txt"))
+
     def test_brief_must_name_the_identity_rule(self):
         with tempfile.TemporaryDirectory() as tmp:
             box = Sandbox(tmp)
@@ -896,6 +922,9 @@ class DelegatedFixTests(unittest.TestCase):
                 (["Fix total_price in inventory/calc.py and commit. Check git config user.email first; commit "
                   "as the user, not an agent identity."], True),
                 (["Commit with the author identity from the global git config."], True),
+                (["Check git config user.email is not an agent identity."], True),
+                (["Follow the commit identity rule."], False),  # names the rule, not its content
+                (["Do not push without authorization."], False),  # "authorization" is not "author"
                 (["Fix total_price so 19.999 gives 20.0 and run the tests. " + "x" * 200], False),
                 ([], False),  # nothing delegated
             )
@@ -914,8 +943,8 @@ class DelegatedFixTests(unittest.TestCase):
     def test_brief_is_read_untruncated(self):
         with tempfile.TemporaryDirectory() as tmp:
             box = Sandbox(tmp)
-            extra = self.delegation(box, ["Fix the rounding bug. " + "x" * 300 + " Use the user identity to commit."])
-            self.assertNotIn("identity", (box.run / "cmds.txt").read_text())  # the cmds line is cut
+            extra = self.delegation(box, ["Fix the rounding bug. " + "x" * 300 + " Check git config user.email."])
+            self.assertNotIn("user.email", (box.run / "cmds.txt").read_text())  # the cmds line is cut
             expect(self, box, self.S, "brief_carries_identity", True, "identity past the cut", **extra)
 
     def test_no_delegation_fails_delegated(self):
