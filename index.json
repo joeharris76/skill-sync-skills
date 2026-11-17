@@ -419,10 +419,15 @@
       "title": "Build and pre-register the eleven phase 3 scenario families"
     },
     "p3-harness": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-18T21:23:29Z",
+        "generation": "76ac3bfbd0a349e884f6b92a0d2ed0f1",
+        "renewals": 0,
+        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783"
+      },
       "needs": [],
       "priority": "high",
-      "status": "open",
+      "status": "active",
       "title": "Add text-range skill drops, arm interleaving, read logging and equivalence statistics"
     },
     "p3-map-todo-references": {
