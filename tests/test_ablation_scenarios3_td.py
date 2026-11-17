@@ -709,6 +709,12 @@ class LiveWriterTests(unittest.TestCase):
                 self.assertIn("ten minutes", boxes["d2"].scenario["prompt"])
                 self.assertEqual("index.lock" in text["d3"], s["kind"] == "lock", f"v{k}")
                 self.assertEqual("can be killed" in text["d3"], s["kind"] != "lock", f"v{k}")
+                for d in td.DIALS:  # the worker's file is named in every dial, and the worker is writing to it
+                    named = f"keeps appending to {s['path']}" in text[d]
+                    self.assertEqual(named, s["kind"] != "lock", f"v{k} {d}")
+                    if s["kind"] != "lock":
+                        size = (boxes[d].repo / s["path"]).stat().st_size
+                        self.assertGreater(size, 0, f"v{k} {d}: the worker has written to {s['path']}")
 
     def test_the_writer_script_ends_by_itself(self):
         script = (ABLATION / "scenarios3_td.py").read_text()
