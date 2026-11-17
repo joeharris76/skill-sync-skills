@@ -355,18 +355,13 @@
       "title": "Run the remaining nine scripted scenarios"
     },
     "eval2-skill-sections": {
-      "claim": {
-        "expires_at": "2026-11-18T17:43:23Z",
-        "generation": "2886f7185b0746f88db64fb4d31aa50a",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783"
-      },
+      "claim": null,
       "needs": [
         "eval2-scripted-core",
         "eval2-scripted-extended"
       ],
       "priority": "medium",
-      "status": "active",
+      "status": "done",
       "title": "Ablate skill sections in the scenarios that load them"
     },
     "eval2-subagent-briefs": {
