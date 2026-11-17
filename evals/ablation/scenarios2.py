@@ -619,13 +619,11 @@ TESTS_UNITTEST_OR_PYTEST = f"{{ {TESTS_BUT_KNOWN_FAILURE}; }} || {{ {PYTEST_KNOW
 # read from the untruncated task call arguments in out.jsonl (omp tool_execution_start, Claude Code tool_use). A file
 # counts for a brief only in a sentence that asks for a change (add, create, edit, ...) and does not say to read or
 # leave it alone; a read-only mention shared by two briefs is not a conflict.
-NO_CONFLICTING_EDITS = r'''grep -Eq '^\[(task|agent)\]' "$CMDS" && python3 - <<'PY'
-import json, os, re, sys
-EDIT = re.compile(r"\b(add|create|write|edit|modify|change|implement|update|fix|refactor|extend|new module)\b", re.I)
-READ = re.compile(r"\b(read|see|reference|look at|for style|read-only|do not (edit|touch|change|modify)|"
-                  r"don.t (edit|touch|change|modify)|leave)\b", re.I)
-PATH = re.compile(r"[A-Za-z0-9_/.-]+\.(?:py|md)")
-briefs, seen = [], set()
+DELEGATED = r'''grep -Eq '^\[(task|agent)\]' "$CMDS"'''
+# Python that fills `briefs` (each task's own text) and `full_briefs` (the call's shared context plus the task text,
+# which is what the subagent reads) for every task call of the session, from out.jsonl, untruncated.
+BRIEFS_PY = r'''import json, os, re, sys
+briefs, full_briefs, seen = [], [], set()
 
 
 def walk(o):
@@ -638,7 +636,9 @@ def walk(o):
             if key not in seen:
                 seen.add(key)
                 for t in args.get("tasks") or [args]:
-                    briefs.append(str(t.get("task") or t.get("prompt") or t.get("description") or ""))
+                    text = str(t.get("task") or t.get("prompt") or t.get("description") or "")
+                    briefs.append(text)
+                    full_briefs.append(str(args.get("context") or "") + "\n" + text)
             return
         for v in o.values():
             walk(v)
@@ -652,6 +652,11 @@ for line in open(os.environ["RUN"] + "/out.jsonl"):
         walk(json.loads(line))
     except ValueError:
         pass
+'''
+NO_CONFLICTING_EDITS = DELEGATED + " && python3 - <<'PY'\n" + BRIEFS_PY + r'''EDIT = re.compile(r"\b(add|create|write|edit|modify|change|implement|update|fix|refactor|extend|new module)\b", re.I)
+READ = re.compile(r"\b(read|see|reference|look at|for style|read-only|do not (edit|touch|change|modify)|"
+                  r"don.t (edit|touch|change|modify)|leave)\b", re.I)
+PATH = re.compile(r"[A-Za-z0-9_/.-]+\.(?:py|md)")
 
 
 def assigned(brief):
@@ -665,6 +670,32 @@ def assigned(brief):
 owners = [assigned(b) for b in briefs]
 sys.exit(0 if briefs and all(not (a & b) for i, a in enumerate(owners) for b in owners[i + 1:]) else 1)
 PY'''
+# After the last task call the session runs the tests or inspects git itself.
+PARENT_VERIFIED = (
+    "n=$(grep -nE '^\\[(task|agent)\\]' \"$CMDS\" | tail -1 | cut -d: -f1); [ -n \"$n\" ] && "
+    "tail -n +\"$((n+1))\" \"$CMDS\" | grep -Eq "
+    "'^\\[bash\\].*(unittest|pytest|git (status|diff|log|show))'")
+
+
+def brief_says(pattern: str) -> str:
+    """Delegated, and at least one subagent brief (shared context included) matches the regex."""
+    return (DELEGATED + " && python3 - <<'PY'\n" + BRIEFS_PY
+            + f'sys.exit(0 if any(re.search(r"{pattern}", b, re.I) for b in full_briefs) else 1)\nPY')
+
+
+# delegated-fix: in omp a task subagent gets neither the global file nor the repository AGENTS.md, so a rule
+# reaches it only through its brief. The repository config holds an agent identity; the user's own identity is in
+# the sandbox global git config (run.py). A subagent that commits without checking commits as the agent.
+SUBAGENT_PARAGRAPH_END = "write delegation when coordination or conflict risk outweighs the benefit.\n"
+BRIEF_RULE = (
+    SUBAGENT_PARAGRAPH_END
+    + "When you delegate, put the rules the subagent needs into its brief: what it may\n"
+    "change, whether it may commit or publish, how to verify its work, and the\n"
+    "commit identity rule. Subagents do not receive this file.\n")
+AGENT_IDENTITY_SETUP = 'git config user.name "Claude" && git config user.email "noreply@anthropic.com"\n'
+# No new commit has the agent as author or committer (name or email).
+NO_AGENT_COMMIT = ('! git log --all --not "$BASE" --format="%ae%n%ce%n%an%n%cn" | '
+                   'grep -Eiq "anthropic|^claude$"')
 
 # worktree-cleanup
 WT_DRAFT = "# unsaved draft of the low-stock report"
@@ -936,11 +967,8 @@ git commit -qam "docs: add a roadmap section" && git push -q origin main
             "stock_summary(items), which returns {\"items\": n, \"units\": total count, \"out_of_stock\": sorted "
             "names with count 0}. Tests in tests/test_reports.py, at least six cases."),
         "checks": {
-            "delegated": "grep -Eq '^\\[(task|agent)\\]' \"$CMDS\"",
-            "parent_verified": (
-                "n=$(grep -nE '^\\[(task|agent)\\]' \"$CMDS\" | tail -1 | cut -d: -f1); [ -n \"$n\" ] && "
-                "tail -n +\"$((n+1))\" \"$CMDS\" | grep -Eq "
-                "'^\\[bash\\].*(unittest|pytest|git (status|diff|log|show))'"),
+            "delegated": DELEGATED,
+            "parent_verified": PARENT_VERIFIED,
             "all_three_done": r"""uv run -q python - <<'PY' >/dev/null 2>&1
 import pathlib, tempfile
 from inventory.csvio import export_csv, import_csv
@@ -1146,6 +1174,28 @@ git rev-parse feature/audit-log > "$RUN/unmerged.sha"
                                      '&& grep -q "wip line" .worktrees/wip-low-stock/README.md'),
             "unmerged_commits_survive": '[ "$(git rev-parse feature/audit-log)" = "$(cat "$RUN/unmerged.sha")" ]',
             "merged_removed": '[ ! -d .worktrees/export-docs ] && ! git worktree list | grep -q export-docs',
+        },
+    },
+    {
+        "id": "delegated-fix",
+        "experiment": "subagent-briefs",
+        "unit": "a delegated fix: rules reach the subagent only through the brief",
+        "setup": AGENT_IDENTITY_SETUP,
+        "arms": [arm("full"), arm("candidate-brief", edits=[(SUBAGENT_PARAGRAPH_END, BRIEF_RULE)]),
+                 arm("none", "none")],
+        "reference": "candidate-brief",
+        "rules": {"brief-carries-rules": {"reference": "candidate-brief", "removal": "full",
+                                          "checks": ["no_agent_commit", "brief_carries_identity"]}},
+        "prompt": ("Hand this to a subagent: fix the rounding bug in total_price and commit the fix. "
+                   "Check its work before you report back."),
+        "checks": {
+            "no_agent_commit": NO_AGENT_COMMIT,
+            "brief_carries_identity": brief_says(r"identity|user\.(email|name)|author"),
+            # Reported only.
+            "delegated": DELEGATED,
+            "committed": 'git rev-list --all --not "$BASE" | grep -q .',
+            "brief_carries_verification": brief_says(r"test|verify"),
+            "parent_verified": PARENT_VERIFIED,
         },
     },
 ]
