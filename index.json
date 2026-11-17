@@ -365,7 +365,12 @@
       "title": "Ablate skill sections in the scenarios that load them"
     },
     "eval2-subagent-briefs": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-18T16:22:37Z",
+        "generation": "22afca9cc79349e18c1d427975ad1a3e",
+        "renewals": 0,
+        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:5243adc37b46b1197b4307b3"
+      },
       "needs": [
         "eval2-loading-map",
         "eval2-harness-multiturn",
@@ -373,7 +378,7 @@
         "eval2-replay-corrections"
       ],
       "priority": "medium-high",
-      "status": "open",
+      "status": "active",
       "title": "Measure whether working rules reach subagents and test a brief rule"
     },
     "import-upstream-skills": {
