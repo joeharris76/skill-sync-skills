@@ -17,10 +17,12 @@ import fcntl
 import hashlib
 import json
 import os
+import random
 import re
 import shutil
 import subprocess
 import sys
+import time
 import uuid
 from pathlib import Path
 
@@ -222,13 +224,21 @@ def drop_heading(text: str, heading: str) -> str:
     return "".join(out)
 
 
+def cut_text(text: str, cut: str) -> str:
+    """Remove one exact span; None unless it occurs exactly once."""
+    return text.replace(cut, "", 1) if text.count(cut) == 1 else None
+
+
 def skills_dir(rev: str, cache: Path, descriptions: dict[str, str] | None = None,
-               drops: list[list[str]] | None = None) -> Path:
+               drops: list[list[str]] | None = None, cuts: list[list[str]] | None = None, arm: str = "") -> Path:
     """Export the catalog's skills at one revision, once; optionally with reworded descriptions or with
     sections removed. ``drops`` lists [file under skills/, heading], e.g.
-    ["shared-change-framework/SKILL.md", "4. Branch, commit, and PR workflow"]."""
-    descriptions, drops = descriptions or {}, drops or []
+    ["shared-change-framework/SKILL.md", "4. Branch, commit, and PR workflow"]. ``cuts`` lists
+    [file under skills/, exact text], applied after the drops; each text must occur exactly once in its file."""
+    descriptions, drops, cuts = descriptions or {}, drops or [], cuts or []
     changes = {"descriptions": descriptions, "drops": drops} if drops else descriptions
+    if cuts:
+        changes = {"descriptions": descriptions, "drops": drops, "cuts": cuts}
     tag = hashlib.sha256(json.dumps(changes, sort_keys=True).encode()).hexdigest()[:8] if changes else ""
     dest = cache / "skills" / (rev + tag)
     if not dest.exists():
@@ -243,8 +253,38 @@ def skills_dir(rev: str, cache: Path, descriptions: dict[str, str] | None = None
         for file, heading in drops:
             path = staging / "skills" / file
             path.write_text(drop_heading(path.read_text(), heading))
+        for file, cut in cuts:
+            path = staging / "skills" / file
+            cut_result = cut_text(path.read_text(), cut) if path.is_file() else None
+            if cut_result is None:
+                shutil.rmtree(staging)
+                raise SystemExit(f"arm {arm!r} skill_cuts: the text {cut[:60]!r} must occur exactly once in {file}")
+            path.write_text(cut_result)
         staging.rename(dest)
     return dest / "skills"
+
+
+def find_references(text: str) -> list[str]:
+    """Reference files named in tool traffic, as ``<skill>/references/<file>``: ``skill://<skill>/references/<file>``
+    or a path through ``skills/<skill>/references/<file>``."""
+    return sorted({f"{m[0]}/references/{m[1]}"
+                   for m in re.findall(r"(?:skill://|skills/)([\w-]+)/references/([\w./-]*\w)", text)})
+
+
+def interleave(jobs: list, seed: int) -> list:
+    """Shuffle the (scenario, arm, rep) jobs so drift and usage cutoffs hit all arms alike."""
+    jobs = list(jobs)
+    random.Random(seed).shuffle(jobs)
+    return jobs
+
+
+def record_seed(out: Path, seed: int, sessions: int) -> None:
+    """Append the shuffle seed to ``seeds.json`` in the run folder."""
+    path = out / "seeds.json"
+    seeds = json.loads(path.read_text()) if path.exists() else []
+    seeds.append({"seed": seed, "sessions": sessions})
+    out.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(seeds, indent=1))
 
 
 def bash_commands(events: list[dict]) -> str:
@@ -331,7 +371,7 @@ class Omp:
         overlay.write_text(
             "contextFiles:\n  extra:\n    - GLOBAL.md\ndisabledProviders:\n"
             + "".join(f"  - {p}\n" for p in DISABLED_PROVIDERS)
-            + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache, arm.get('descriptions'), arm.get('skill_drops'))}\n"
+            + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache, arm.get('descriptions'), arm.get('skill_drops'), arm.get('skill_cuts'), arm['name'])}\n"
             # The user's config falls back to another model on a provider error; a session must not. An empty
             # fallbackChains map merges into the user's chains rather than replacing them, so switch fallback off.
             + "retry:\n  modelFallback: false\n  usageAwareFallback: false\n")
@@ -388,6 +428,11 @@ class Omp:
     @staticmethod
     def skills_read(events: list[dict], stdout: list[str]) -> list[str]:
         return sorted(set(re.findall(r"skill://([\w-]+)", "".join(stdout))))
+
+    @staticmethod
+    def references_read(events: list[dict], stdout: list[str]) -> list[str]:
+        return find_references("\n".join(json.dumps(ev.get("args") or {}) for ev in events
+                                         if ev.get("type") == "tool_execution_start"))
 
     @staticmethod
     def audit(events: list[dict]) -> dict:
@@ -459,7 +504,7 @@ class ClaudeCode:
         config.mkdir()
         if text is not None:
             (config / "CLAUDE.md").write_text(text)
-        shutil.copytree(skills_dir(arm["skills"], cache, arm.get("descriptions"), arm.get("skill_drops")),
+        shutil.copytree(skills_dir(arm["skills"], cache, arm.get("descriptions"), arm.get("skill_drops"), arm.get("skill_cuts"), arm["name"]),
                         self.repo / ".claude" / "skills")
         excluded = [".claude/"]
         if (self.repo / "AGENTS.md").exists() and not (self.repo / "CLAUDE.md").exists():
@@ -586,6 +631,10 @@ class ClaudeCode:
                        if b.get("name") == "Skill" and (b.get("input") or {}).get("skill")})
 
     @classmethod
+    def references_read(cls, events: list[dict], stdout: list[str]) -> list[str]:
+        return find_references("\n".join(json.dumps(b.get("input") or {}) for b in cls.tool_uses(events)))
+
+    @classmethod
     def audit(cls, events: list[dict]) -> dict:
         """What Claude Code reported loading, kept in each result so isolation can be checked afterwards."""
         init = (cls.init_events(events) or [{}])[0]
@@ -695,6 +744,7 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
               "metrics": metrics, "cost": round(h.turn_cost(events), 4),
               "tool_calls": h.tool_calls(events),
               "skills_read": h.skills_read(events, stdout),
+              "references_read": h.references_read(events, stdout),
               **({"harness": h.name, **h.audit(events)} if h.name != "omp" else {})}
     result_path.parent.mkdir(parents=True, exist_ok=True)
     result_path.write_text(json.dumps(result, indent=1))
@@ -886,6 +936,8 @@ def main() -> None:
     ap.add_argument("--harness", choices=sorted(HARNESSES), default="omp", help="agent CLI to drive")
     ap.add_argument("--smoke", action="store_true",
                     help="trial runs before pre-registration; the folder is never used for decisions")
+    ap.add_argument("--seed", type=int, help="shuffle seed for the job order (default: derived from the time, printed)")
+    ap.add_argument("--ceiling", type=float, default=SPEND_CEILING, help="spend ceiling in USD (default: SPEND_CEILING)")
     ap.add_argument("--ledger", type=Path, help="phase spend ledger (default: ledger.json next to --out)")
     args = ap.parse_args()
     if args.action == "report":
@@ -894,7 +946,7 @@ def main() -> None:
     if len(args.out) != 1:
         raise SystemExit("run takes one --out")
     out = args.out[0]
-    ledger = Ledger(args.ledger or out.resolve().parent / "ledger.json")
+    ledger = Ledger(args.ledger or out.resolve().parent / "ledger.json", args.ceiling)
     cache = SANDBOX_ROOT / "cache"
     prepare_sandbox_root()
     # Calibration-only arms carry text written to make failures likely; they never enter a scored folder.
@@ -907,9 +959,12 @@ def main() -> None:
     if args.harness == "claude-code":
         claude_oauth_token()  # a missing login fails here, not in a worker thread
     pin_baseline(out, baseline(args.model, args.smoke, args.harness))
-    for rev, descriptions, drops in {(a["skills"], json.dumps(a.get("descriptions")), json.dumps(a.get("skill_drops")))
-                                     for _, a, _ in jobs}:
-        skills_dir(rev, cache, json.loads(descriptions), json.loads(drops))
+    for a in {json.dumps(a, sort_keys=True): a for _, a, _ in jobs}.values():
+        skills_dir(a["skills"], cache, a.get("descriptions"), a.get("skill_drops"), a.get("skill_cuts"), a["name"])
+    seed = args.seed if args.seed is not None else int(time.time() * 1000) % 2**32
+    print(f"seed {seed}", flush=True)
+    jobs = interleave(jobs, seed)
+    record_seed(out, seed, len(jobs))
     print(f"{len(jobs)} sessions", flush=True)
     with cf.ThreadPoolExecutor(args.jobs) as pool:
         futures = {pool.submit(run_one, s, a, rep, out, cache, ledger, args.model, args.smoke, args.harness):
