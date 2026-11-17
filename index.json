@@ -310,6 +310,16 @@
       "status": "open",
       "title": "Run the remaining nine scripted scenarios"
     },
+    "eval2-skill-sections": {
+      "claim": null,
+      "needs": [
+        "eval2-scripted-core",
+        "eval2-scripted-extended"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Ablate skill sections in the scenarios that load them"
+    },
     "eval2-subagent-briefs": {
       "claim": null,
       "needs": [
