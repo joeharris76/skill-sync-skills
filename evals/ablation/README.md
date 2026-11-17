@@ -58,10 +58,67 @@ turn starts a session in the run directory; each later turn resumes it with
 turn. `$FINAL` is the last turn's final message and `$RUN/final.<turn>.txt`
 holds each turn's (0-based). A failed turn discards the whole session.
 
+## Claude Code harness
+
+`run.py run --harness claude-code` (default `omp`) drives `claude -p
+--output-format stream-json --verbose` instead, with the same scenarios, arms,
+sandbox and checks. A run folder is pinned to one harness and version by
+`baseline.json`; Anthropic models only.
+
+- **Global text.** Written as `CLAUDE.md` in a per-session sandbox config
+  directory (`CLAUDE_CONFIG_DIR`), loaded with `--setting-sources user,project`.
+  This is how the user's real global file reaches Claude Code (user-level
+  memory), so the text has the same standing as in use. `--setting-sources
+  project` alone ignores user memory. The directory holds only that file; the
+  `none` arm has no file. Text passed with `--append-system-prompt-file`
+  reaches the main session only, not subagents, so it would misstate real use.
+- **Skills.** The arm's skills are copied to `.claude/skills` in the sandbox
+  repository. `.claude/` is excluded from git. If the repository has an
+  `AGENTS.md`, a `CLAUDE.md` containing `@AGENTS.md` (also excluded) lets Claude
+  Code read it, as omp does. Claude Code also lists its own bundled skills.
+- **Login.** The deny profile hides `~/.claude` and `~/.claude.json` and refuses
+  to run `/usr/bin/security`; Claude Code's keychain entry is keyed to its
+  config directory, so a sandbox directory cannot see it. The runner reads the
+  login token from the keychain (or takes `CLAUDE_CODE_OAUTH_TOKEN`) and passes
+  it in the child's environment. The runner writes it to no file, and removes it
+  from the output before anything is parsed or saved (`[redacted]`); Claude
+  Code's own session logs in the sandbox config directory are deleted after the
+  last turn. The agent could still print its environment, so scenario prompts
+  must not invite it. The keychain access token expires and is not refreshed
+  during a run: for long batches run `claude setup-token` and export
+  `CLAUDE_CODE_OAUTH_TOKEN`. A missing login fails before any session starts.
+  Nothing from `~/.claude` is copied.
+- **Permissions.** `--dangerously-skip-permissions`, only inside the
+  `sandbox-exec` profile. `--strict-mcp-config` with no MCP config loads no
+  servers. A session that reports non-bundled plugins or MCP servers at start-up
+  is discarded, and each result records the skills and plugins reported
+  (`init_skills`, `init_plugins`).
+- **Turns.** The first turn starts with `--session-id <uuid>`, later turns use
+  `--resume <uuid>`.
+- **Output.** Final text is the last assistant message of the main thread. Tool
+  calls go to `cmds.txt` as `[tool] command` with the tool name in lower case
+  (`[bash]`, `[edit]`, `[write]`); a Skill call is `[skill] skill://<name>`, so
+  skill-loading checks work. Claude Code's file tools use `file_path` where omp
+  uses `path`, so a check that greps those arguments needs checking per harness.
+  Cost: Claude Code restores the saved session total on `--resume`, so each
+  turn's `total_cost_usd` already includes the earlier turns; the ledger gets
+  the difference and a result's cost is the last total. A turn that reports
+  nothing (timeout, kill) is charged the `--max-budget-usd` cap. The runner refuses
+  the session if any model other than `--model` appears in the init event,
+  messages or `modelUsage`.
+- **Spend.** `--max-budget-usd 3` per turn; spend goes to the ledger.
+
+`isolation_probe.py --out DIR` runs sessions that try to quote the first line of
+the user's `~/.claude/CLAUDE.md` and text from a section the arm drops, and
+must quote a marker only the arm's text holds; it also compares the reported
+skills and plugins with the user's own. A second probe session tries, through the
+agent's Bash tool, to read `~/.claude.json` and to run
+`security find-generic-password -s "Claude Code-credentials"`; both must fail.
+
 ## Commands
 
 ```sh
-uv run --no-project python evals/ablation/run.py run --out <dir> [--scenario <id>] [--arm <name>] [--reps 30] [--jobs 6] [--model <id>] [--smoke] [--ledger <file>]
+uv run --no-project python evals/ablation/run.py run --out <dir> [--scenario <id>] [--arm <name>] [--reps 30] [--jobs 6] [--model <id>] [--smoke] [--ledger <file>] [--harness omp|claude-code]
 uv run --no-project python evals/ablation/run.py report --out <dir> [--out <dir> ...]
 ```
 
