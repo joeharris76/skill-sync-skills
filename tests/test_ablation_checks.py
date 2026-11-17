@@ -142,14 +142,15 @@ class ArmTests(unittest.TestCase):
                         self.assertIsNotNone(text)
                         self.assertIn(old, text)
 
-    def test_compared_arms_exist(self):
-        """A decision against a misnamed arm would compare nothing and report no result."""
+    def test_compared_arms_and_checks_exist(self):
+        """A decision against a misnamed arm or check would compare nothing and report no result."""
         for scenario in run.SCENARIOS:
             names = {arm["name"] for arm in scenario["arms"]}
-            for key in ("reference", "removal"):
-                if key in scenario:
-                    with self.subTest(scenario=scenario["id"], key=key):
-                        self.assertIn(scenario[key], names)
+            for rule, spec in run.rule_specs(scenario).items():
+                with self.subTest(scenario=scenario["id"], rule=rule):
+                    self.assertIn(spec["reference"], names)
+                    self.assertIn(spec["removal"], names)
+                    self.assertLessEqual(set(spec["checks"]), set(scenario["checks"]))
 
     def test_removing_a_section_removes_only_that_section(self):
         text = "# T\n\n## A\n\na\n\n## B\n\nb\n\n## C\n\nc\n"

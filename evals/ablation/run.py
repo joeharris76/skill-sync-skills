@@ -377,6 +377,21 @@ def load_results(out: Path) -> tuple[dict[tuple[str, str], list[dict]], int]:
     return rows, void
 
 
+def rule_specs(scenario: dict) -> dict[str, dict]:
+    """The rules a scenario tests: each with the arm that has it, the arm without it, and its decision checks.
+
+    ``rules`` maps a rule name to {"removal": arm, "checks": [...], "reference": arm}; checks default to all
+    of the scenario's checks and reference to the scenario's reference arm. A scenario may instead name one
+    ``rule`` and ``removal``. A candidate rule (text not yet deployed) uses the candidate arm as reference and
+    the deployed text as removal.
+    """
+    specs = scenario.get("rules") or (
+        {scenario["rule"]: {"removal": scenario["removal"]}} if scenario.get("rule") and scenario.get("removal") else {})
+    return {rule: {"reference": spec.get("reference", scenario.get("reference", "full")),
+                   "removal": spec["removal"], "checks": spec.get("checks") or list(scenario["checks"])}
+            for rule, spec in specs.items()}
+
+
 def decisions(outs: list[Path]) -> dict:
     """Apply the decision rule over scored run folders.
 
@@ -402,25 +417,26 @@ def decisions(outs: list[Path]) -> dict:
         for (sid, arm_name), rs in rows.items():
             arms = pooled.setdefault((sid, base["model"], base.get("harness", "omp")), {})
             arms.setdefault(arm_name, []).extend(r for r in rs if r.get("prereg"))
-    by_rule: dict[str, list[dict]] = {}
+    by_rule: dict[str, list[tuple[dict, dict]]] = {}
     for sc in SCENARIOS:
-        if sc.get("rule") and sc.get("removal") and sc.get("experiment"):
-            by_rule.setdefault(sc["rule"], []).append(sc)
+        if sc.get("experiment"):
+            for rule, spec in rule_specs(sc).items():
+                by_rule.setdefault(rule, []).append((sc, spec))
     bands, rules = [], {}
-    for rule, scenarios in by_rule.items():
-        ids = {sc["id"] for sc in scenarios}
+    for rule, targets in by_rule.items():
+        ids = {sc["id"] for sc, _ in targets}
         tested = sorted({(model, harness) for (sid, model, harness), arms in pooled.items()
                          if sid in ids and any(arms.values())})
         for model, harness in tested:
-            for sc in scenarios:
+            for sc, spec in targets:
                 arms = pooled.get((sc["id"], model, harness), {})
-                with_rule, without = arms.get(sc.get("reference", "full")), arms.get(sc["removal"])
+                with_rule, without = arms.get(spec["reference"]), arms.get(spec["removal"])
                 if not with_rule or not without:
                     result = {"band": "untested", "min_n": 0, "checks": {}}
                 else:
                     result = compare({name: (sum(r["checks"].get(name, False) for r in with_rule), len(with_rule),
                                              sum(r["checks"].get(name, False) for r in without), len(without))
-                                      for name in sc["checks"]})
+                                      for name in spec["checks"]})
                 bands.append({"rule": rule, "scenario": sc["id"], "model": model, "harness": harness, **result})
                 rules.setdefault(rule, []).append(result["band"])
     return {"bands": bands, "rules": {rule: rule_decision(b) for rule, b in rules.items()}}
