@@ -441,10 +441,15 @@
       "title": "Run one SkillSpector LLM semantic pass over the catalog and triage it"
     },
     "verify-instruction-cleanup-behaviour": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-18T19:37:16Z",
+        "generation": "0f33d670df334ac2b5da1cd4158e6dd3",
+        "renewals": 0,
+        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783"
+      },
       "needs": [],
       "priority": "high",
-      "status": "open",
+      "status": "active",
       "title": "Confirm the November instruction and skill cleanup works in live sessions and removed no behaviour"
     }
   },
