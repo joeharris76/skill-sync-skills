@@ -18,6 +18,7 @@ phase began) and the skills deployed at the same time.
 from __future__ import annotations
 
 import json
+import re
 
 from scenarios import DRAFT_PR, PUSHED
 
@@ -1149,3 +1150,49 @@ git rev-parse feature/audit-log > "$RUN/unmerged.sha"
         },
     },
 ]
+
+
+# --- skill-section experiments -----------------------------------------------------------------------------
+# One new scenario per base scenario, reusing its setup, prompts and checks. Each arm removes one top-level
+# section of a skill that loads in the base scenario (observed on Sonnet), against the full skill set. Sections
+# are headings of the skill files at PHASE2_SKILLS; prereg/skill-sections.md lists the sections left out.
+SKILL_SECTIONS = {
+    "plan-then-proceed": [("change-framework", "shared-change-framework/SKILL.md", [
+        "1. Source-code selection", "2. Slicing discipline", "3. Post-edit verification ladder",
+        "4. Branch, commit, and PR workflow", "5. Capability removal and replacement [CHANGE-REMOVAL-001]"])],
+    "review-then-address": [("change-framework", "shared-change-framework/SKILL.md", [
+        "1. Source-code selection", "2. Slicing discipline", "3. Post-edit verification ladder",
+        "4. Branch, commit, and PR workflow", "5. Capability removal and replacement [CHANGE-REMOVAL-001]"])],
+    "handoff-takeover": [("session-takeover", "session-takeover/SKILL.md", ["Authority ceiling", "Procedure"])],
+    "tracker-file-items": [("todo", "todo/SKILL.md", [
+        "Critical rules", "Gates and what to do about them", "Planning", "Finding the right tool"])],
+}
+
+
+def heading_slug(heading: str) -> str:
+    """'5. Capability removal [TAG-1]' -> 'capability-removal'."""
+    text = re.sub(r"\[[^\]]*\]", "", heading)
+    text = re.sub(r"^\d+\.\s*", "", text)
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+def skill_sections_scenario(base: dict, sections: list[tuple[str, str, list[str]]]) -> dict:
+    """A copy of ``base`` whose arms are the full skills plus one arm per removed skill section. The base
+    scenario is not touched, so its checks_hash stays what scored results recorded."""
+    scenario = {k: v for k, v in base.items() if k not in ("rule", "removal", "reference")}
+    # The decision checks are the base scenario's: those its rules use, or all of its checks when it has none.
+    checks = list(dict.fromkeys(c for spec in (base.get("rules") or {}).values() for c in spec.get("checks", []))) \
+        or list(base["checks"])
+    arms, rules = [arm("full")], {}
+    for skill, path, headings in sections:
+        for heading in headings:
+            name = f"minus-{skill}-{heading_slug(heading)}"
+            arms.append(arm(name, skill_drops=[[path, heading]]))
+            rules[f"{skill}-{heading_slug(heading)}"] = {"reference": "full", "removal": name, "checks": checks}
+    scenario.update(id=f"skills-{base['id']}", experiment="skill-sections", arms=arms, rules=rules,
+                    unit=f"skill sections: {base['unit']}")
+    return scenario
+
+
+_BASE = {s["id"]: s for s in SCENARIOS2}
+SCENARIOS2 += [skill_sections_scenario(_BASE[base], sections) for base, sections in SKILL_SECTIONS.items()]
