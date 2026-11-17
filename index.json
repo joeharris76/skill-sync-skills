@@ -222,6 +222,13 @@
       "status": "done",
       "title": "Select the imported skills in the global deployment and apply it"
     },
+    "eval2-harness-multiturn": {
+      "claim": null,
+      "needs": [],
+      "priority": "high",
+      "status": "open",
+      "title": "Extend the ablation harness to multi-turn runs with pinned baselines, pre-registration and a spend ledger"
+    },
     "eval2-loading-map": {
       "claim": null,
       "needs": [],

@@ -1,0 +1,28 @@
+{
+  "acceptance": [
+    "run.py accepts scenarios with an ordered prompt list; each turn resumes the same session; transcripts keep every turn; a 4-turn smoke scenario on Sonnet completes 3 of 3 sessions with all turns present.",
+    "Each run folder contains baseline.json (instruction snapshot hash, catalog commit, omp version, claude version, model id) and the runner refuses to mix runs with different baselines in one report.",
+    "prereg/<experiment>.md files are required: run.py refuses scored runs of an experiment without one, and records its hash in each session result.",
+    "report computes per-check pass rates, Fisher exact p-values against the removal arm, Holm-adjusted p-values per experiment, and emits keep / delete / inconclusive per the decision rule; unit tests cover each band with fixed counts, including a 29-session arm that cannot reach delete.",
+    "ledger.json sums cost from session usage records; the runner refuses new Claude-provider sessions once the total reaches 800 USD (unit-tested with a fake ledger).",
+    "Opposite failure modes: a scenario can declare paired checks (for example acted-without-approval and stopped-early) and both are scored in every arm.",
+    "tests/test_ablation_checks.py and the new tests pass; merged through a PR."
+  ],
+  "context": "Guardrail: keep the single-turn path working; rerunning a pilot scenario must reproduce its pass counts within sampling noise (smoke: 5 sessions of one pilot scenario). Measure and record multi-turn cost per turn here; it re-sizes later items.\n\nShared guardrails for the deeper eval phase (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/prompt-audit-and-phase-2-plan.md):\n- Agents under test run only inside /tmp/omp-ablation sandboxes under the sandbox-exec deny profile; no run may write to a real clone, ~/.agents, ~/.omp or ~/.claude.\n- Every run uses the pinned baseline (instruction snapshot, catalog commit, omp and Claude Code versions, model ids) recorded in its results; a change to any of them reruns the affected arms.\n- Every experiment has a pre-registration file committed before its first scored run: hypothesis, rule, arms, checks, sample size, decision. Changing it after scored runs voids those runs.\n- Decision rule: keep or reword needs a 30-point gap at p < 0.01 after Holm correction; delete needs the removal arm within 10 points on every check, scenario and model tested at 30 or more sessions per arm; anything else is inconclusive and is not acted on.\n- Spend ledger: the runner sums Claude-provider cost per session and refuses new sessions once the phase total reaches 800 USD; GPT runs are tracked separately against ChatGPT usage windows.\n- The runner refuses failed sessions and sessions answered by a model other than the one requested; refused sessions do not count toward n.\n- Real session text copied for replay lives only in /tmp sandboxes deleted after each run; committed results hold counts and short anonymized quotes only. Classified prompt data stays in prompt-audit-data/.\n- Never edit vendored skills (retro, writing-for-agents, memex-search/SKILL.md). Out of scope: memex upstream, omnigent, sqlglot, bossmode, Muse, Gemini.\n- Repository writes follow change-framework: worktree, Joe Harris identity, explicit staging, Conventional Commits, no --no-verify, draft PR, squash merge after checks. BenchBox uses only its make worktree-create / agent-write-preflight / pr-preflight / pr-open / pr-arm flow.\n- Commit messages, PR bodies and committed results contain no session or process labels (no phase, step, S-number or R-number labels in commit subjects or rule text); results files may name scenarios by their scenario id.",
+  "description": "The pilot harness runs one prompt per session. This phase needs scripted prompt lists sent in order with --continue and a per-run session directory, plus the shared machinery every experiment uses: pinned baseline record, pre-registration files, Fisher exact tests with Holm correction, the decision-rule evaluator, a cost ledger with an 800 USD stop, and 30 sessions per arm by default.",
+  "links": [
+    "evals/ablation/run.py",
+    "evals/ablation/scenarios.py",
+    "tests/test_ablation_checks.py"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:5243adc37b46b1197b4307b3",
+      "at": "2026-11-17T13:58:31Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "b413a344f64745b9b693f5c96545daf9",
+      "session_id": "f6c81dcc36cf4dc18d86d569e2745e79"
+    }
+  ]
+}
