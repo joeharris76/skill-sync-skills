@@ -84,11 +84,17 @@ def compare(counts: dict[str, tuple[int, int, int, int]]) -> dict:
     return {"band": band, "min_n": min_n, "checks": checks}
 
 
-def rule_decision(bands: list[str]) -> str:
+MIN_MODELS_TO_DELETE = 2
+
+
+def rule_decision(bands: list[str], models: int = MIN_MODELS_TO_DELETE) -> str:
     """Decision for a rule from its per-scenario, per-model bands.
 
     ``untested`` (a scenario for the rule with no results on a model that ran
-    others) blocks deletion; it does not block keep.
+    others) blocks deletion; it does not block keep. ``models`` is how many
+    distinct models the bands cover: no rule is deleted on one model's result,
+    so all-within on fewer than MIN_MODELS_TO_DELETE models is ``within``, a
+    candidate that needs another model.
     """
     if not bands:
         return "untested"
@@ -99,5 +105,5 @@ def rule_decision(bands: list[str]) -> str:
     if "harmful" in bands:
         return "reword"
     if all(b == "within" for b in bands):
-        return "delete"
+        return "delete" if models >= MIN_MODELS_TO_DELETE else "within"
     return "inconclusive"

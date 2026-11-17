@@ -113,7 +113,9 @@ def pin_baseline(out: Path, current: dict) -> None:
 
 
 def checks_hash(scenario: dict) -> str:
-    return hashlib.sha256(json.dumps(scenario.get("checks", {}), sort_keys=True).encode()).hexdigest()[:16]
+    """Hash of what scores a session: the check scripts and which checks each rule's decision uses."""
+    scored = {"checks": scenario.get("checks", {}), "rules": scenario.get("rules", {})}
+    return hashlib.sha256(json.dumps(scored, sort_keys=True).encode()).hexdigest()[:16]
 
 
 def parse_events(stdout: str | bytes | None) -> list[dict]:
@@ -293,8 +295,9 @@ class Omp:
             "contextFiles:\n  extra:\n    - GLOBAL.md\ndisabledProviders:\n"
             + "".join(f"  - {p}\n" for p in DISABLED_PROVIDERS)
             + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache, arm.get('descriptions'))}\n"
-            # The user's config may fall back to another model on a provider error; a session must not.
-            + "retry:\n  fallbackChains: {}\n  usageAwareFallback: false\n")
+            # The user's config falls back to another model on a provider error; a session must not. An empty
+            # fallbackChains map merges into the user's chains rather than replacing them, so switch fallback off.
+            + "retry:\n  modelFallback: false\n  usageAwareFallback: false\n")
 
     def command(self, prompt: str, turn: int, turns: int, model: str) -> list[str]:
         session = (["--no-session"] if turns == 1
@@ -609,6 +612,7 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
             events.extend(turn_events)
             # $RUN/final.<turn>.txt is the agent's last message of that turn; $FINAL is the last turn's.
             (run / f"final.{turn}.txt").write_text(h.final_text(turn_events))
+            snapshot(repo, run, base, env, turn)
     finally:
         h.cleanup()
     (run / "out.jsonl").write_text("".join(stdout))
@@ -616,7 +620,8 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
     (run / "final.txt").write_text((run / f"final.{len(prompts) - 1}.txt").read_text())
     kept = out / "transcripts" / result_path.stem
     kept.mkdir(parents=True, exist_ok=True)
-    for name in ["out.jsonl", "cmds.txt", "final.txt"] + [f"final.{t}.txt" for t in range(len(prompts))]:
+    for name in (["out.jsonl", "cmds.txt", "final.txt"] + [f"final.{t}.txt" for t in range(len(prompts))]
+                 + [f"state.{t}.txt" for t in range(len(prompts))]):
         shutil.copy(run / name, kept / name)
     env["BASE"] = base
     checks = {}
@@ -637,6 +642,20 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
     return result
 
 
+def snapshot(repo: Path, run: Path, base: str, env: dict, turn: int) -> None:
+    """Record the repository state after a turn in $RUN/state.<turn>.txt, for checks on earlier turns.
+
+    Lines: dirty=<changed paths in the tree>, commits=<new commits on any ref>, pushed=<new commits on the
+    sandbox remote>, prs=<pr create calls>. Counts only.
+    """
+    script = ('echo "dirty=$(git status --porcelain | wc -l | tr -d " ")"; '
+              'echo "commits=$(git rev-list --all --not "$BASE" | wc -l | tr -d " ")"; '
+              'echo "pushed=$(git --git-dir="$RUN/remote.git" rev-list --all --not "$BASE" 2>/dev/null | wc -l | tr -d " ")"; '
+              'echo "prs=$(cat "$GH_SHIM_LOG" 2>/dev/null | grep -c "^pr create")"')
+    out = subprocess.run(["bash", "-c", script], cwd=repo, env=dict(env, BASE=base), capture_output=True, text=True)
+    (run / f"state.{turn}.txt").write_text(out.stdout)
+
+
 def load_results(out: Path) -> tuple[dict[tuple[str, str], list[dict]], int]:
     """Results by (scenario, arm), without runs whose pre-registration or checks changed afterwards."""
     by_id = {s["id"]: s for s in SCENARIOS}
@@ -651,6 +670,21 @@ def load_results(out: Path) -> tuple[dict[tuple[str, str], list[dict]], int]:
             continue
         rows.setdefault((r["scenario"], r["arm"]), []).append(r)
     return rows, void
+
+
+def rule_specs(scenario: dict) -> dict[str, dict]:
+    """The rules a scenario tests: each with the arm that has it, the arm without it, and its decision checks.
+
+    ``rules`` maps a rule name to {"removal": arm, "checks": [...], "reference": arm}; checks default to all
+    of the scenario's checks and reference to the scenario's reference arm. A scenario may instead name one
+    ``rule`` and ``removal``. A candidate rule (text not yet deployed) uses the candidate arm as reference and
+    the deployed text as removal.
+    """
+    specs = scenario.get("rules") or (
+        {scenario["rule"]: {"removal": scenario["removal"]}} if scenario.get("rule") and scenario.get("removal") else {})
+    return {rule: {"reference": spec.get("reference", scenario.get("reference", "full")),
+                   "removal": spec["removal"], "checks": spec.get("checks") or list(scenario["checks"])}
+            for rule, spec in specs.items()}
 
 
 def decisions(outs: list[Path]) -> dict:
@@ -678,28 +712,30 @@ def decisions(outs: list[Path]) -> dict:
         for (sid, arm_name), rs in rows.items():
             arms = pooled.setdefault((sid, base["model"], base.get("harness", "omp")), {})
             arms.setdefault(arm_name, []).extend(r for r in rs if r.get("prereg"))
-    by_rule: dict[str, list[dict]] = {}
+    by_rule: dict[str, list[tuple[dict, dict]]] = {}
     for sc in SCENARIOS:
-        if sc.get("rule") and sc.get("removal") and sc.get("experiment"):
-            by_rule.setdefault(sc["rule"], []).append(sc)
-    bands, rules = [], {}
-    for rule, scenarios in by_rule.items():
-        ids = {sc["id"] for sc in scenarios}
+        if sc.get("experiment"):
+            for rule, spec in rule_specs(sc).items():
+                by_rule.setdefault(rule, []).append((sc, spec))
+    bands, rules, models = [], {}, {}
+    for rule, targets in by_rule.items():
+        ids = {sc["id"] for sc, _ in targets}
         tested = sorted({(model, harness) for (sid, model, harness), arms in pooled.items()
                          if sid in ids and any(arms.values())})
+        models[rule] = len({model for model, _ in tested})
         for model, harness in tested:
-            for sc in scenarios:
+            for sc, spec in targets:
                 arms = pooled.get((sc["id"], model, harness), {})
-                with_rule, without = arms.get(sc.get("reference", "full")), arms.get(sc["removal"])
+                with_rule, without = arms.get(spec["reference"]), arms.get(spec["removal"])
                 if not with_rule or not without:
                     result = {"band": "untested", "min_n": 0, "checks": {}}
                 else:
                     result = compare({name: (sum(r["checks"].get(name, False) for r in with_rule), len(with_rule),
                                              sum(r["checks"].get(name, False) for r in without), len(without))
-                                      for name in sc["checks"]})
+                                      for name in spec["checks"]})
                 bands.append({"rule": rule, "scenario": sc["id"], "model": model, "harness": harness, **result})
                 rules.setdefault(rule, []).append(result["band"])
-    return {"bands": bands, "rules": {rule: rule_decision(b) for rule, b in rules.items()}}
+    return {"bands": bands, "rules": {rule: rule_decision(b, models[rule]) for rule, b in rules.items()}}
 
 
 def report(outs: list[Path]) -> None:
