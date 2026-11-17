@@ -193,6 +193,7 @@ class DecisionRuleTests(unittest.TestCase):
 
     def test_rule_decision_needs_every_band_within_to_delete(self):
         self.assertEqual(stats.rule_decision(["within", "within"]), "delete")
+        self.assertEqual(stats.rule_decision(["within", "within"], models=1), "within")
         self.assertEqual(stats.rule_decision(["within", "inconclusive"]), "inconclusive")
         self.assertEqual(stats.rule_decision(["within", "keep"]), "keep")
         self.assertEqual(stats.rule_decision(["harmful", "within"]), "reword")
@@ -231,9 +232,17 @@ class DecisionAggregationTests(unittest.TestCase):
     def test_a_rule_is_not_deleted_while_one_of_its_scenarios_is_unrun(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = self.folder(Path(tmp), "o", [("a", "full", 28, 30), ("a", "minus", 28, 30)])
-            self.assertEqual(self.decide(out)["rules"]["r"], "inconclusive")
+            other = self.folder(Path(tmp), "q", [("a", "full", 28, 30), ("a", "minus", 28, 30)], model="m2")
+            self.assertEqual(self.decide(out, other)["rules"]["r"], "inconclusive")
             both = self.folder(Path(tmp), "p", [("b", "full", 28, 30), ("b", "minus", 28, 30)])
-            self.assertEqual(self.decide(out, both)["rules"]["r"], "delete")
+            both2 = self.folder(Path(tmp), "p2", [("b", "full", 28, 30), ("b", "minus", 28, 30)], model="m2")
+            self.assertEqual(self.decide(out, other, both, both2)["rules"]["r"], "delete")
+
+    def test_no_rule_is_deleted_on_one_model(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = self.folder(Path(tmp), "o", [("a", "full", 28, 30), ("a", "minus", 28, 30),
+                                              ("b", "full", 28, 30), ("b", "minus", 28, 30)])
+            self.assertEqual(self.decide(out)["rules"]["r"], "within")
 
     def test_results_without_a_preregistration_do_not_count(self):
         with tempfile.TemporaryDirectory() as tmp:

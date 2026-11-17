@@ -1,12 +1,14 @@
 """Known-pass and known-fail cases for the checks of the multi-turn scenarios.
 
-Standard library only; needs bash, grep and git.
+Standard library only; needs bash, grep and git. Checks that run Python through uv are skipped where uv is
+not installed; the sandboxes they score always have it.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -121,6 +123,7 @@ class ChangedPathTests(unittest.TestCase):
             self.assertTrue(box.check(script))
 
 
+@unittest.skipUnless(shutil.which("uv"), "the check runs Python through uv")
 class FixCheckTests(unittest.TestCase):
     def test_both_defects_must_be_fixed(self):
         script = scenarios2.BOTH_FIXED
