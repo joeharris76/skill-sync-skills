@@ -335,14 +335,19 @@
       "title": "Ablate BenchBox AGENTS.md sections in replays of real BenchBox sessions"
     },
     "eval2-scripted-core": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-18T15:44:52Z",
+        "generation": "08de2fd51e6a42238296faf2277a39db",
+        "renewals": 0,
+        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:5243adc37b46b1197b4307b3"
+      },
       "needs": [
         "eval2-harness-multiturn",
         "eval2-harness-judged-checks",
         "eval2-loading-map"
       ],
       "priority": "high",
-      "status": "open",
+      "status": "active",
       "title": "Run the first five scripted multi-turn scenarios"
     },
     "eval2-scripted-extended": {
