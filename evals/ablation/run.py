@@ -5,7 +5,7 @@ which global instruction text and which skills revision the agent sees; nothing
 else differs. Checks are shell commands run against the sandbox afterwards.
 
 Usage:
-    run.py run --out DIR [--scenario ID ...] [--reps 30] [--jobs 6] [--smoke]
+    run.py run --out DIR [--scenario ID ...] [--reps 30] [--jobs 6] [--smoke] [--harness omp|claude-code]
     run.py report --out DIR [--out DIR ...]
 """
 
@@ -90,11 +90,11 @@ def file_hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
 
 
-def baseline(model: str, smoke: bool) -> dict:
+def baseline(model: str, smoke: bool, harness: str = "omp") -> dict:
     """What a run folder's results depend on besides the arm; one folder holds one baseline."""
-    omp = subprocess.run(["omp", "--version"], capture_output=True, text=True, check=True).stdout.strip()
+    version = HARNESSES[harness].version()
     fixtures = {p.name: file_hash(p) for p in sorted((HERE / "fixtures").glob("*.md"))}
-    return {"harness": "omp", "harness_version": omp, "model": model, "smoke": smoke, "fixtures": fixtures}
+    return {"harness": harness, "harness_version": version, "model": model, "smoke": smoke, "fixtures": fixtures}
 
 
 def pin_baseline(out: Path, current: dict) -> None:
@@ -248,11 +248,17 @@ def prepare_sandbox_root() -> None:
     shutil.copytree(HERE / "shims", SANDBOX_ROOT / "shims", dirs_exist_ok=True)
     shutil.copytree(CATALOG / "deployment" / "global" / "hooks", SANDBOX_ROOT / "hooks", dirs_exist_ok=True)
     home = Path.home()
-    hidden = ["Developer", ".agents", ".claude", ".codex", ".gemini", ".tractable", ".skill-sync-deployment",
-              "Documents", "Desktop"]
+    hidden = ["Developer", ".agents", ".claude", ".claude.json", ".codex", ".gemini", ".tractable",
+              ".skill-sync-deployment", "Documents", "Desktop"]
+    # No session may run `security`: Claude Code's login token sits in the keychain. The keychain
+    # service itself stays reachable, since other agents may use it.
     (SANDBOX_ROOT / "deny.sb").write_text(
         "(version 1)\n(allow default)\n(deny file-read* file-write*\n"
-        + "".join(f'  (subpath "{home / name}")\n' for name in hidden) + ")\n")
+        + "".join(f'  (subpath "{home / name}")\n' for name in hidden) + ")\n"
+        '(deny process-exec (literal "/usr/bin/security"))\n')
+
+
+MAX_TURN_BUDGET = 3.0  # USD per turn, passed as --max-budget-usd and charged when a turn reports nothing
 
 
 def turn_cost(events: list[dict]) -> float:
@@ -260,8 +266,284 @@ def turn_cost(events: list[dict]) -> float:
                for ev in events if ev.get("type") == "message_end")
 
 
+class Omp:
+    """One session driven through ``omp -p --mode json``."""
+
+    name = "omp"
+    cwd = None  # omp is given --cwd instead
+
+    def __init__(self, run: Path, repo: Path):
+        self.run, self.repo = run, repo
+
+    @staticmethod
+    def version() -> str:
+        return subprocess.run(["omp", "--version"], capture_output=True, text=True, check=True).stdout.strip()
+
+    @staticmethod
+    def check_model(model: str) -> None:
+        pass
+
+    def prepare(self, arm: dict, cache: Path, text: str | None) -> None:
+        if text is not None:
+            (self.repo / "GLOBAL.md").write_text(text)
+            with (self.repo / ".git" / "info" / "exclude").open("a") as fh:
+                fh.write("GLOBAL.md\n")
+        overlay = self.run / "overlay.yml"
+        overlay.write_text(
+            "contextFiles:\n  extra:\n    - GLOBAL.md\ndisabledProviders:\n"
+            + "".join(f"  - {p}\n" for p in DISABLED_PROVIDERS)
+            + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache, arm.get('descriptions'))}\n"
+            # The user's config may fall back to another model on a provider error; a session must not.
+            + "retry:\n  fallbackChains: {}\n  usageAwareFallback: false\n")
+
+    def command(self, prompt: str, turn: int, turns: int, model: str) -> list[str]:
+        session = (["--no-session"] if turns == 1
+                   else ["--session-dir", str(self.run / "sessions")] + (["--continue"] if turn else []))
+        return ["sandbox-exec", "-f", str(SANDBOX_ROOT / "deny.sb"),
+                "omp", "-p", "--mode", "json", "--model", model, "--config", str(self.run / "overlay.yml"),
+                "--cwd", str(self.repo), *session, "--no-title", "--auto-approve", "--max-time", "900",
+                "--max-cost", "3", prompt]
+
+    def env(self, env: dict) -> dict:
+        return env
+
+    @staticmethod
+    def redact(stdout):
+        return stdout
+
+    charge = staticmethod(turn_cost)
+
+    @staticmethod
+    def cleanup() -> None:
+        pass
+
+    @staticmethod
+    def finished(events: list[dict]) -> bool:
+        return any(ev.get("type") == "agent_end" for ev in events)
+
+    @staticmethod
+    def failure_detail(events: list[dict]) -> str:
+        return ""
+
+    @staticmethod
+    def answered(events: list[dict]) -> set:
+        return {(ev.get("message") or {}).get("model") for ev in events
+                if ev.get("type") == "message_end" and (ev.get("message") or {}).get("role") == "assistant"}
+
+    @staticmethod
+    def check_isolation(events: list[dict]) -> None:
+        pass
+
+    turn_cost = staticmethod(turn_cost)
+    final_text = staticmethod(final_text)
+    bash_commands = staticmethod(bash_commands)
+
+    @staticmethod
+    def tool_calls(events: list[dict]) -> int:
+        return sum(ev.get("type") == "tool_execution_start" for ev in events)
+
+    @staticmethod
+    def skills_read(events: list[dict], stdout: list[str]) -> list[str]:
+        return sorted(set(re.findall(r"skill://([\w-]+)", "".join(stdout))))
+
+    @staticmethod
+    def audit(events: list[dict]) -> dict:
+        return {}
+
+
+def claude_oauth_token() -> str:
+    """The login token Claude Code needs, taken at run time.
+
+    Claude Code keeps its login in the macOS keychain under a name that depends on
+    its config directory, so a sandbox config directory cannot see it; the same
+    token passed in the environment authenticates without exposing any of the
+    user's ``~/.claude`` files. ``CLAUDE_CODE_OAUTH_TOKEN`` in the caller's
+    environment (from ``claude setup-token``) takes precedence.
+    """
+    token = os.environ.get("CLAUDE_CODE_OAUTH_TOKEN")
+    if token:
+        return token
+    raw = subprocess.run(["security", "find-generic-password", "-s", "Claude Code-credentials", "-w"],
+                         capture_output=True, text=True)
+    try:
+        return json.loads(raw.stdout)["claudeAiOauth"]["accessToken"]
+    except (json.JSONDecodeError, KeyError, TypeError):
+        raise SystemExit("no Claude Code login found: run `claude auth login` or set CLAUDE_CODE_OAUTH_TOKEN") from None
+
+
+def claude_blocks(events: list[dict], main_only: bool = False):
+    """Content blocks of assistant events as (message id, block); ``main_only`` skips subagent messages."""
+    for ev in events:
+        if ev.get("type") != "assistant" or (main_only and ev.get("parent_tool_use_id")):
+            continue
+        msg = ev.get("message") or {}
+        for block in msg.get("content") or []:
+            yield msg.get("id"), block
+
+
+class ClaudeCode:
+    """One session driven through ``claude -p --output-format stream-json``.
+
+    The arm's global text is the config directory's ``CLAUDE.md``, which is
+    where a deployed global instruction file lives (user memory, not the system
+    prompt), so the text carries the same authority as in real use. The arm's
+    skills sit in the repository's ``.claude/skills``, excluded from git.
+    ``user`` in ``--setting-sources`` means that sandbox directory, which holds
+    nothing but the ``CLAUDE.md``; ``local`` settings stay out. With
+    ``--setting-sources project`` alone Claude Code ignores user memory.
+    """
+
+    name = "claude-code"
+
+    def __init__(self, run: Path, repo: Path):
+        self.run, self.repo = run, repo
+        self.cwd = repo
+        self.session = str(uuid.uuid4())
+        self._token = None
+        self._total = 0.0
+
+    @staticmethod
+    def version() -> str:
+        return subprocess.run(["claude", "--version"], capture_output=True, text=True, check=True).stdout.strip()
+
+    @staticmethod
+    def check_model(model: str) -> None:
+        if not model.startswith("anthropic/"):
+            raise SystemExit(f"claude-code runs Anthropic models only, not {model}")
+
+    def prepare(self, arm: dict, cache: Path, text: str | None) -> None:
+        config = self.run / "cfg"
+        config.mkdir()
+        if text is not None:
+            (config / "CLAUDE.md").write_text(text)
+        shutil.copytree(skills_dir(arm["skills"], cache, arm.get("descriptions")), self.repo / ".claude" / "skills")
+        excluded = [".claude/"]
+        if (self.repo / "AGENTS.md").exists() and not (self.repo / "CLAUDE.md").exists():
+            # omp reads the repository's AGENTS.md itself; Claude Code reads CLAUDE.md, so point it there.
+            (self.repo / "CLAUDE.md").write_text("@AGENTS.md\n")
+            excluded.append("CLAUDE.md")
+        with (self.repo / ".git" / "info" / "exclude").open("a") as fh:
+            fh.write("".join(f"{p}\n" for p in excluded))
+
+    def command(self, prompt: str, turn: int, turns: int, model: str) -> list[str]:
+        session = ["--resume", self.session] if turn else ["--session-id", self.session]
+        return ["sandbox-exec", "-f", str(SANDBOX_ROOT / "deny.sb"),
+                "claude", "-p", "--model", model.split("/", 1)[-1], "--output-format", "stream-json", "--verbose",
+                "--setting-sources", "user,project", "--strict-mcp-config",
+                "--dangerously-skip-permissions",  # only ever inside the deny profile above
+                "--max-budget-usd", str(MAX_TURN_BUDGET), *session, prompt]
+
+    def env(self, env: dict) -> dict:
+        self._token = claude_oauth_token()
+        kept = {k: v for k, v in env.items() if not k.startswith(("CLAUDE", "ANTHROPIC"))}
+        return {**kept, "CLAUDE_CONFIG_DIR": str(self.run / "cfg"), "CLAUDE_CODE_OAUTH_TOKEN": self._token,
+                "DISABLE_AUTOUPDATER": "1"}
+
+    def redact(self, text: str | bytes | None) -> str:
+        """Remove the login token from output before it is parsed, saved or quoted in an error."""
+        if isinstance(text, bytes):
+            text = text.decode(errors="replace")
+        text = text or ""
+        return text.replace(self._token, "[redacted]") if self._token else text
+
+    @staticmethod
+    def finished(events: list[dict]) -> bool:
+        return any(ev.get("type") == "result" and not ev.get("is_error") and ev.get("subtype") == "success"
+                   for ev in events)
+
+    @staticmethod
+    def failure_detail(events: list[dict]) -> str:
+        results = [ev for ev in events if ev.get("type") == "result"]
+        return f"{results[-1].get('subtype')}: {results[-1].get('result', '')}" if results else "no result event"
+
+    @staticmethod
+    def answered(events: list[dict]) -> set:
+        models = {ev["model"] for ev in events if ev.get("type") == "system" and ev.get("subtype") == "init"}
+        for ev in events:
+            if ev.get("type") == "assistant":
+                models.add((ev.get("message") or {}).get("model"))
+            elif ev.get("type") == "result":
+                models.update((ev.get("modelUsage") or {}).keys())
+        return models - {"<synthetic>"}  # Claude Code's marker for messages it wrote itself
+
+    @staticmethod
+    def init_events(events: list[dict]) -> list[dict]:
+        return [ev for ev in events if ev.get("type") == "system" and ev.get("subtype") == "init"]
+
+    @classmethod
+    def check_isolation(cls, events: list[dict]) -> None:
+        """Refuse a session that loaded anything outside the sandbox: user plugins or MCP servers."""
+        for init in cls.init_events(events):
+            outside = [p for p in init.get("plugins") or [] if p.get("path") != "builtin"]
+            if outside or init.get("mcp_servers"):
+                raise RuntimeError(f"session loaded plugins {outside} or MCP servers {init.get('mcp_servers')}")
+
+    @staticmethod
+    def turn_cost(events: list[dict]) -> float:
+        """Session total so far: Claude Code restores the saved total on --resume, so each result is cumulative."""
+        return max((ev.get("total_cost_usd") or 0 for ev in events if ev.get("type") == "result"), default=0.0)
+
+    def charge(self, events: list[dict]) -> float:
+        """What this turn added to the session total; a turn that never reported is charged the budget cap."""
+        if not any(ev.get("type") == "result" for ev in events):
+            return MAX_TURN_BUDGET
+        total = self.turn_cost(events)
+        delta, self._total = max(total - self._total, 0.0), max(total, self._total)
+        return delta
+
+    def cleanup(self) -> None:
+        """Drop Claude Code's own session logs, which hold the full transcript."""
+        shutil.rmtree(self.run / "cfg" / "projects", ignore_errors=True)
+
+    @staticmethod
+    def final_text(events: list[dict]) -> str:
+        texts: dict[str, str] = {}
+        for msg_id, block in claude_blocks(events, main_only=True):
+            if block.get("type") == "text":
+                texts[msg_id] = texts.get(msg_id, "") + block.get("text", "")
+        texts = {k: v for k, v in texts.items() if v.strip()}
+        return list(texts.values())[-1] if texts else ""
+
+    @staticmethod
+    def tool_uses(events: list[dict]) -> list[dict]:
+        return [block for _, block in claude_blocks(events) if block.get("type") == "tool_use"]
+
+    @classmethod
+    def bash_commands(cls, events: list[dict]) -> str:
+        """One line per tool call, ``[tool] command``, as for omp; a loaded skill is ``[skill] skill://<name>``."""
+        cmds = []
+        for block in cls.tool_uses(events):
+            args = block.get("input") or {}
+            name = (block.get("name") or "").lower()
+            if name == "skill":
+                cmds.append(f"[skill] skill://{args.get('skill')}")
+            else:
+                cmds.append(f"[{name}] " + (args.get("command") or json.dumps(args))[:4000])
+        return "\n".join(cmds) + "\n"
+
+    @classmethod
+    def tool_calls(cls, events: list[dict]) -> int:
+        return len(cls.tool_uses(events))
+
+    @classmethod
+    def skills_read(cls, events: list[dict], stdout: list[str]) -> list[str]:
+        return sorted({b["input"]["skill"] for b in cls.tool_uses(events)
+                       if b.get("name") == "Skill" and (b.get("input") or {}).get("skill")})
+
+    @classmethod
+    def audit(cls, events: list[dict]) -> dict:
+        """What Claude Code reported loading, kept in each result so isolation can be checked afterwards."""
+        init = (cls.init_events(events) or [{}])[0]
+        return {"init_skills": sorted(init.get("skills") or []),
+                "init_plugins": sorted(p.get("name", "") for p in init.get("plugins") or []),
+                "claude_code_version": init.get("claude_code_version")}
+
+
+HARNESSES = {"omp": Omp, "claude-code": ClaudeCode}
+
+
 def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger: Ledger,
-            model: str = MODEL, smoke: bool = False) -> dict:
+            model: str = MODEL, smoke: bool = False, harness: str = "omp") -> dict:
     result_path = out / "results" / f"{scenario['id']}__{arm['name']}__{rep}.json"
     if result_path.exists():
         return json.loads(result_path.read_text())
@@ -286,58 +568,51 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
         target.write_text(drop_section(target.read_text(), heading))
         git("commit", "-q", "-am", "docs: update agent guide", cwd=repo)
         git("push", "-q", "origin", "HEAD", cwd=repo)
+    h = HARNESSES[harness](run, repo)
+    h.check_model(model)
     text = global_text(arm["global"], arm.get("fixture", "global-under-test.md"))
     for old, new in arm.get("edits", []):  # a reworded rule, to test before changing the real file
         if text is None or old not in text:
             raise SystemExit(f"arm {arm['name']}: text to replace not found")
         text = text.replace(old, new)
-    if text is not None:
-        (repo / "GLOBAL.md").write_text(text)
-        with (repo / ".git" / "info" / "exclude").open("a") as fh:
-            fh.write("GLOBAL.md\n")
     base = git("rev-parse", "HEAD", cwd=repo).strip()
     (run / "base").write_text(base)
-    overlay = run / "overlay.yml"
-    overlay.write_text(
-        "contextFiles:\n  extra:\n    - GLOBAL.md\ndisabledProviders:\n"
-        + "".join(f"  - {p}\n" for p in DISABLED_PROVIDERS)
-        + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache, arm.get('descriptions'))}\n"
-        # The user's config may fall back to another model on a provider error; a session must not.
-        + "retry:\n  fallbackChains: {}\n  usageAwareFallback: false\n")
+    h.prepare(arm, cache, text)
     # One prompt per turn; later turns continue the same session, as a user's follow-up would.
     prompts = scenario.get("prompts") or [scenario["prompt"]]
     events: list[dict] = []
     stdout = []
     wanted = model.split("/", 1)[-1]
-    for turn, prompt in enumerate(prompts):
-        ledger.admit(model)  # per turn, so a long session stops at the ceiling too
-        session = (["--no-session"] if len(prompts) == 1
-                   else ["--session-dir", str(run / "sessions")] + (["--continue"] if turn else []))
-        cmd = ["sandbox-exec", "-f", str(SANDBOX_ROOT / "deny.sb"),
-               "omp", "-p", "--mode", "json", "--model", model, "--config", str(overlay), "--cwd", str(repo),
-               *session, "--no-title", "--auto-approve", "--max-time", "900", "--max-cost", "3", prompt]
-        turn_events: list[dict] = []
-        try:
-            proc = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=1200)
-            turn_events = parse_events(proc.stdout)
-        except subprocess.TimeoutExpired as exc:
-            turn_events = parse_events(exc.stdout)
-            raise RuntimeError(f"turn {turn} timed out") from exc
-        finally:
-            ledger.add(model, turn_cost(turn_events))  # failed turns are spent too
-        stdout.append(proc.stdout)
-        if proc.returncode != 0 or not any(ev.get("type") == "agent_end" for ev in turn_events):
-            # A provider error or rate limit is not a behaviour result; leave no result file so a rerun retries it.
-            raise RuntimeError(f"turn {turn} failed (exit {proc.returncode}): {proc.stderr.strip()[-200:]}")
-        answered = {(ev.get("message") or {}).get("model") for ev in turn_events
-                    if ev.get("type") == "message_end" and (ev.get("message") or {}).get("role") == "assistant"}
-        if answered - {wanted}:
-            raise RuntimeError(f"turn {turn} answered by {sorted(answered)}, not {wanted}")
-        events.extend(turn_events)
-        # $RUN/final.<turn>.txt is the agent's last message of that turn; $FINAL is the last turn's.
-        (run / f"final.{turn}.txt").write_text(final_text(turn_events))
+    try:
+        for turn, prompt in enumerate(prompts):
+            ledger.admit(model)  # per turn, so a long session stops at the ceiling too
+            cmd = h.command(prompt, turn, len(prompts), model)
+            turn_events: list[dict] = []
+            try:
+                proc = subprocess.run(cmd, env=h.env(env), cwd=h.cwd, capture_output=True, text=True, timeout=1200)
+                raw, err = h.redact(proc.stdout), h.redact(proc.stderr)  # before anything is parsed or saved
+                turn_events = parse_events(raw)
+            except subprocess.TimeoutExpired as exc:
+                turn_events = parse_events(h.redact(exc.stdout))
+                raise RuntimeError(f"turn {turn} timed out") from exc
+            finally:
+                ledger.add(model, h.charge(turn_events))  # failed turns are spent too
+            stdout.append(raw)
+            if proc.returncode != 0 or not h.finished(turn_events):
+                # A provider error or rate limit is not a behaviour result; leave no result file so a rerun retries it.
+                raise RuntimeError(f"turn {turn} failed (exit {proc.returncode}): "
+                                   f"{(err.strip() or h.failure_detail(turn_events))[-200:]}")
+            answered = h.answered(turn_events)
+            if answered - {wanted}:
+                raise RuntimeError(f"turn {turn} answered by {sorted(answered)}, not {wanted}")
+            h.check_isolation(turn_events)
+            events.extend(turn_events)
+            # $RUN/final.<turn>.txt is the agent's last message of that turn; $FINAL is the last turn's.
+            (run / f"final.{turn}.txt").write_text(h.final_text(turn_events))
+    finally:
+        h.cleanup()
     (run / "out.jsonl").write_text("".join(stdout))
-    (run / "cmds.txt").write_text(bash_commands(events))
+    (run / "cmds.txt").write_text(h.bash_commands(events))
     (run / "final.txt").write_text((run / f"final.{len(prompts) - 1}.txt").read_text())
     kept = out / "transcripts" / result_path.stem
     kept.mkdir(parents=True, exist_ok=True)
@@ -353,9 +628,10 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
         metrics[name] = float(raw) if re.fullmatch(r"-?\d+(\.\d+)?", raw) else None
     result = {"scenario": scenario["id"], "arm": arm["name"], "rep": rep, "model": model, "run": str(run),
               "turns": len(prompts), "prereg": prereg, "checks_hash": checks_hash(scenario),
-              "checks": checks, "metrics": metrics, "cost": round(turn_cost(events), 4),
-              "tool_calls": sum(ev.get("type") == "tool_execution_start" for ev in events),
-              "skills_read": sorted(set(re.findall(r"skill://([\w-]+)", "".join(stdout))))}
+              "checks": checks, "metrics": metrics, "cost": round(h.turn_cost(events), 4),
+              "tool_calls": h.tool_calls(events),
+              "skills_read": h.skills_read(events, stdout),
+              **({"harness": h.name, **h.audit(events)} if h.name != "omp" else {})}
     result_path.parent.mkdir(parents=True, exist_ok=True)
     result_path.write_text(json.dumps(result, indent=1))
     return result
@@ -512,6 +788,7 @@ def main() -> None:
     ap.add_argument("--reps", type=int, default=DEFAULT_REPS)
     ap.add_argument("--jobs", type=int, default=6)
     ap.add_argument("--model", default=MODEL, help="use a separate --out directory per model")
+    ap.add_argument("--harness", choices=sorted(HARNESSES), default="omp", help="agent CLI to drive")
     ap.add_argument("--smoke", action="store_true",
                     help="trial runs before pre-registration; the folder is never used for decisions")
     ap.add_argument("--ledger", type=Path, help="phase spend ledger (default: ledger.json next to --out)")
@@ -529,12 +806,16 @@ def main() -> None:
             for a in s["arms"] if not args.arm or a["name"] in args.arm for rep in range(args.reps)]
     for s in {s["id"]: s for s, _, _ in jobs}.values():
         prereg_hash(s, args.smoke)  # refuse before spending anything
-    pin_baseline(out, baseline(args.model, args.smoke))
+    HARNESSES[args.harness].check_model(args.model)  # refuse before spending anything
+    if args.harness == "claude-code":
+        claude_oauth_token()  # a missing login fails here, not in a worker thread
+    pin_baseline(out, baseline(args.model, args.smoke, args.harness))
     for rev, descriptions in {(a["skills"], json.dumps(a.get("descriptions"))) for _, a, _ in jobs}:
         skills_dir(rev, cache, json.loads(descriptions))
     print(f"{len(jobs)} sessions", flush=True)
     with cf.ThreadPoolExecutor(args.jobs) as pool:
-        futures = {pool.submit(run_one, s, a, rep, out, cache, ledger, args.model, args.smoke): (s["id"], a["name"], rep)
+        futures = {pool.submit(run_one, s, a, rep, out, cache, ledger, args.model, args.smoke, args.harness):
+                   (s["id"], a["name"], rep)
                    for s, a, rep in jobs}
         for fut in cf.as_completed(futures):
             try:
