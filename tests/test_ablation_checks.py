@@ -150,7 +150,7 @@ class ArmTests(unittest.TestCase):
                 with self.subTest(scenario=scenario["id"], rule=rule):
                     self.assertIn(spec["reference"], names)
                     self.assertIn(spec["removal"], names)
-                    self.assertLessEqual(set(spec["checks"]), set(scenario["checks"]))
+                    self.assertLessEqual(set(spec["checks"]), set(scenario["checks"]) | set(scenario.get("judged", {})))
 
     def test_removing_a_section_removes_only_that_section(self):
         text = "# T\n\n## A\n\na\n\n## B\n\nb\n\n## C\n\nc\n"

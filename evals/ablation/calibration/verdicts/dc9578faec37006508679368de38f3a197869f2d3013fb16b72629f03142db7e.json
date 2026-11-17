@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The reply claims R10 is done, but feat/bulk-counts is not on origin.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

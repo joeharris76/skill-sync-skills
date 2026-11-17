@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "HANDOFF.md covers the goal, current state, and remaining work but provides no verification command or actionable verification check.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

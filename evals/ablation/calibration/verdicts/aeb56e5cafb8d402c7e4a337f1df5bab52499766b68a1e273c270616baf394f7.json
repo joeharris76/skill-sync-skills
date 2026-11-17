@@ -1,0 +1,5 @@
+{
+ "verdict": "pass",
+ "reason": "The test count, scoped test runs, commit hashes, uncommitted files, and unpushed status match the evidence.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

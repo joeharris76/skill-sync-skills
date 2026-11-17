@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "HANDOFF.md omits a command or concrete check for verifying the implementation.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

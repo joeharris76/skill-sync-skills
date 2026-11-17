@@ -37,6 +37,7 @@ DISABLED_PROVIDERS = ["agents", "claude", "codex", "gemini", "opencode", "github
 sys.path.insert(0, str(HERE))
 from scenarios import SCENARIOS as PILOT_SCENARIOS  # noqa: E402
 from scenarios2 import SCENARIOS2  # noqa: E402
+import judge  # noqa: E402
 from stats import compare, fisher, rule_decision  # noqa: E402
 
 SCENARIOS = PILOT_SCENARIOS + SCENARIOS2
@@ -113,8 +114,11 @@ def pin_baseline(out: Path, current: dict) -> None:
 
 
 def checks_hash(scenario: dict) -> str:
-    """Hash of what scores a session: the check scripts and which checks each rule's decision uses."""
+    """Hash of what scores a session: the check scripts, which checks each rule's decision uses, and any
+    judged checks. A scenario without judged checks keeps the hash it had before they existed."""
     scored = {"checks": scenario.get("checks", {}), "rules": scenario.get("rules", {})}
+    if "judged" in scenario:
+        scored["judged"] = scenario["judged"]
     return hashlib.sha256(json.dumps(scored, sort_keys=True).encode()).hexdigest()[:16]
 
 
@@ -237,6 +241,14 @@ def final_text(events: list[dict]) -> str:
             if text.strip():
                 texts.append(text)
     return texts[-1] if texts else ""
+
+
+def session_env(run: Path, cache: Path) -> dict:
+    """The environment a session's setup and checks run in; ``judge.py`` rebuilds it for evidence."""
+    return dict(os.environ, RUN=str(run), GIT_CONFIG_GLOBAL=str(run / "gitconfig"), GIT_CONFIG_NOSYSTEM="1",
+                PATH=f"{SANDBOX_ROOT / 'shims'}:{os.environ['PATH']}", GH_SHIM_LOG=str(run / "gh.log"),
+                GH_CANNED=str(run / "gh"), GH_TOKEN="sandbox", GH_CONFIG_DIR=str(run / "ghcfg"),
+                CMDS=str(run / "cmds.txt"), FINAL=str(run / "final.txt"), HARNESS=str(HERE), CACHE=str(cache))
 
 
 def prepare_sandbox_root() -> None:
@@ -560,10 +572,7 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
         "[advice]\n\tdetachedHead = false\n"
         + (f'[hook "reject-agent-identity"]\n\tevent = pre-commit\n\tcommand = {SANDBOX_ROOT}/hooks/reject-agent-identity\n'
            if arm.get("identity_hook") else ""))
-    env = dict(os.environ, RUN=str(run), GIT_CONFIG_GLOBAL=str(run / "gitconfig"), GIT_CONFIG_NOSYSTEM="1",
-               PATH=f"{SANDBOX_ROOT / 'shims'}:{os.environ['PATH']}", GH_SHIM_LOG=str(run / "gh.log"),
-               GH_CANNED=str(run / "gh"), GH_TOKEN="sandbox", GH_CONFIG_DIR=str(run / "ghcfg"),
-               CMDS=str(run / "cmds.txt"), FINAL=str(run / "final.txt"), HARNESS=str(HERE), CACHE=str(cache))
+    env = session_env(run, cache)
     setup = (HERE / scenario.get("base_setup", "base_setup.sh")).read_text() + "\n" + scenario.get("setup", "")
     subprocess.run(["bash", "-euo", "pipefail", "-c", setup], cwd=repo, env=env, check=True, capture_output=True)
     for path, heading in arm.get("repo_drop_sections", []):  # ablate a repository's own instruction file
@@ -627,13 +636,18 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
     checks = {}
     for name, script in scenario["checks"].items():
         checks[name] = subprocess.run(["bash", "-c", script], cwd=repo, env=env, capture_output=True).returncode == 0
+    judged, judged_details, judged_unusable, judged_missing = judge.run_judged(
+        scenario, arm["name"], result_path.stem, repo, env, run, text, out, out.resolve().parent / "judge-cache", ledger)
+    checks.update(judged)  # only calibrated checks with a verdict; the rest are listed, never counted as fails
     metrics = {}
     for name, script in scenario.get("metrics", {}).items():
         raw = subprocess.run(["bash", "-c", script], cwd=repo, env=env, capture_output=True, text=True).stdout.strip()
         metrics[name] = float(raw) if re.fullmatch(r"-?\d+(\.\d+)?", raw) else None
     result = {"scenario": scenario["id"], "arm": arm["name"], "rep": rep, "model": model, "run": str(run),
               "turns": len(prompts), "prereg": prereg, "checks_hash": checks_hash(scenario),
-              "checks": checks, "metrics": metrics, "cost": round(h.turn_cost(events), 4),
+              "checks": checks, "judged": judged_details, "judged_unusable": judged_unusable,
+              "judged_missing": judged_missing,
+              "metrics": metrics, "cost": round(h.turn_cost(events), 4),
               "tool_calls": h.tool_calls(events),
               "skills_read": h.skills_read(events, stdout),
               **({"harness": h.name, **h.audit(events)} if h.name != "omp" else {})}
@@ -676,14 +690,15 @@ def rule_specs(scenario: dict) -> dict[str, dict]:
     """The rules a scenario tests: each with the arm that has it, the arm without it, and its decision checks.
 
     ``rules`` maps a rule name to {"removal": arm, "checks": [...], "reference": arm}; checks default to all
-    of the scenario's checks and reference to the scenario's reference arm. A scenario may instead name one
-    ``rule`` and ``removal``. A candidate rule (text not yet deployed) uses the candidate arm as reference and
-    the deployed text as removal.
+    of the scenario's checks and judged checks, and reference to the scenario's reference arm. A scenario
+    may instead name one ``rule`` and ``removal``. A candidate rule (text not yet deployed) uses the
+    candidate arm as reference and the deployed text as removal.
     """
     specs = scenario.get("rules") or (
         {scenario["rule"]: {"removal": scenario["removal"]}} if scenario.get("rule") and scenario.get("removal") else {})
     return {rule: {"reference": spec.get("reference", scenario.get("reference", "full")),
-                   "removal": spec["removal"], "checks": spec.get("checks") or list(scenario["checks"])}
+                   "removal": spec["removal"],
+                   "checks": spec.get("checks") or list(scenario["checks"]) + list(scenario.get("judged", {}))}
             for rule, spec in specs.items()}
 
 
@@ -730,9 +745,13 @@ def decisions(outs: list[Path]) -> dict:
                 if not with_rule or not without:
                     result = {"band": "untested", "min_n": 0, "checks": {}}
                 else:
-                    result = compare({name: (sum(r["checks"].get(name, False) for r in with_rule), len(with_rule),
-                                             sum(r["checks"].get(name, False) for r in without), len(without))
-                                      for name in spec["checks"]})
+                    # A judged check counts only when every result has a verdict for it.
+                    names = [n for n in spec["checks"] if n in sc.get("checks", {})
+                             or all(n in r["checks"] for r in with_rule + without)]
+                    result = (compare({name: (sum(r["checks"].get(name, False) for r in with_rule), len(with_rule),
+                                              sum(r["checks"].get(name, False) for r in without), len(without))
+                                       for name in names})
+                              if names else {"band": "untested", "min_n": 0, "checks": {}})
                 bands.append({"rule": rule, "scenario": sc["id"], "model": model, "harness": harness, **result})
                 rules.setdefault(rule, []).append(result["band"])
     return {"bands": bands, "rules": {rule: rule_decision(b, models[rule]) for rule, b in rules.items()}}
@@ -768,7 +787,9 @@ def report_folder(out: Path) -> None:
     for sid in dict.fromkeys(s for s, _ in rows):
         sc = by_id.get(sid, {})
         print(f"## {sid} — unit: {sc.get('unit', '?')}")
-        names = list(sc.get("checks", {})) or sorted({c for (s, _), rs in rows.items() if s == sid for r in rs for c in r["checks"]})
+        names = (list(sc.get("checks", {})) + [n for n in sc.get("judged", {})
+                                               if all(n in r["checks"] for (s, _), rs in rows.items() if s == sid for r in rs)]
+                 ) or sorted({c for (s, _), rs in rows.items() if s == sid for r in rs for c in r["checks"]})
         ref = rows.get((sid, sc.get("reference", "full")))
         print("| arm | n | " + " | ".join(names) + " | metrics (mean) | skills read | tools | $/run |")
         print("|---|---|" + "---|" * (len(names) + 4))
@@ -796,6 +817,15 @@ def report_folder(out: Path) -> None:
             print(f"| {arm} | {len(rs)} | " + " | ".join(cells) + f" | {' '.join(means)} | "
                   f"{' '.join(f'{k}:{v}' for k, v in sorted(loaded.items())) or '-'} | "
                   f"{sum(r['tool_calls'] for r in rs) / len(rs):.0f} | {sum(r['cost'] for r in rs) / len(rs):.2f} |")
+        for (s, arm), rs in rows.items():
+            if s != sid:
+                continue
+            gaps: dict[str, int] = {}
+            for r in rs:
+                for name in r.get("judged_missing", {}):
+                    gaps[name] = gaps.get(name, 0) + 1
+            for name, count in gaps.items():
+                print(f"missing verdicts: {arm} {name} {count}/{len(rs)} (run judge.py rejudge --out {out})")
         print()
 
 
@@ -822,8 +852,10 @@ def main() -> None:
     ledger = Ledger(args.ledger or out.resolve().parent / "ledger.json")
     cache = SANDBOX_ROOT / "cache"
     prepare_sandbox_root()
+    # Calibration-only arms carry text written to make failures likely; they never enter a scored folder.
     jobs = [(s, a, rep) for s in SCENARIOS if not args.scenario or s["id"] in args.scenario
-            for a in s["arms"] if not args.arm or a["name"] in args.arm for rep in range(args.reps)]
+            for a in s["arms"] if (not args.arm or a["name"] in args.arm) and (args.smoke or not a.get("calibration_only"))
+            for rep in range(args.reps)]
     for s in {s["id"]: s for s, _, _ in jobs}.values():
         prereg_hash(s, args.smoke)  # refuse before spending anything
     HARNESSES[args.harness].check_model(args.model)  # refuse before spending anything

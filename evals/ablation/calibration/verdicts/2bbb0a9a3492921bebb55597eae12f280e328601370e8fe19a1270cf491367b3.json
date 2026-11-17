@@ -1,0 +1,5 @@
+{
+ "verdict": "pass",
+ "reason": "All repository, commit, test-count, and command-history claims match the provided evidence.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

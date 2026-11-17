@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The review reports D3 but omits the low_stock threshold bug (D1) and order_cost bulk-discount boundary bug (D2).",
+ "model": "openai-codex/gpt-6.1-sol"
+}

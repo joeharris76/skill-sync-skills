@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The review identifies restock_plan\u2019s mutation but does not state the actual boundary causes in low_stock and order_cost.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

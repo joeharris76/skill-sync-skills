@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "Finding 8 flags the correct None-price check and acceptance of zero prices as a problem, reporting decoy X2.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

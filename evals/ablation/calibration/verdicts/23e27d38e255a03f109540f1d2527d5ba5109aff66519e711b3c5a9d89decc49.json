@@ -1,0 +1,5 @@
+{
+ "verdict": "pass",
+ "reason": "The measured repository facts support that all ten requirements are met.",
+ "model": "openai-codex/gpt-6.1-sol"
+}
