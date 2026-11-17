@@ -239,14 +239,19 @@
       "title": "Replicate and apply the phase decisions"
     },
     "eval2-final-report": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-18T19:37:01Z",
+        "generation": "ec2a65ac772c4709adb7f80f359055f7",
+        "renewals": 0,
+        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783"
+      },
       "needs": [
         "eval2-apply-decisions",
         "eval2-outcomes",
         "eval2-pilot-report-gpt-results"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "active",
       "title": "Publish the phase results and close the instruction-cleanup verification"
     },
     "eval2-harness-claude-code": {
