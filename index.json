@@ -280,6 +280,16 @@
       "status": "open",
       "title": "Replay real turns that drew a correction"
     },
+    "eval2-replay-reviews": {
+      "claim": null,
+      "needs": [
+        "eval2-harness-replay",
+        "eval2-harness-judged-checks"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Replay real review requests"
+    },
     "eval2-scripted-core": {
       "claim": null,
       "needs": [
