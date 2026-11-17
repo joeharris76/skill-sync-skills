@@ -276,6 +276,7 @@ class Omp:
 
     def __init__(self, run: Path, repo: Path):
         self.run, self.repo = run, repo
+        self._sessions = 0
 
     @staticmethod
     def version() -> str:
@@ -299,9 +300,12 @@ class Omp:
             # fallbackChains map merges into the user's chains rather than replacing them, so switch fallback off.
             + "retry:\n  modelFallback: false\n  usageAwareFallback: false\n")
 
-    def command(self, prompt: str, turn: int, turns: int, model: str) -> list[str]:
+    def command(self, prompt: str, turn: int, turns: int, model: str, fresh: bool = False) -> list[str]:
+        """``fresh`` starts a new session (another agent taking over); later turns continue the newest one."""
+        if fresh:
+            self._sessions += 1
         session = (["--no-session"] if turns == 1
-                   else ["--session-dir", str(self.run / "sessions")] + (["--continue"] if turn else []))
+                   else ["--session-dir", str(self.run / f"sessions{self._sessions}")] + ([] if fresh else ["--continue"]))
         return ["sandbox-exec", "-f", str(SANDBOX_ROOT / "deny.sb"),
                 "omp", "-p", "--mode", "json", "--model", model, "--config", str(self.run / "overlay.yml"),
                 "--cwd", str(self.repo), *session, "--no-title", "--auto-approve", "--max-time", "900",
@@ -428,8 +432,11 @@ class ClaudeCode:
         with (self.repo / ".git" / "info" / "exclude").open("a") as fh:
             fh.write("".join(f"{p}\n" for p in excluded))
 
-    def command(self, prompt: str, turn: int, turns: int, model: str) -> list[str]:
-        session = ["--resume", self.session] if turn else ["--session-id", self.session]
+    def command(self, prompt: str, turn: int, turns: int, model: str, fresh: bool = False) -> list[str]:
+        """``fresh`` starts a new session (another agent taking over); later turns resume the newest one."""
+        if fresh and turn:
+            self.session, self._total = str(uuid.uuid4()), 0.0
+        session = ["--session-id", self.session] if fresh else ["--resume", self.session]
         return ["sandbox-exec", "-f", str(SANDBOX_ROOT / "deny.sb"),
                 "claude", "-p", "--model", model.split("/", 1)[-1], "--output-format", "stream-json", "--verbose",
                 "--setting-sources", "user,project", "--strict-mcp-config",
@@ -581,15 +588,18 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
     base = git("rev-parse", "HEAD", cwd=repo).strip()
     (run / "base").write_text(base)
     h.prepare(arm, cache, text)
-    # One prompt per turn; later turns continue the same session, as a user's follow-up would.
+    # One prompt per turn; later turns continue the same session, as a user's follow-up would. A prompt given
+    # as {"prompt": ..., "new_session": True} starts a fresh session instead, as another agent taking over.
     prompts = scenario.get("prompts") or [scenario["prompt"]]
     events: list[dict] = []
     stdout = []
     wanted = model.split("/", 1)[-1]
     try:
-        for turn, prompt in enumerate(prompts):
+        for turn, entry in enumerate(prompts):
+            prompt = entry["prompt"] if isinstance(entry, dict) else entry
+            fresh = turn == 0 or (isinstance(entry, dict) and entry.get("new_session", False))
             ledger.admit(model)  # per turn, so a long session stops at the ceiling too
-            cmd = h.command(prompt, turn, len(prompts), model)
+            cmd = h.command(prompt, turn, len(prompts), model, fresh)
             turn_events: list[dict] = []
             try:
                 proc = subprocess.run(cmd, env=h.env(env), cwd=h.cwd, capture_output=True, text=True, timeout=1200)
@@ -611,7 +621,9 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
             h.check_isolation(turn_events)
             events.extend(turn_events)
             # $RUN/final.<turn>.txt is the agent's last message of that turn; $FINAL is the last turn's.
+            # $RUN/cmds.<turn>.txt holds that turn's tool calls; $CMDS holds every turn's.
             (run / f"final.{turn}.txt").write_text(h.final_text(turn_events))
+            (run / f"cmds.{turn}.txt").write_text(h.bash_commands(turn_events))
             snapshot(repo, run, base, env, turn)
     finally:
         h.cleanup()
@@ -620,8 +632,8 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
     (run / "final.txt").write_text((run / f"final.{len(prompts) - 1}.txt").read_text())
     kept = out / "transcripts" / result_path.stem
     kept.mkdir(parents=True, exist_ok=True)
-    for name in (["out.jsonl", "cmds.txt", "final.txt"] + [f"final.{t}.txt" for t in range(len(prompts))]
-                 + [f"state.{t}.txt" for t in range(len(prompts))]):
+    for name in (["out.jsonl", "cmds.txt", "final.txt"]
+                 + [f"{kind}.{t}.txt" for t in range(len(prompts)) for kind in ("final", "cmds", "state")]):
         shutil.copy(run / name, kept / name)
     env["BASE"] = base
     checks = {}

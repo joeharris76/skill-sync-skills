@@ -71,22 +71,38 @@ class Commands(unittest.TestCase):
 
     def test_turns_resume_the_first_session(self):
         h = self.harness()
-        first = h.command("p", 0, 2, "anthropic/claude-sonnet-5-5")
+        first = h.command("p", 0, 2, "anthropic/claude-sonnet-5-5", fresh=True)
         later = h.command("p", 1, 2, "anthropic/claude-sonnet-5-5")
         self.assertEqual(first[first.index("--session-id") + 1], h.session)
         self.assertEqual(later[later.index("--resume") + 1], h.session)
         self.assertEqual(first[first.index("--model") + 1], "claude-sonnet-5-5")
 
+    def test_a_fresh_turn_starts_a_new_session_and_later_turns_resume_it(self):
+        h = self.harness()
+        first = h.command("p", 0, 3, "anthropic/claude-sonnet-5-5", fresh=True)
+        taken_over = h.command("p", 1, 3, "anthropic/claude-sonnet-5-5", fresh=True)
+        later = h.command("p", 2, 3, "anthropic/claude-sonnet-5-5")
+        new = taken_over[taken_over.index("--session-id") + 1]
+        self.assertNotEqual(new, first[first.index("--session-id") + 1])
+        self.assertEqual(later[later.index("--resume") + 1], new)
+
     def test_only_anthropic_models(self):
         with self.assertRaises(SystemExit):
             CC.check_model("openai-codex/gpt-6")
 
-    def test_omp_command_is_unchanged(self):
+    def test_omp_turns_continue_and_a_fresh_turn_uses_a_new_session_directory(self):
         tmp = Path(tempfile.mkdtemp())
-        cmd = run.Omp(tmp, tmp / "repo").command("p", 1, 2, "m")
-        self.assertEqual(cmd[3:6], ["omp", "-p", "--mode"])
-        self.assertIn("--continue", cmd)
-        self.assertEqual(cmd[-1], "p")
+        h = run.Omp(tmp, tmp / "repo")
+        first = h.command("p", 0, 3, "m", fresh=True)
+        later = h.command("p", 1, 3, "m")
+        taken_over = h.command("p", 2, 3, "m", fresh=True)
+        self.assertEqual(first[3:6], ["omp", "-p", "--mode"])
+        self.assertNotIn("--continue", first)
+        self.assertIn("--continue", later)
+        self.assertEqual(later[later.index("--session-dir") + 1], first[first.index("--session-dir") + 1])
+        self.assertNotIn("--continue", taken_over)
+        self.assertNotEqual(taken_over[taken_over.index("--session-dir") + 1], first[first.index("--session-dir") + 1])
+        self.assertEqual(later[-1], "p")
 
     def test_resumed_turns_charge_only_the_difference(self):
         h = self.harness()
