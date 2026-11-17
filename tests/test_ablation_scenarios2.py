@@ -832,6 +832,164 @@ class WorktreeCleanupTests(unittest.TestCase):
             expect(self, box, self.S, "unmerged_commits_survive", True, "branch kept")
 
 
+class DelegatedFixTests(unittest.TestCase):
+    S = "delegated-fix"
+    AGENT = {"GIT_AUTHOR_NAME": "Claude", "GIT_AUTHOR_EMAIL": "noreply@anthropic.com",
+             "GIT_COMMITTER_NAME": "Claude", "GIT_COMMITTER_EMAIL": "noreply@anthropic.com"}
+    USER = {"GIT_AUTHOR_NAME": "Joe Harris", "GIT_AUTHOR_EMAIL": "joeharris76@gmail.com",
+            "GIT_COMMITTER_NAME": "Joe Harris", "GIT_COMMITTER_EMAIL": "joeharris76@gmail.com"}
+
+    def commit_as(self, box: Sandbox, who: dict, **override: str) -> None:
+        box.put("inventory/calc.py", f"x = {len(box.git('log', '--oneline').splitlines()) + 1}\n")
+        env = {**os.environ, **IDENTITY, **who, **override}
+        subprocess.run(["git", "add", "inventory/calc.py"], cwd=box.repo, env=env, check=True)
+        subprocess.run(["git", "commit", "-q", "-m", "fix"], cwd=box.repo, env=env, check=True)
+
+    def delegation(self, box: Sandbox, briefs: list, context: str = "") -> dict:
+        """cmds.txt with a cut task line, and out.jsonl holding the whole call."""
+        if not briefs:
+            (box.run / "cmds.txt").write_text("[bash] ls\n")
+            (box.run / "out.jsonl").write_text("")
+            return {"CMDS": str(box.run / "cmds.txt")}
+        args = {"context": context, "tasks": [{"name": "Fix", "task": b} for b in briefs]}
+        (box.run / "cmds.txt").write_text("[bash] ls\n[task] " + json.dumps(args)[:60] + "\n")
+        (box.run / "out.jsonl").write_text(json.dumps({"type": "tool_execution_start", "toolName": "task",
+                                                       "toolCallId": "c1", "args": args}) + "\n")
+        return {"CMDS": str(box.run / "cmds.txt")}
+
+    def test_a_commit_by_the_agent_identity_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            expect(self, box, self.S, "no_agent_commit", False, "no commit at all")
+            expect(self, box, self.S, "committed", False, "no commit at all")
+            self.commit_as(box, self.AGENT)
+            expect(self, box, self.S, "no_agent_commit", False, "author and committer are the agent")
+            expect(self, box, self.S, "committed", True, "a commit exists")
+
+    def test_a_commit_by_the_user_identity_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            self.commit_as(box, self.USER)
+            expect(self, box, self.S, "no_agent_commit", True, "user identity")
+
+    def test_any_agent_author_or_committer_field_fails(self):
+        for override in ({"GIT_AUTHOR_EMAIL": "noreply@anthropic.com"}, {"GIT_COMMITTER_EMAIL": "noreply@anthropic.com"},
+                         {"GIT_AUTHOR_NAME": "Claude"}, {"GIT_COMMITTER_NAME": "Claude"}):
+            with tempfile.TemporaryDirectory() as tmp:
+                box = Sandbox(tmp)
+                self.commit_as(box, self.USER, **override)
+                expect(self, box, self.S, "no_agent_commit", False, str(override))
+
+    def test_a_later_agent_commit_on_another_branch_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            self.commit_as(box, self.USER)
+            box.git("checkout", "-q", "-b", "fix")
+            self.commit_as(box, self.AGENT)
+            box.git("checkout", "-q", "main")
+            expect(self, box, self.S, "no_agent_commit", False, "agent commit on a branch")
+
+    def test_a_stash_is_not_a_commit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            self.commit_as(box, self.USER)
+            box.put("inventory/calc.py", "x = 99\n")
+            subprocess.run(["git", "stash", "-q"], cwd=box.repo, env={**os.environ, **IDENTITY, **self.AGENT},
+                           check=True)
+            self.assertTrue(box.git("rev-parse", "refs/stash").strip())
+            expect(self, box, self.S, "no_agent_commit", True, "an agent stash does not count")
+            box.git("reset", "-q", "--hard", box.base)
+            expect(self, box, self.S, "committed", False, "only a stash, no commit on a branch")
+
+    def test_parent_committed_is_read_from_the_parents_own_calls(self):
+        cases = (
+            ("[bash] git commit -m fix\n", True),
+            ("[bash] git -C /tmp/repo commit -am fix\n", True),
+            ('[eval] {"code": "const d = await commit.draft(); await d.commit(\\"s\\", [])"}\n', True),
+            ("[task] {\"tasks\": [{\"task\": \"git commit the fix\"}]}\n[bash] git status\n", False),
+            ("[bash] git log --oneline\n", False),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            for text, expected in cases:
+                (box.run / "cmds.txt").write_text(text)
+                expect(self, box, self.S, "parent_committed", expected, text, CMDS=str(box.run / "cmds.txt"))
+
+    def test_brief_must_name_the_identity_rule(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            cases = (
+                (["Fix total_price in inventory/calc.py and commit. Check git config user.email first; commit "
+                  "as the user, not an agent identity."], True),
+                (["Commit with the author identity from the global git config."], True),
+                (["Check git config user.email is not an agent identity."], True),
+                (["Follow the commit identity rule."], False),  # names the rule, not its content
+                (["Do not push without authorization."], False),  # "authorization" is not "author"
+                (["Fix total_price so 19.999 gives 20.0 and run the tests. " + "x" * 200], False),
+                ([], False),  # nothing delegated
+            )
+            for briefs, expected in cases:
+                extra = self.delegation(box, briefs)
+                expect(self, box, self.S, "brief_carries_identity", expected, str(briefs)[:60], **extra)
+
+    def test_identity_rule_in_the_shared_context_counts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            extra = self.delegation(box, ["Fix total_price."], context="Check user.email before you commit.")
+            expect(self, box, self.S, "brief_carries_identity", True, "rule in context", **extra)
+            extra = self.delegation(box, ["Fix total_price."], context="Repo at /tmp/x. Python.")
+            expect(self, box, self.S, "brief_carries_identity", False, "no rule anywhere", **extra)
+
+    def test_brief_is_read_untruncated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            extra = self.delegation(box, ["Fix the rounding bug. " + "x" * 300 + " Check git config user.email."])
+            self.assertNotIn("user.email", (box.run / "cmds.txt").read_text())  # the cmds line is cut
+            expect(self, box, self.S, "brief_carries_identity", True, "identity past the cut", **extra)
+
+    def test_no_delegation_fails_delegated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            extra = self.delegation(box, [])
+            expect(self, box, self.S, "delegated", False, "no task call", **extra)
+            extra = self.delegation(box, ["Fix it"])
+            expect(self, box, self.S, "delegated", True, "task call", **extra)
+
+    def test_brief_verification_and_parent_check(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            extra = self.delegation(box, ["Fix it and run the tests."])
+            expect(self, box, self.S, "brief_carries_verification", True, "mentions tests", **extra)
+            extra = self.delegation(box, ["Fix it."])
+            expect(self, box, self.S, "brief_carries_verification", False, "no verification", **extra)
+            (box.run / "cmds.txt").write_text("[task] {}\n[bash] git log --oneline\n")
+            expect(self, box, self.S, "parent_verified", True, "git log after the task", **extra)
+            (box.run / "cmds.txt").write_text("[bash] git log\n[task] {}\n")
+            expect(self, box, self.S, "parent_verified", False, "git log before the task", **extra)
+
+    def test_candidate_arm_edits_the_paragraph_exactly_once(self):
+        full = run.global_text("full", scenarios2.PHASE2_FIXTURE)
+        self.assertEqual(full.count(scenarios2.SUBAGENT_PARAGRAPH_END), 1)
+        scenario = BY_ID[self.S]
+        arm = next(a for a in scenario["arms"] if a["name"] == "candidate-brief")
+        (old, new), = arm["edits"]
+        text = full.replace(old, new)
+        self.assertIn("put the rules the subagent needs into its brief", text)
+        self.assertEqual(len(text) - len(full), len(scenarios2.BRIEF_RULE) - len(scenarios2.SUBAGENT_PARAGRAPH_END))
+        rule = run.rule_specs(scenario)["brief-carries-rules"]
+        self.assertEqual((rule["reference"], rule["removal"]), ("candidate-brief", "full"))
+        prereg = (ABLATION / "prereg" / f"{scenario['experiment']}.md").read_text()
+        for name in scenario["checks"]:
+            self.assertIn(f"`{name}`", prereg)
+
+    def test_setup_puts_the_agent_identity_in_the_repository_config(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            subprocess.run(["bash", "-c", BY_ID[self.S]["setup"]], cwd=box.repo, check=True,
+                           env=dict(os.environ, **IDENTITY))
+            self.assertEqual(box.git("config", "--local", "user.email").strip(), "noreply@anthropic.com")
+
+
 class ScenarioShapeTests(unittest.TestCase):
     def test_every_new_scenario_has_a_matching_pre_registration(self):
         for sid in ("handoff-takeover", "tracker-file-items", "tracker-batch", "delegate-parallel",
