@@ -346,17 +346,12 @@
       "title": "Run the first five scripted multi-turn scenarios"
     },
     "eval2-scripted-extended": {
-      "claim": {
-        "expires_at": "2026-11-18T18:23:16Z",
-        "generation": "531cfed8cb8a41e9a1ac6513e4a43b08",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783"
-      },
+      "claim": null,
       "needs": [
         "eval2-scripted-core"
       ],
       "priority": "medium-high",
-      "status": "active",
+      "status": "done",
       "title": "Run the remaining nine scripted scenarios"
     },
     "eval2-skill-sections": {
