@@ -222,6 +222,15 @@
       "status": "done",
       "title": "Select the imported skills in the global deployment and apply it"
     },
+    "eval2-harness-claude-code": {
+      "claim": null,
+      "needs": [
+        "eval2-harness-multiturn"
+      ],
+      "priority": "medium-high",
+      "status": "open",
+      "title": "Add a Claude Code headless runner for replication"
+    },
     "eval2-harness-judged-checks": {
       "claim": null,
       "needs": [
