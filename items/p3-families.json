@@ -1,0 +1,24 @@
+{
+  "acceptance": [
+    "prereg/phase3-<family>.md per family: variants, dial levels, controls, shell checks, arms, margin 20 points, counting models, sample per model",
+    "Every check has fixture tests that pass and fail on purpose",
+    "Reviewer finds no section-text leaks in prompts, fixtures or repository text, and no open critical or required findings",
+    "No-temptation controls pass >= 27/30 on Sonnet per variant; failing variants dropped and recorded",
+    "PR merged"
+  ],
+  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.",
+  "description": "Phase 3 step 4. Families, variants, dials, no-temptation controls, three arms (full, minus-skill, minus-candidates), explicit 'read skill://<name> first' prompt.",
+  "links": [
+    "~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783",
+      "at": "2026-11-17T21:09:56Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "c48100c9ec864cee9f492cb0c53575c4",
+      "session_id": "b0e22510b3ae4ab38c30015d036c9db6"
+    }
+  ]
+}

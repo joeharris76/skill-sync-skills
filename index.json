@@ -390,6 +390,16 @@
       "status": "done",
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
+    "p3-families": {
+      "claim": null,
+      "needs": [
+        "p3-map-todo-references",
+        "p3-harness"
+      ],
+      "priority": "high",
+      "status": "open",
+      "title": "Build and pre-register the eleven phase 3 scenario families"
+    },
     "p3-harness": {
       "claim": null,
       "needs": [],
