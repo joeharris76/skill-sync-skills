@@ -22,6 +22,7 @@ Usage:
     judge.py collect <check> --out DIR [--out DIR ...]   gather unlabelled evidence from run folders
     judge.py calibrate <check> [--jobs 4] [--ledger FILE]  measure agreement with the labels
     judge.py regather [<check>] --out DIR [--out DIR ...]  rebuild a folder's evidence after a script change
+    judge.py rejudge --out DIR [--out DIR ...] [--ledger FILE]  fill verdicts a judge error left missing
 """
 
 from __future__ import annotations
@@ -29,6 +30,7 @@ from __future__ import annotations
 import argparse
 import concurrent.futures as cf
 import hashlib
+import inspect
 import json
 import re
 import subprocess
@@ -64,7 +66,8 @@ def text_hash(*parts: str) -> str:
 
 
 def script_hash(spec: dict) -> str:
-    return text_hash(spec["evidence"])[:16]
+    """Hash of the evidence script and of the scrubbing applied to its output."""
+    return text_hash(spec["evidence"], inspect.getsource(scrub), str(MAX_EVIDENCE), str(MIN_SCRUB_LINE))[:16]
 
 
 def rubric_hash(spec: dict) -> str:
@@ -105,8 +108,9 @@ def prompt_for(rubric: str, evidence: str) -> str:
     return f"# Rubric\n\n{rubric.strip()}\n\n# Evidence\n\n{evidence.strip()}\n"
 
 
-def cache_key(rubric: str, evidence: str) -> str:
-    return text_hash(rubric, evidence)
+def cache_key(rubric: str, evidence: str, model: str = JUDGE_MODEL) -> str:
+    """Everything that decides a verdict: the judge, its instructions, the rubric and the evidence."""
+    return text_hash(model, SYSTEM, rubric, evidence)
 
 
 def parse_verdict(text: str) -> dict:
@@ -152,8 +156,8 @@ def ask_judge(rubric: str, evidence: str, model: str = JUDGE_MODEL, timeout: int
 
 
 def judge(rubric: str, evidence: str, cache_dir: Path, ledger=None, model: str = JUDGE_MODEL) -> dict:
-    """Verdict for one rubric and evidence text; the same pair is never judged twice."""
-    path = cache_dir / f"{cache_key(rubric, evidence)}.json"
+    """Verdict for one rubric and evidence text; the same pair is never judged twice by one judge."""
+    path = cache_dir / f"{cache_key(rubric, evidence, model)}.json"
     if path.exists():
         return {**json.loads(path.read_text()), "cached": True}
     verdict, cost = ask_judge(rubric, evidence, model)
@@ -188,16 +192,49 @@ def gate(stats: dict) -> tuple[bool, str]:
     return (not problems, "; ".join(problems))
 
 
+def labels_hash(rows: list[dict]) -> str:
+    """Hash of every row's evidence and label, so the labels a summary was measured on can be checked."""
+    return text_hash(*(f"{text_hash(r['evidence'])} {r['label']}" for r in rows))
+
+
+def rebuild_stats(check: str, spec: dict, calibration: Path = CALIBRATION) -> tuple[dict | None, str, str]:
+    """Agreement recomputed from the stored labels and cached verdicts: (stats, labels hash, why not)."""
+    rows = read_rows(calibration / f"{check}.jsonl")
+    if not rows:
+        return None, "", "no labelled rows"
+    if any(r.get("label") not in ("pass", "fail") or r.get("script") != script_hash(spec) for r in rows):
+        return None, "", "rows are unlabelled or were gathered with another evidence script"
+    verdicts = []
+    for r in rows:
+        path = calibration / "verdicts" / f"{cache_key(spec['rubric'], r['evidence'])}.json"
+        cached = json.loads(path.read_text()) if path.exists() else None
+        if not cached or cached.get("model") != JUDGE_MODEL:
+            return None, "", "a calibration verdict is missing or from another judge"
+        verdicts.append(cached["verdict"])
+    return agreement([r["label"] for r in rows], verdicts), labels_hash(rows), ""
+
+
 def usable(check: str, spec: dict, calibration: Path = CALIBRATION) -> tuple[bool, str]:
-    """Whether a judged check may enter results: calibrated well, for this rubric and evidence script."""
+    """Whether a judged check may enter results.
+
+    The summary must be for this judge, rubric and evidence script. The
+    numbers are rebuilt from the stored labels and verdicts, never read from
+    the summary, so an edited summary cannot unlock a check.
+    """
     path = calibration / f"{check}.json"
     if not path.exists():
         return False, "not calibrated"
     summary = json.loads(path.read_text())
+    if summary.get("judge") != JUDGE_MODEL:
+        return False, f"calibrated with another judge ({summary.get('judge')})"
     if summary.get("rubric") != rubric_hash(spec) or summary.get("script") != script_hash(spec):
         return False, "calibration is for another rubric or evidence script"
-    ok, why = gate(summary)  # recomputed, so an edited summary cannot unlock a check
-    return (ok, why)
+    stats, labels, why = rebuild_stats(check, spec, calibration)
+    if stats is None:
+        return False, why
+    if summary.get("labels_sha256") != labels:
+        return False, "labels changed since calibration"
+    return gate(stats)
 
 
 def gather_evidence(spec: dict, repo: Path, env: dict, run: str, arm: str, global_text: str | None) -> str:
@@ -207,15 +244,19 @@ def gather_evidence(spec: dict, repo: Path, env: dict, run: str, arm: str, globa
 
 def run_judged(scenario: dict, arm_name: str, stem: str, repo: Path, env: dict, run: Path,
                global_text: str | None, out: Path, cache_dir: Path, ledger=None,
-               calibration: Path = CALIBRATION) -> tuple[dict, dict, dict]:
-    """Judged checks for one finished session: (verdicts to add to checks, details, why others are unusable).
+               calibration: Path = CALIBRATION) -> tuple[dict, dict, dict, dict]:
+    """Judged checks for one finished session: (verdicts for checks, details, unusable, missing).
 
-    Evidence is always written to ``<out>/evidence`` so it can be labelled; the
-    judge is asked only about calibrated checks.
+    Evidence is always written to ``<out>/evidence`` so it can be labelled or
+    judged later. The judge is asked only about calibrated checks. A check
+    that is not calibrated is ``unusable``; one whose judge call failed is
+    ``missing`` with the error. Neither enters the checks, and ``rejudge``
+    fills the missing ones.
     """
     checks: dict[str, bool] = {}
     details: dict[str, dict] = {}
     unusable: dict[str, str] = {}
+    missing: dict[str, str] = {}
     for name, spec in scenario.get("judged", {}).items():
         evidence = gather_evidence(spec, repo, env, str(run), arm_name, global_text)
         (out / "evidence").mkdir(parents=True, exist_ok=True)
@@ -227,11 +268,11 @@ def run_judged(scenario: dict, arm_name: str, stem: str, repo: Path, env: dict, 
         try:
             verdict = judge(spec["rubric"], evidence, cache_dir, ledger)
         except (JudgeError, subprocess.TimeoutExpired) as exc:
-            unusable[name] = f"judge error: {str(exc)[:200]}"
+            missing[name] = f"judge error: {str(exc)[:200]}"
             continue
         checks[name] = verdict["verdict"] == "pass"
         details[name] = {"verdict": verdict["verdict"], "reason": verdict["reason"]}
-    return checks, details, unusable
+    return checks, details, unusable, missing
 
 
 def scenario_spec(check: str) -> dict:
@@ -290,6 +331,7 @@ def calibrate(check: str, jobs: int = 4, ledger=None, calibration: Path = CALIBR
     disagreements = [i for i, (r, v) in enumerate(zip(rows, results)) if r["label"] != v["verdict"]]
     summary = {"check": check, **stats, "usable": ok, "reason": why or "meets the gate",
                "rubric": rubric_hash(spec), "script": script_hash(spec), "judge": JUDGE_MODEL,
+               "labels_sha256": labels_hash(rows),
                "labelled_by": "a Claude model, from each transcript and the repository state",
                "disagreements": [{"row": i, "label": rows[i]["label"], "label_reason": rows[i]["reason"],
                                   "judge_reason": results[i]["reason"]} for i in disagreements]}
@@ -322,9 +364,8 @@ def regather(out: Path, only: str | None = None) -> int:
         for old, new in arm.get("edits", []):
             text = (text or "").replace(old, new)
         directory = Path(result["run"])
-        env = dict(os.environ, RUN=str(directory), BASE=(directory / "base").read_text(),
-                   GIT_CONFIG_GLOBAL=str(directory / "gitconfig"), CMDS=str(directory / "cmds.txt"),
-                   FINAL=str(directory / "final.txt"))
+        env = run.session_env(directory, run.SANDBOX_ROOT / "cache")
+        env["BASE"] = (directory / "base").read_text()
         for name, spec in scenario["judged"].items():
             if only and name != only:
                 continue
@@ -335,9 +376,46 @@ def regather(out: Path, only: str | None = None) -> int:
     return rebuilt
 
 
+def rejudge(out: Path, ledger=None, calibration: Path = CALIBRATION) -> tuple[int, int]:
+    """Fill verdicts a judge error left missing, from the evidence saved with each session.
+
+    Returns (filled, still missing). A result keeps everything else it had.
+    """
+    sys.path.insert(0, str(HERE))
+    import run
+
+    by_id = {s["id"]: s for s in run.SCENARIOS}
+    filled = missing = 0
+    for path in sorted((out / "results").glob("*.json")):
+        result = json.loads(path.read_text())
+        gaps = result.get("judged_missing") or {}
+        if not gaps:
+            continue
+        for name in list(gaps):
+            spec = by_id[result["scenario"]]["judged"][name]
+            ok, why = usable(name, spec, calibration)
+            evidence_file = out / "evidence" / f"{path.stem}__{name}.txt"
+            if not ok or not evidence_file.exists():
+                missing += 1
+                continue
+            try:
+                verdict = judge(spec["rubric"], evidence_file.read_text(), out.resolve().parent / "judge-cache", ledger)
+            except (JudgeError, subprocess.TimeoutExpired) as exc:
+                gaps[name] = f"judge error: {str(exc)[:200]}"
+                missing += 1
+                continue
+            result["checks"][name] = verdict["verdict"] == "pass"
+            result.setdefault("judged", {})[name] = {"verdict": verdict["verdict"], "reason": verdict["reason"]}
+            del gaps[name]
+            filled += 1
+        result["judged_missing"] = gaps
+        path.write_text(json.dumps(result, indent=1))
+    return filled, missing
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("action", choices=["collect", "calibrate", "regather"])
+    ap.add_argument("action", choices=["collect", "calibrate", "regather", "rejudge"])
     ap.add_argument("check", nargs="?", help="judged check name; for regather, limits it to that check")
     ap.add_argument("--out", type=Path, action="append", default=[])
     ap.add_argument("--jobs", type=int, default=4)
@@ -347,6 +425,18 @@ def main() -> None:
         if not args.out:
             raise SystemExit("regather needs --out")
         print(f"rebuilt {sum(regather(out, args.check) for out in args.out)} evidence files")
+        return
+    if args.action == "rejudge":
+        if not args.out:
+            raise SystemExit("rejudge needs --out")
+        sys.path.insert(0, str(HERE))
+        ledger = None
+        if args.ledger:
+            from run import Ledger
+            ledger = Ledger(args.ledger)
+        for out in args.out:
+            filled, left = rejudge(out, ledger)
+            print(f"{out}: filled {filled}, still missing {left}")
         return
     if not args.check:
         raise SystemExit(f"{args.action} needs a check name")

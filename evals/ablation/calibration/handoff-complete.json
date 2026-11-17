@@ -7,8 +7,9 @@
  "usable": true,
  "reason": "meets the gate",
  "rubric": "a309560a4bdeeb2c",
- "script": "6349a696d5fca733",
+ "script": "92749cf42cee077f",
  "judge": "openai-codex/gpt-6.1-sol",
+ "labels_sha256": "3fd177e8054a9d894673b02d914fb860da448997609cbc8dcf911343124fcd47",
  "labelled_by": "a Claude model, from each transcript and the repository state",
  "disagreements": [
   {

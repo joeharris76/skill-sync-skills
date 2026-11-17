@@ -27,9 +27,19 @@ def stub(verdict="pass"):
     return mock.patch.object(judge, "ask_judge", return_value=({"verdict": verdict, "reason": "stub"}, 0.5))
 
 
-def write_summary(directory: Path, name: str, spec: dict, **over) -> None:
-    summary = {"n": 40, "passes": 20, "fails": 20, "agreement": 0.95,
-               "rubric": judge.rubric_hash(spec), "script": judge.script_hash(spec), **over}
+def write_summary(directory: Path, name: str, spec: dict, passes: int = 20, fails: int = 20, wrong: int = 1, **over) -> None:
+    """A calibration set (labels, cached verdicts, summary) in which the judge is wrong on ``wrong`` rows."""
+    rows = []
+    for i in range(passes + fails):
+        label = "pass" if i < passes else "fail"
+        rows.append({"evidence": f"e{i}", "label": label, "reason": "r", "script": judge.script_hash(spec)})
+        verdict = label if i >= wrong else ("fail" if label == "pass" else "pass")
+        key = judge.cache_key(spec["rubric"], f"e{i}")
+        (directory / "verdicts").mkdir(exist_ok=True)
+        (directory / "verdicts" / f"{key}.json").write_text(json.dumps({"verdict": verdict, "reason": "r", "model": judge.JUDGE_MODEL}))
+    judge.write_rows(directory / f"{name}.jsonl", rows)
+    summary = {"rubric": judge.rubric_hash(spec), "script": judge.script_hash(spec), "judge": judge.JUDGE_MODEL,
+               "labels_sha256": judge.labels_hash(rows), **over}
     (directory / f"{name}.json").write_text(json.dumps(summary))
 
 
@@ -84,20 +94,20 @@ class UsableGateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as t, stub() as ask:
             tmp = Path(t)
             (tmp / "cal").mkdir()
-            checks, details, unusable = self.run_judged(tmp / "cal", tmp)
+            checks, details, unusable, missing = self.run_judged(tmp / "cal", tmp)
             self.assertEqual((checks, details), ({}, {}))
             self.assertEqual(unusable, {"demo-check": "not calibrated"})
             ask.assert_not_called()
             self.assertTrue(list((tmp / "out" / "evidence").glob("*__demo-check.txt")))  # evidence is kept for labelling
 
     def test_low_agreement_or_few_examples_are_unusable(self):
-        for over, expect in [({"agreement": 0.85}, "agreement 0.85"), ({"passes": 14, "fails": 26}, "has 14 and 26"),
-                             ({"passes": 30, "fails": 3}, "has 30 and 3")]:
+        for over, expect in [({"wrong": 6}, "agreement 0.85"), ({"passes": 14, "fails": 26, "wrong": 0}, "has 14 and 26"),
+                             ({"passes": 30, "fails": 3, "wrong": 0}, "has 30 and 3")]:
             with self.subTest(over=over), tempfile.TemporaryDirectory() as t, stub() as ask:
                 tmp = Path(t)
                 (tmp / "cal").mkdir()
                 write_summary(tmp / "cal", "demo-check", SPEC, **over)
-                checks, _, unusable = self.run_judged(tmp / "cal", tmp)
+                checks, _, unusable, missing = self.run_judged(tmp / "cal", tmp)
                 self.assertEqual(checks, {})
                 self.assertIn(expect, unusable["demo-check"])
                 ask.assert_not_called()
@@ -106,7 +116,7 @@ class UsableGateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as t, stub():
             tmp = Path(t)
             (tmp / "cal").mkdir()
-            write_summary(tmp / "cal", "demo-check", SPEC, agreement=0.5, usable=True)
+            write_summary(tmp / "cal", "demo-check", SPEC, wrong=20, agreement=0.99, passes=20, fails=20, usable=True)
             self.assertEqual(self.run_judged(tmp / "cal", tmp)[0], {})
 
     def test_calibration_for_another_rubric_is_unusable(self):
@@ -114,7 +124,7 @@ class UsableGateTests(unittest.TestCase):
             tmp = Path(t)
             (tmp / "cal").mkdir()
             write_summary(tmp / "cal", "demo-check", {**SPEC, "rubric": "an older rubric"})
-            checks, _, unusable = self.run_judged(tmp / "cal", tmp)
+            checks, _, unusable, missing = self.run_judged(tmp / "cal", tmp)
             self.assertEqual(checks, {})
             self.assertIn("another rubric", unusable["demo-check"])
 
@@ -123,7 +133,7 @@ class UsableGateTests(unittest.TestCase):
             tmp = Path(t)
             (tmp / "cal").mkdir()
             write_summary(tmp / "cal", "demo-check", SPEC)
-            checks, details, unusable = self.run_judged(tmp / "cal", tmp)
+            checks, details, unusable, missing = self.run_judged(tmp / "cal", tmp)
             self.assertEqual(checks, {"demo-check": False})
             self.assertEqual(details["demo-check"]["reason"], "stub")
             self.assertEqual(unusable, {})
@@ -133,9 +143,45 @@ class UsableGateTests(unittest.TestCase):
             tmp = Path(t)
             (tmp / "cal").mkdir()
             write_summary(tmp / "cal", "demo-check", SPEC)
-            checks, _, unusable = self.run_judged(tmp / "cal", tmp)
+            checks, _, unusable, missing = self.run_judged(tmp / "cal", tmp)
             self.assertEqual(checks, {})
-            self.assertIn("judge error", unusable["demo-check"])
+            self.assertEqual(unusable, {})
+            self.assertIn("judge error", missing["demo-check"])
+
+    def test_calibration_by_another_judge_or_with_changed_labels_is_unusable(self):
+        with tempfile.TemporaryDirectory() as t:
+            cal = Path(t)
+            write_summary(cal, "demo-check", SPEC, judge="openai/other")
+            self.assertIn("another judge", judge.usable("demo-check", SPEC, cal)[1])
+            write_summary(cal, "demo-check", SPEC)
+            self.assertTrue(judge.usable("demo-check", SPEC, cal)[0])
+            rows = judge.read_rows(cal / "demo-check.jsonl")
+            rows[0]["label"] = "fail" if rows[0]["label"] == "pass" else "pass"
+            judge.write_rows(cal / "demo-check.jsonl", rows)
+            self.assertIn("labels changed", judge.usable("demo-check", SPEC, cal)[1])
+
+    def test_a_verdict_from_another_judge_or_prompt_has_another_cache_key(self):
+        base = judge.cache_key("r", "e")
+        self.assertNotEqual(base, judge.cache_key("r", "e", "openai/other"))
+        with mock.patch.object(judge, "SYSTEM", "another system prompt"):
+            self.assertNotEqual(base, judge.cache_key("r", "e"))
+
+    def test_rejudge_fills_missing_verdicts_from_saved_evidence(self):
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            out = tmp / "out"
+            (out / "results").mkdir(parents=True)
+            (out / "evidence").mkdir()
+            (tmp / "cal").mkdir()
+            result = {"scenario": "review-planted", "arm": "none", "checks": {"no_changes": True}, "judged": {},
+                      "judged_missing": {"review-findings-match": "judge error: down"}}
+            (out / "results" / "review-planted__none__0.json").write_text(json.dumps(result))
+            (out / "evidence" / "review-planted__none__0__review-findings-match.txt").write_text("evidence")
+            with mock.patch.object(judge, "usable", return_value=(True, "")), stub("pass"):
+                self.assertEqual(judge.rejudge(out, calibration=tmp / "cal"), (1, 0))
+            fixed = json.loads((out / "results" / "review-planted__none__0.json").read_text())
+            self.assertEqual(fixed["checks"]["review-findings-match"], True)
+            self.assertEqual(fixed["judged_missing"], {})
 
     def test_shipped_checks_start_out_unusable_without_calibration(self):
         with tempfile.TemporaryDirectory() as t:

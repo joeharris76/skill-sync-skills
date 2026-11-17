@@ -80,18 +80,24 @@ verdict joins the session's `checks`. The evidence is also written to
   arm's name (in the form `scenario__arm__0`), the name `GLOBAL.md` and every
   line of the arm's global text removed. The agent never sees the arm name, so
   plain words such as "full" in a reply stay.
-- **Same input, one call.** Verdicts are cached by the hash of the model, the
-  rubric and the evidence, so a rerun costs nothing. Each call is recorded in
-  the spend ledger as uncapped spend. The judge runs with no tools, no
-  instruction files and no saved session, and an answer from any other model
-  than the one asked for is refused.
+- **Same input, one call.** Verdicts are cached by the hash of the judge
+  model, its instructions, the rubric and the evidence, so a rerun costs
+  nothing and a verdict from another judge is never reused. Each call is
+  recorded in the spend ledger as uncapped spend. The judge runs with no
+  tools, no instruction files and no saved session, and an answer from any
+  other model than the one asked for is refused.
 - **Only calibrated checks count.** A verdict enters `checks` only when
-  `calibration/<check>.json` shows agreement of at least 0.90 with labels made
-  from the transcripts, on at least 15 passes and 15 fails, for the current
-  rubric and evidence script. Otherwise the check is listed under
-  `judged_unusable` with the reason, no judge call is made, and the report
-  leaves it out. Editing a rubric or an evidence script makes its calibration
-  stale until it is run again.
+  `calibration/<check>.json` is for this judge model, rubric and evidence
+  script (the hash covers the scrubbing code too), and the agreement rebuilt
+  from the stored labels and cached verdicts, not read from the summary, is at
+  least 0.90 on at least 15 passes and 15 fails. Otherwise the check is listed
+  under `judged_unusable` with the reason, no judge call is made, and the
+  report leaves it out.
+- **A judge error never drops a check.** The session's result is kept and the
+  check is listed under `judged_missing` with the error, not counted as a
+  fail. The report prints how many verdicts are missing for each arm, and a
+  decision uses a judged check only when every result has its verdict.
+  `judge.py rejudge --out <dir>` fills the gaps from the saved evidence.
 
 ### Calibration
 
@@ -115,7 +121,11 @@ rebuilds a folder's evidence after an evidence script changes.
 **The labels come from a Claude model**, the same family as the agents under
 test, working from each transcript and the repository state. The judge is a
 different model, but agreement measures how closely it follows that one
-labeller's reading of the rubric; it is not an independent ground truth.
+labeller's reading of the rubric; it is not an independent ground truth. The
+labels and the verdicts for them were committed together, so the order
+"label first, judge second" rests on the procedure above, not on the history;
+each summary stores a hash of its labels (`labels_sha256`) so a later change to
+a label is noticed and the check becomes unusable until it is calibrated again.
 
 | Check | Scenario | Rows | Passes | Fails | Agreement | Usable |
 |---|---|---|---|---|---|---|

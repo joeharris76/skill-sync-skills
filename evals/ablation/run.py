@@ -243,6 +243,14 @@ def final_text(events: list[dict]) -> str:
     return texts[-1] if texts else ""
 
 
+def session_env(run: Path, cache: Path) -> dict:
+    """The environment a session's setup and checks run in; ``judge.py`` rebuilds it for evidence."""
+    return dict(os.environ, RUN=str(run), GIT_CONFIG_GLOBAL=str(run / "gitconfig"), GIT_CONFIG_NOSYSTEM="1",
+                PATH=f"{SANDBOX_ROOT / 'shims'}:{os.environ['PATH']}", GH_SHIM_LOG=str(run / "gh.log"),
+                GH_CANNED=str(run / "gh"), GH_TOKEN="sandbox", GH_CONFIG_DIR=str(run / "ghcfg"),
+                CMDS=str(run / "cmds.txt"), FINAL=str(run / "final.txt"), HARNESS=str(HERE), CACHE=str(cache))
+
+
 def prepare_sandbox_root() -> None:
     """Copy the shims out of the checkout and write the profile that hides the user's own files.
 
@@ -564,10 +572,7 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
         "[advice]\n\tdetachedHead = false\n"
         + (f'[hook "reject-agent-identity"]\n\tevent = pre-commit\n\tcommand = {SANDBOX_ROOT}/hooks/reject-agent-identity\n'
            if arm.get("identity_hook") else ""))
-    env = dict(os.environ, RUN=str(run), GIT_CONFIG_GLOBAL=str(run / "gitconfig"), GIT_CONFIG_NOSYSTEM="1",
-               PATH=f"{SANDBOX_ROOT / 'shims'}:{os.environ['PATH']}", GH_SHIM_LOG=str(run / "gh.log"),
-               GH_CANNED=str(run / "gh"), GH_TOKEN="sandbox", GH_CONFIG_DIR=str(run / "ghcfg"),
-               CMDS=str(run / "cmds.txt"), FINAL=str(run / "final.txt"), HARNESS=str(HERE), CACHE=str(cache))
+    env = session_env(run, cache)
     setup = (HERE / scenario.get("base_setup", "base_setup.sh")).read_text() + "\n" + scenario.get("setup", "")
     subprocess.run(["bash", "-euo", "pipefail", "-c", setup], cwd=repo, env=env, check=True, capture_output=True)
     for path, heading in arm.get("repo_drop_sections", []):  # ablate a repository's own instruction file
@@ -631,9 +636,9 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
     checks = {}
     for name, script in scenario["checks"].items():
         checks[name] = subprocess.run(["bash", "-c", script], cwd=repo, env=env, capture_output=True).returncode == 0
-    judged, judged_details, judged_unusable = judge.run_judged(
+    judged, judged_details, judged_unusable, judged_missing = judge.run_judged(
         scenario, arm["name"], result_path.stem, repo, env, run, text, out, out.resolve().parent / "judge-cache", ledger)
-    checks.update(judged)  # only calibrated checks; the rest are listed under judged_unusable
+    checks.update(judged)  # only calibrated checks with a verdict; the rest are listed, never counted as fails
     metrics = {}
     for name, script in scenario.get("metrics", {}).items():
         raw = subprocess.run(["bash", "-c", script], cwd=repo, env=env, capture_output=True, text=True).stdout.strip()
@@ -641,6 +646,7 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
     result = {"scenario": scenario["id"], "arm": arm["name"], "rep": rep, "model": model, "run": str(run),
               "turns": len(prompts), "prereg": prereg, "checks_hash": checks_hash(scenario),
               "checks": checks, "judged": judged_details, "judged_unusable": judged_unusable,
+              "judged_missing": judged_missing,
               "metrics": metrics, "cost": round(h.turn_cost(events), 4),
               "tool_calls": h.tool_calls(events),
               "skills_read": h.skills_read(events, stdout),
@@ -811,6 +817,15 @@ def report_folder(out: Path) -> None:
             print(f"| {arm} | {len(rs)} | " + " | ".join(cells) + f" | {' '.join(means)} | "
                   f"{' '.join(f'{k}:{v}' for k, v in sorted(loaded.items())) or '-'} | "
                   f"{sum(r['tool_calls'] for r in rs) / len(rs):.0f} | {sum(r['cost'] for r in rs) / len(rs):.2f} |")
+        for (s, arm), rs in rows.items():
+            if s != sid:
+                continue
+            gaps: dict[str, int] = {}
+            for r in rs:
+                for name in r.get("judged_missing", {}):
+                    gaps[name] = gaps.get(name, 0) + 1
+            for name, count in gaps.items():
+                print(f"missing verdicts: {arm} {name} {count}/{len(rs)} (run judge.py rejudge --out {out})")
         print()
 
 
