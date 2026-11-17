@@ -222,6 +222,13 @@
       "status": "done",
       "title": "Select the imported skills in the global deployment and apply it"
     },
+    "eval2-pilot-report-gpt-results": {
+      "claim": null,
+      "needs": [],
+      "priority": "medium",
+      "status": "open",
+      "title": "Add the GPT results to the pilot report"
+    },
     "import-upstream-skills": {
       "claim": null,
       "needs": [],
