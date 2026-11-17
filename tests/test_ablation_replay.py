@@ -20,7 +20,7 @@ sys.path.insert(0, str(ABLATION))
 import replay  # noqa: E402
 import run  # noqa: E402
 
-REPO = "/Users/joe/Developer/example-repo"
+REPO = os.path.realpath(Path.home() / "Developer" / "example-repo")
 
 
 def user(n: int, parent: str, text: str) -> dict:
