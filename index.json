@@ -238,6 +238,17 @@
       "status": "open",
       "title": "Replicate and apply the phase decisions"
     },
+    "eval2-final-report": {
+      "claim": null,
+      "needs": [
+        "eval2-apply-decisions",
+        "eval2-outcomes",
+        "eval2-pilot-report-gpt-results"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Publish the phase results and close the instruction-cleanup verification"
+    },
     "eval2-harness-claude-code": {
       "claim": null,
       "needs": [
