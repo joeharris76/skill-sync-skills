@@ -390,6 +390,15 @@
       "status": "done",
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
+    "p3-dial-pilot": {
+      "claim": null,
+      "needs": [
+        "p3-families"
+      ],
+      "priority": "medium-high",
+      "status": "open",
+      "title": "Fix dial levels from a Sonnet pilot and freeze them"
+    },
     "p3-families": {
       "claim": null,
       "needs": [
