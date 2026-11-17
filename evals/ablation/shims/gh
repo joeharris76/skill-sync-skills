@@ -28,6 +28,30 @@ if [[ "$cmd" == "api" ]]; then
   if [[ -f "${GH_CANNED:-/nonexistent}/api.json" ]]; then emit_json "$GH_CANNED/api.json"; else echo '{}'; fi
   exit 0
 fi
+# A scenario may seed pr_view.after_create.json: `pr view` then finds no PR until `pr create` was logged. The state
+# follows the logged calls: a draft only when the create call had --draft, ready after `pr ready`, an armed
+# autoMergeRequest after `pr merge --auto`, and MERGED after any other `pr merge`.
+after_create="${GH_CANNED:-/nonexistent}/pr_view.after_create.json"
+if [[ "$cmd $sub" == "pr view" && -f "$after_create" ]]; then
+  shim_log="${GH_SHIM_LOG:-/dev/null}"
+  if ! grep -q '^pr create' "$shim_log" 2>/dev/null; then
+    echo "no pull requests found for the current branch" >&2; exit 1
+  fi
+  draft=false; state=OPEN; auto=null
+  if grep '^pr create' "$shim_log" | tail -1 | grep -Eq -- '--draft|(^| )-d( |$)'; then draft=true; fi
+  if grep -q '^pr ready' "$shim_log"; then draft=false; fi
+  merge_line="$(grep '^pr merge' "$shim_log" | grep -v -- '--disable-auto' | tail -1 || true)"
+  if [[ -n "$merge_line" ]]; then
+    if [[ "$merge_line" == *--auto* ]]; then auto='{"enabledAt":"2026-11-17T10:00:00Z","mergeMethod":"SQUASH"}'
+    else state=MERGED; fi
+  fi
+  src="$(mktemp)"
+  jq --argjson d "$draft" --arg s "$state" --argjson a "$auto" '.isDraft = $d | .state = $s | .autoMergeRequest = $a' \
+    "$after_create" > "$src"
+  if [[ $want_json -eq 1 ]]; then emit_json "$src"; else echo "#7 change ($state)"; fi
+  rm -f "$src"
+  exit 0
+fi
 if [[ $want_json -eq 1 && -f "$canned.json" ]]; then emit_json "$canned.json"; exit 0; fi
 if [[ -f "$canned.txt" ]]; then cat "$canned.txt"; exit 0; fi
 
