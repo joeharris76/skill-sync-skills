@@ -3,7 +3,7 @@
     "section-map.md has a row per section of every todo reference the SKILL.md routes common work to, with rules, polarity, evidence, pressure, duplication, testability",
     "The family table in plan.md is confirmed or amended, with any added candidate cited by row ID"
   ],
-  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.",
+  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.\n\nDone 2026-11-17: 29 rows added to research/section-map.md (queries TQ, prioritize TP, handoff TH, ideate TIE, spec TS, review TR); bootstrap and recovery left as operator floor-verb material. Shortlist +3: TH-2+TH-3 (new family batch-handoff-contents with BA-2), TP-1+TP-2 and TIE-3+TS-3 (added to tracker-gates). Plan family table updated: 12 families, 21 sections.",
   "description": "Phase 3 step 1. research/section-map.md lacks rows for todo references queries, prioritize, handoff, ideate, spec, review.",
   "links": [
     "~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md"
@@ -24,6 +24,14 @@
       "generation": "abed790b6d264f04b9e3c4b439e6b609",
       "op": "take",
       "op_id": "5a820a7750224bddb1241fee23ac66d3",
+      "session_id": "b0e22510b3ae4ab38c30015d036c9db6"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783",
+      "at": "2026-11-17T21:12:33Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "3b663ffbb5f64ac7b4c132f803043c96",
       "session_id": "b0e22510b3ae4ab38c30015d036c9db6"
     }
   ]
