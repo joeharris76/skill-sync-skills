@@ -1,0 +1,19 @@
+{
+  "acceptance": [
+    "A table of the 222 closed PRs and 10 reverts with linked session (or 'unlinked'), cause label, and preventable-by-text yes or no, method documented.",
+    "A spot check of 20 labels re-derived from the PR and session evidence agrees on at least 18.",
+    "A list of replay targets for a later round; none run in this phase."
+  ],
+  "context": "Read-only analysis through gh and memex. Guardrail: no comments or edits on GitHub PRs.\n\nShared guardrails for the deeper eval phase (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/prompt-audit-and-phase-2-plan.md):\n- Agents under test run only inside /tmp/omp-ablation sandboxes under the sandbox-exec deny profile; no run may write to a real clone, ~/.agents, ~/.omp or ~/.claude.\n- Every run uses the pinned baseline (instruction snapshot, catalog commit, omp and Claude Code versions, model ids) recorded in its results; a change to any of them reruns the affected arms.\n- Every experiment has a pre-registration file committed before its first scored run: hypothesis, rule, arms, checks, sample size, decision. Changing it after scored runs voids those runs.\n- Decision rule: keep or reword needs a 30-point gap at p < 0.01 after Holm correction; delete needs the removal arm within 10 points on every check, scenario and model tested at 30 or more sessions per arm; anything else is inconclusive and is not acted on.\n- Spend ledger: the runner sums Claude-provider cost per session and refuses new sessions once the phase total reaches 800 USD; GPT runs are tracked separately against ChatGPT usage windows.\n- The runner refuses failed sessions and sessions answered by a model other than the one requested; refused sessions do not count toward n.\n- Real session text copied for replay lives only in /tmp sandboxes deleted after each run; committed results hold counts and short anonymized quotes only. Classified prompt data stays in prompt-audit-data/.\n- Never edit vendored skills (retro, writing-for-agents, memex-search/SKILL.md). Out of scope: memex upstream, omnigent, sqlglot, bossmode, Muse, Gemini.\n- Repository writes follow change-framework: worktree, Joe Harris identity, explicit staging, Conventional Commits, no --no-verify, draft PR, squash merge after checks. BenchBox uses only its make worktree-create / agent-write-preflight / pr-preflight / pr-open / pr-arm flow.\n- Commit messages, PR bodies and committed results contain no session or process labels (no phase, step, S-number or R-number labels in commit subjects or rule text); results files may name scenarios by their scenario id.",
+  "description": "Link BenchBox PRs merged, closed unmerged (222) and reverted (10) since September 2025 to the sessions that produced them. Classify the closed PRs and reverts by cause. Causes instruction text could have prevented become replay targets for a later round.",
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:5243adc37b46b1197b4307b3",
+      "at": "2026-11-17T13:58:55Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "edf401fc83ed425fbf1cc6a1466b8292",
+      "session_id": "f6c81dcc36cf4dc18d86d569e2745e79"
+    }
+  ]
+}

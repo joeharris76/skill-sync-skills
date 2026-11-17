@@ -263,6 +263,13 @@
       "status": "open",
       "title": "Map which instruction text each harness and role actually receives"
     },
+    "eval2-outcomes": {
+      "claim": null,
+      "needs": [],
+      "priority": "medium",
+      "status": "open",
+      "title": "Classify closed-unmerged PRs and reverts by cause"
+    },
     "eval2-pilot-report-gpt-results": {
       "claim": null,
       "needs": [],
