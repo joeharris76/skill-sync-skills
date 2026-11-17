@@ -291,6 +291,15 @@
       "status": "open",
       "title": "Run the first five scripted multi-turn scenarios"
     },
+    "eval2-scripted-extended": {
+      "claim": null,
+      "needs": [
+        "eval2-scripted-core"
+      ],
+      "priority": "medium-high",
+      "status": "open",
+      "title": "Run the remaining nine scripted scenarios"
+    },
     "eval2-subagent-briefs": {
       "claim": null,
       "needs": [

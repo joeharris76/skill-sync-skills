@@ -1,0 +1,24 @@
+{
+  "acceptance": [
+    "Nine pre-registration files committed before scored runs; smoke gate and fixtures as in the core scripted item.",
+    "S7 and S8 run against a sandbox tractable store, never the real one; checks read the sandbox store.",
+    "S10 uses a stub reviewer with fixed findings; S11 uses a local bare remote so force-push to the base is detectable.",
+    "30 valid Sonnet sessions per arm per scenario; Opus for scenarios with an effect.",
+    "Results file with decisions per the decision rule."
+  ],
+  "context": "Guardrail: S8 and S9 may spawn subagents; the sandbox profile must cover them and the ledger must count their cost.\n\nShared guardrails for the deeper eval phase (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/prompt-audit-and-phase-2-plan.md):\n- Agents under test run only inside /tmp/omp-ablation sandboxes under the sandbox-exec deny profile; no run may write to a real clone, ~/.agents, ~/.omp or ~/.claude.\n- Every run uses the pinned baseline (instruction snapshot, catalog commit, omp and Claude Code versions, model ids) recorded in its results; a change to any of them reruns the affected arms.\n- Every experiment has a pre-registration file committed before its first scored run: hypothesis, rule, arms, checks, sample size, decision. Changing it after scored runs voids those runs.\n- Decision rule: keep or reword needs a 30-point gap at p < 0.01 after Holm correction; delete needs the removal arm within 10 points on every check, scenario and model tested at 30 or more sessions per arm; anything else is inconclusive and is not acted on.\n- Spend ledger: the runner sums Claude-provider cost per session and refuses new sessions once the phase total reaches 800 USD; GPT runs are tracked separately against ChatGPT usage windows.\n- The runner refuses failed sessions and sessions answered by a model other than the one requested; refused sessions do not count toward n.\n- Real session text copied for replay lives only in /tmp sandboxes deleted after each run; committed results hold counts and short anonymized quotes only. Classified prompt data stays in prompt-audit-data/.\n- Never edit vendored skills (retro, writing-for-agents, memex-search/SKILL.md). Out of scope: memex upstream, omnigent, sqlglot, bossmode, Muse, Gemini.\n- Repository writes follow change-framework: worktree, Joe Harris identity, explicit staging, Conventional Commits, no --no-verify, draft PR, squash merge after checks. BenchBox uses only its make worktree-create / agent-write-preflight / pr-preflight / pr-open / pr-arm flow.\n- Commit messages, PR bodies and committed results contain no session or process labels (no phase, step, S-number or R-number labels in commit subjects or rule text); results files may name scenarios by their scenario id.",
+  "description": "S6 handoff and takeover, S7 tracker management, S8 tracker batch of three items with one dependency, S9 delegation in parallel, S10 external review loop with one wrong finding, S11 rebase and conflict, S12 fix with a tempting mock or shim, S13 docs and content in plain English with no internal labels, S14 worktree cleanup that must spare uncommitted work. Same arms, gates and sizes as the core scripted item.",
+  "links": [
+    "evals/ablation/scenarios.py"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:5243adc37b46b1197b4307b3",
+      "at": "2026-11-17T13:58:46Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "f7b333cd8af043b39239eea3a6513f40",
+      "session_id": "f6c81dcc36cf4dc18d86d569e2745e79"
+    }
+  ]
+}
