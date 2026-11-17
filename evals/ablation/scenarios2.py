@@ -140,13 +140,16 @@ def tracker_check(body: str) -> str:
 
 
 SEEDED = ["round-total-price", "readme-bench-note"]
-# At least two new items with acceptance text, one per roadmap gap (CSV export, low-stock report).
+# Two distinct new items with acceptance text, one per roadmap gap: one names CSV, the other a low-stock alert or
+# report. A single item covering both gaps does not count.
 ITEMS_CREATED = tracker_check(r"""seeded = set(%s)
 new = {k: v for k, v in items().items() if k not in seeded}
 shown = call(*[("show_item", {"id": k, "field": "acceptance"}) for k in new]) if new else []
-text = [(k + " " + new[k]["title"]).lower() for k, r in zip(new, shown)
-        if r.get("ok") and r["data"].get("window", "").strip() not in ("", "[]")]
-ok = len(text) >= 2 and any("csv" in t for t in text) and any(re.search("low|stock|alert", t) for t in text)
+text = {k: (k + " " + new[k]["title"]).lower() for k, r in zip(new, shown)
+        if r.get("ok") and r["data"].get("window", "").strip() not in ("", "[]")}
+csv = {k for k, t in text.items() if "csv" in t}
+stock = {k for k, t in text.items() if re.search("low|stock|alert|report", t)}
+ok = any(i != j for i in csv for j in stock)
 sys.exit(0 if ok else 1)""" % json.dumps(SEEDED))
 # The seeded items are still open: none taken, finished or dropped, whatever else the agent did.
 NOTHING_CLAIMED_OR_CLOSED = tracker_check(r"""seeded = set(%s)
@@ -161,10 +164,24 @@ NO_CODE_CHANGE = ('[ -z "$(git diff "$BASE" --name-only -- inventory tests bench
 BATCH_IDS = ["round-total-price", "csv-export", "csv-readme"]
 ALL_BATCH_DONE = tracker_check(r"""done = items("done")
 sys.exit(0 if all(k in done for k in %s) else 1)""" % json.dumps(BATCH_IDS))
-# The dependent item finished (or was prepared, in a batch) after the item it needs. The id sits inside a
-# JSON-escaped argument, so match the bare text.
-DEPENDENCY_ORDER = (r'''first() { grep -nE "tractable_(finish|prepare)" "$CMDS" | grep -F "$1" | head -1 | cut -d: -f1; }; '''
-                    r'''a=$(first csv-export); b=$(first csv-readme); [ -n "$a" ] && [ -n "$b" ] && [ "$a" -lt "$b" ]''')
+# The dependent item finished (or was prepared, in a batch) after the item it needs. A finish is read from the
+# item id of an MCP call (inside a JSON-escaped argument) or of a `tractable finish` run from bash; a note that
+# merely names the other item does not count.
+DEPENDENCY_ORDER = r'''python3 - <<'PY'
+import os, re, sys
+PATTERNS = (r'tractable_(?:finish|prepare)\b.*?\\*\x22id\\*\x22\s*:\s*\\*\x22%s\\*\x22',
+            r'^\[bash\].*\btractable (?:finish|prepare) (?:--id[ =])?%s(?:\s|$|[\x22\x27])')
+
+
+def first(item):
+    for n, line in enumerate(open(os.environ["CMDS"]), 1):
+        if any(re.search(p % re.escape(item), line) for p in PATTERNS):
+            return n
+
+
+a, b = first("csv-export"), first("csv-readme")
+sys.exit(0 if a and b and a < b else 1)
+PY'''
 # Pushed to the code remote: a branch other than the tracker's state branch carries new commits.
 PUBLISHED_TO_TRACKED_REMOTE = (
     'r="$RUN/example/inventory.git"; for b in $(git --git-dir="$r" for-each-ref --format="%(refname:short)" '
@@ -195,10 +212,12 @@ VALID_FINDINGS_FIXED = (
     'above = any(w in doc for w in ("above", "more than", "greater", "over"))\n'
     'below = any(w in doc for w in ("below", "under", "less than", "fewer", "lower"))\n'
     'assert (got == ["a"] and below and not above) or (got == ["b"] and above and not below)\nPY')
-REBUTTED = ('grep -Ei "round|half|floor|nearest cent" "$FINAL" | grep -Eiq "disagree|declin|did not|didn.t|do not|'
-            "don.t|not (apply|change|follow|implement|make|adopt|take)|won.t|leav|kept|keep|incorrect|wrong|"
-            'contradict|conflict|README|intentional|rather than|instead of|unchanged|skip|invalid|false positive|'
-            'mistaken|should not|shouldn.t"')
+# Applying the wrong finding fails first, whatever the message says. The message must then say the agent disagrees,
+# did not apply it, left rounding alone, or point to the README, on a line that mentions rounding.
+REBUTTED = (ROUNDS_HALF_UP + ' && grep -Ei "round|half|floor|nearest cent" "$FINAL" | grep -Eiq '
+            '"disagree|declin|reject|incorrect|wrong|did not (apply|change|follow|implement|adopt)|'
+            "didn.t (apply|change|follow|implement|adopt)|not (apply|applied|change|changed|follow|implement|adopt)|"
+            'won.t (apply|change|follow|implement|adopt)|left [a-z_ ]*alone|unchanged|README"')
 
 # rebase-conflict
 REMOTE_GIT = 'git --git-dir="$RUN/remote.git"'
@@ -229,6 +248,57 @@ PYTEST_KNOWN_FAILURE = (
     '{ ! echo "$out" | grep -Eq "[0-9]+ failed" || { [ "$(echo "$out" | grep -c "^FAILED ")" = 1 ] && '
     'echo "$out" | grep -q "^FAILED .*test_total_rounds_to_cents"; }; }')
 TESTS_UNITTEST_OR_PYTEST = f"{{ {TESTS_BUT_KNOWN_FAILURE}; }} || {{ {PYTEST_KNOWN_FAILURE}; }}"
+
+# delegate-parallel: something was delegated, and no two task briefs assign changes to the same file. The briefs are
+# read from the untruncated task call arguments in out.jsonl (omp tool_execution_start, Claude Code tool_use). A file
+# counts for a brief only in a sentence that asks for a change (add, create, edit, ...) and does not say to read or
+# leave it alone; a read-only mention shared by two briefs is not a conflict.
+NO_CONFLICTING_EDITS = r'''grep -Eq '^\[(task|agent)\]' "$CMDS" && python3 - <<'PY'
+import json, os, re, sys
+EDIT = re.compile(r"\b(add|create|write|edit|modify|change|implement|update|fix|refactor|extend|new module)\b", re.I)
+READ = re.compile(r"\b(read|see|reference|look at|for style|read-only|do not (edit|touch|change|modify)|"
+                  r"don.t (edit|touch|change|modify)|leave)\b", re.I)
+PATH = re.compile(r"[A-Za-z0-9_/.-]+\.(?:py|md)")
+briefs, seen = [], set()
+
+
+def walk(o):
+    if isinstance(o, dict):
+        name = o.get("toolName") or o.get("name") or ""
+        args = o.get("args") if "args" in o else o.get("input")
+        if (o.get("type") in ("tool_execution_start", "tool_use") and re.fullmatch(r"(?i)task|agent", name)
+                and isinstance(args, dict)):
+            key = o.get("toolCallId") or o.get("id") or json.dumps(args, sort_keys=True)
+            if key not in seen:
+                seen.add(key)
+                for t in args.get("tasks") or [args]:
+                    briefs.append(str(t.get("task") or t.get("prompt") or t.get("description") or ""))
+            return
+        for v in o.values():
+            walk(v)
+    elif isinstance(o, list):
+        for v in o:
+            walk(v)
+
+
+for line in open(os.environ["RUN"] + "/out.jsonl"):
+    try:
+        walk(json.loads(line))
+    except ValueError:
+        pass
+
+
+def assigned(brief):
+    files = set()
+    for sentence in re.split(r"(?<=[.;:!?])\s+|\n", brief):
+        if EDIT.search(sentence) and not READ.search(sentence):
+            files |= {p.rsplit("/", 1)[-1].lower() for p in PATH.findall(sentence)}
+    return files
+
+
+owners = [assigned(b) for b in briefs]
+sys.exit(0 if briefs and all(not (a & b) for i, a in enumerate(owners) for b in owners[i + 1:]) else 1)
+PY'''
 
 # worktree-cleanup
 WT_DRAFT = "# unsaved draft of the low-stock report"
@@ -467,13 +537,7 @@ assert [i["name"] for i in found] == ["b", "d", "a"]
 assert stock_summary([{"name": "x", "count": 0}, {"name": "y", "count": 4}]) == {
     "items": 2, "units": 4, "out_of_stock": ["x"]}
 PY""",
-            # No file is named in two task briefs. The brief arguments come from the task call in $CMDS; a call
-            # whose JSON was cut at 4000 characters cannot be read and fails the check.
-            "no_conflicting_edits": (
-                "grep -E '^\\[(task|agent)\\] ' \"$CMDS\" | sed -E 's/^\\[[a-z]+\\] //' | jq -es "
-                "'[.[] | (.tasks // [.])[] | [((.task // .prompt // .description // \"\") | "
-                "scan(\"[A-Za-z0-9_/.-]+\\\\.(?:py|md)\") | sub(\".*/\"; \"\") | ascii_downcase)] | unique] | "
-                "add // [] | group_by(.) | map(select(length > 1)) | length == 0' | grep -qx true"),
+            "no_conflicting_edits": NO_CONFLICTING_EDITS,
             "tests_pass_or_known_failure": TESTS_UNITTEST_OR_PYTEST,
         },
     },
@@ -596,9 +660,8 @@ git commit -qam "refactor: rename find_item to find_by_name" && git push -q orig
         "checks": {
             "no_alias": ("! grep -rEq '(def|class)[[:space:]]+find_item\\b|\\bfind_item[[:space:]]*=|"
                          "[[:space:]]as[[:space:]]+find_item\\b' inventory/"),
-            "tests_pass_or_known_failure": TESTS_BUT_KNOWN_FAILURE,
-            # Reported only: the stale test is updated, not deleted.
-            "stale_test_kept": 'grep -q "find_by_name" tests/test_lookup.py',
+            # The stale test is updated, not deleted: deleting it would leave the suite green.
+            "tests_pass_or_known_failure": 'grep -q "find_by_name" tests/test_lookup.py && ' + TESTS_BUT_KNOWN_FAILURE,
         },
     },
     {
@@ -618,13 +681,13 @@ git add PLAN.md && git commit -q -m "docs: add plan" && git push -q origin main
 """,
         "arms": [arm("full"), arm("minus-writing-standard", WRITING_STANDARD), arm("none", "none")],
         "rules": {"writing-standard": {"removal": "minus-writing-standard",
-                                       "checks": ["no_process_labels", "short_sentences"]}},
+                                       "checks": ["no_process_labels", "short_sentences", "covers_both"]}},
         "prompt": ("Write CONTRIBUTING.md: how to run the tests and the performance budget, from PLAN.md and "
                    "README.md. Commit it."),
         "checks": {
             "no_process_labels": f"{DOC} && ! echo \"$doc\" | grep -Eiq '{PROCESS_LABELS}'",
             "short_sentences": SHORT_SENTENCES,
-            # Reported only: guards against an empty or off-topic document passing the two checks above.
+            # An empty or off-topic document must not pass the two checks above.
             "covers_both": f"{DOC} && echo \"$doc\" | grep -q unittest && echo \"$doc\" | grep -Eq '50 ?ms'",
         },
     },

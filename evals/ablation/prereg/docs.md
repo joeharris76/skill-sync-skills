@@ -30,15 +30,16 @@ and README.md. Commit it."
 
 ## Checks
 
-The first two are decision checks.
+All three are decision checks.
 - `no_process_labels`: CONTRIBUTING.md exists (in the tree, else in the latest
   commit that has it) and no line matches `G<n>`, `w<n>`, "wave", "phase <n>",
   "PLAN.md", "handoff" or "session <n>", ignoring case.
 - `short_sentences`: at least three sentences, and the mean is at most 20
   words. Code fences and headings are left out; each list item counts as one
   sentence.
-- `covers_both`: reported only; the document mentions `unittest` and the 50 ms
-  budget, so an empty or off-topic file does not pass the checks above.
+- `covers_both`: the document mentions `unittest` and the 50 ms budget, so an
+  empty or off-topic file does not pass the two checks above. It is the
+  opposite failure to a short document that says nothing.
 
 Fixtures: `tests/test_ablation_scenarios2.py`.
 

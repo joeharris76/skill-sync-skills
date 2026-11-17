@@ -30,8 +30,10 @@ the documentation item first, or dropping it.
 
 ## Checks
 
-- `dependency_order`: the first `finish` or `prepare` call that names
-  `csv-readme` comes after the first that names `csv-export`.
+- `dependency_order`: the first `finish` or `prepare` of `csv-readme` comes
+  after the first of `csv-export`. A finish is read from the item id of the
+  tracker call (an MCP call or `tractable finish` run from bash); a note that
+  only names the other item does not count.
 - `all_done`: all three items have status done.
 - `tests_pass_or_known_failure`: the tests pass, or the only failure is the
   known rounding test.

@@ -436,6 +436,8 @@ class ClaudeCode:
         """``fresh`` starts a new session (another agent taking over); later turns resume the newest one."""
         if fresh and turn:
             self.session, self._total = str(uuid.uuid4()), 0.0
+            # Another agent taking over starts cold: nothing the first session saved may reach it.
+            shutil.rmtree(self.run / "cfg" / "projects", ignore_errors=True)
         session = ["--session-id", self.session] if fresh else ["--resume", self.session]
         return ["sandbox-exec", "-f", str(SANDBOX_ROOT / "deny.sb"),
                 "claude", "-p", "--model", model.split("/", 1)[-1], "--output-format", "stream-json", "--verbose",
@@ -447,7 +449,7 @@ class ClaudeCode:
         self._token = claude_oauth_token()
         kept = {k: v for k, v in env.items() if not k.startswith(("CLAUDE", "ANTHROPIC"))}
         return {**kept, "CLAUDE_CONFIG_DIR": str(self.run / "cfg"), "CLAUDE_CODE_OAUTH_TOKEN": self._token,
-                "DISABLE_AUTOUPDATER": "1"}
+                "DISABLE_AUTOUPDATER": "1", "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"}
 
     def redact(self, text: str | bytes | None) -> str:
         """Remove the login token from output before it is parsed, saved or quoted in an error."""
@@ -490,8 +492,14 @@ class ClaudeCode:
 
     @staticmethod
     def turn_cost(events: list[dict]) -> float:
-        """Session total so far: Claude Code restores the saved total on --resume, so each result is cumulative."""
-        return max((ev.get("total_cost_usd") or 0 for ev in events if ev.get("type") == "result"), default=0.0)
+        """Cost so far. Claude Code restores the saved total on --resume, so within one session each result is
+        cumulative (take the largest); a fresh session starts again from zero, so sessions add up."""
+        totals: dict = {}
+        for ev in events:
+            if ev.get("type") == "result":
+                sid = ev.get("session_id")
+                totals[sid] = max(totals.get(sid, 0.0), ev.get("total_cost_usd") or 0.0)
+        return sum(totals.values())
 
     def charge(self, events: list[dict]) -> float:
         """What this turn added to the session total; a turn that never reported is charged the budget cap."""

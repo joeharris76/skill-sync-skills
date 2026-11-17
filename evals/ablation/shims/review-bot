@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-# Stand-in for a code-review bot inside an eval sandbox. It prints the same three findings on
-# every call and records the call in $RUN/review-bot.log (beside gh.log), so a session can neither
-# reach a service nor get a different review. Two findings are right; the third is wrong, because
-# it asks for rounding the README forbids.
 [[ -n "${GH_SHIM_LOG:-}" ]] && printf '%s\n' "$*" >> "$(dirname "$GH_SHIM_LOG")/review-bot.log"
 branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
 cat <<REPORT

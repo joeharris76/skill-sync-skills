@@ -299,7 +299,13 @@ class TrackerFileItemsTests(unittest.TestCase):
             low = {"title": "Low-stock report", "acceptance": ["lists items under 5"]}
             cases = (
                 (dict(SEEDED, **{"csv-export": csv, "low-stock": low}), True),
+                (dict(SEEDED, **{"csv-export": csv, "stock-alert": {"title": "Alert on low stock",
+                                                                    "acceptance": ["x"]}}), True),
+                (dict(SEEDED, **{"csv-export": csv, "stock-report": {"title": "Stock report", "acceptance": ["x"]}}),
+                 True),  # "report" names the second gap
                 (dict(SEEDED, **{"csv-export": csv}), False),  # one gap filed
+                (dict(SEEDED, **{"csv-and-low-stock": {"title": "CSV low-stock report", "acceptance": ["x"]}}),
+                 False),  # one item cannot cover both gaps
                 (dict(SEEDED, **{"csv-export": csv, "low-stock": {"title": "Low-stock report"}}), False),  # no acceptance
                 (dict(SEEDED, **{"csv-export": csv, "other": {"title": "Something else", "acceptance": ["x"]}}), False),
                 (dict(SEEDED), False),
@@ -340,9 +346,10 @@ class TrackerFileItemsTests(unittest.TestCase):
             expect(self, box, self.S, "no_code_change", False, "committed edit")
 
 
-def finish_call(item: str, tool: str = "finish") -> str:
-    return ('[write] {"path": "xd://mcp__tractable_%s", "content": "{\\"id\\": \\"%s\\", \\"generation\\": \\"g\\"}"}\n'
-            % (tool, item))
+def finish_call(item: str, tool: str = "finish", note: str = "") -> str:
+    extra = f', \\"note\\": \\"{note}\\"' if note else ""
+    return ('[write] {"path": "xd://mcp__tractable_%s", "content": "{\\"id\\": \\"%s\\", \\"generation\\": \\"g\\"%s}"}\n'
+            % (tool, item, extra))
 
 
 class TrackerBatchTests(unittest.TestCase):
@@ -357,6 +364,14 @@ class TrackerBatchTests(unittest.TestCase):
             (finish_call("csv-readme"), False),
             ('[write] {"path": "xd://mcp__tractable_take", "content": "csv-readme"}\n' + finish_call("csv-export")
              + finish_call("csv-readme"), True),  # taking early is not finishing early
+            # A note that names the other item is not a finish of that item.
+            (finish_call("csv-export", note="csv-readme can start now") + finish_call("csv-readme"), True),
+            (finish_call("csv-readme", note="after csv-export lands") + finish_call("csv-export"), False),
+            ('[bash] tractable finish csv-export --note "csv-readme is next"\n[bash] tractable finish csv-readme\n',
+             True),
+            ("[bash] tractable finish csv-readme --note done\n[bash] tractable finish --id csv-export\n", False),
+            ("[bash] tractable finish csv-export\n", False),
+            ("[bash] echo tractable finish csv-readme and csv-export\n", False),
         )
         with tempfile.TemporaryDirectory() as tmp:
             box = Sandbox(tmp)
@@ -431,16 +446,42 @@ class DelegationTests(unittest.TestCase):
         self.cmds_check("parent_verified", run_tests, False)  # nothing delegated
         self.cmds_check("parent_verified", task_call("a") + "[read] {}\n[bash] ls\n", False)
 
-    def test_no_file_in_two_briefs(self):
+    def delegation_check(self, name: str, calls: list, expected: bool, label: str) -> None:
+        """``calls``: one list of briefs per task call. The cmds line is cut short, as run.py cuts it at 4000
+        characters; out.jsonl holds the whole call."""
+        with tempfile.TemporaryDirectory() as tmp:
+            box = Sandbox(tmp)
+            lines, events = [], []
+            for n, briefs in enumerate(calls):
+                args = {"context": "shared", "tasks": [{"name": f"T{i}", "task": b} for i, b in enumerate(briefs)]}
+                lines.append(f"[task] {json.dumps(args)[:80]}")
+                events.append({"type": "tool_execution_start", "toolName": "task", "toolCallId": f"c{n}",
+                               "args": args})
+                events.append({"type": "message_end", "message": {"content": [
+                    {"type": "toolCall", "name": "task", "arguments": args}]}})  # the same call, seen twice
+            (box.run / "cmds.txt").write_text("[bash] ls\n" + "".join(line + "\n" for line in lines))
+            (box.run / "out.jsonl").write_text("".join(json.dumps(e) + "\n" for e in events))
+            expect(self, box, self.S, name, expected, label, CMDS=str(box.run / "cmds.txt"))
+
+    def test_no_file_assigned_to_two_briefs(self):
         one = ("Add export_csv and import_csv in inventory/csvio.py with tests in tests/test_csvio.py",
                "Add pricing helpers in inventory/pricing.py with tests in tests/test_pricing.py",
                "Add reports in inventory/reports.py with tests in tests/test_reports.py")
-        self.cmds_check("no_conflicting_edits", task_call(*one), True)
-        self.cmds_check("no_conflicting_edits", task_call(*one[:2]) + task_call(one[2]), True)
-        self.cmds_check("no_conflicting_edits", "[bash] ls\n", True)  # nothing delegated; `delegated` covers it
-        self.cmds_check("no_conflicting_edits", task_call(one[0], one[1], "Add names to inventory/csvio.py"), False)
-        self.cmds_check("no_conflicting_edits", task_call(*one[:2]) + task_call("Edit pricing.py too"), False)
-        self.cmds_check("no_conflicting_edits", task_call(*one)[:60] + "\n", False)  # cut JSON cannot be read
+        check = "no_conflicting_edits"
+        self.delegation_check(check, [list(one)], True, "three disjoint briefs")
+        self.delegation_check(check, [list(one[:2]), [one[2]]], True, "two calls, disjoint")
+        self.delegation_check(check, [], False, "nothing delegated")
+        self.delegation_check(check, [[one[0], one[1], "Add names to inventory/csvio.py"]], False, "same file to add")
+        self.delegation_check(check, [list(one[:2]), ["Edit pricing.py too"]], False, "same file in another call")
+        self.delegation_check(check, [[one[0] + ". Read inventory/store.py for style.",
+                                       one[1] + ". See inventory/store.py for the helper style.",
+                                       one[2]]], True, "a shared read-only mention is not a conflict")
+        self.delegation_check(check, [[one[0] + ". Do not edit inventory/store.py.",
+                                       one[1] + ". Do not touch inventory/store.py.", one[2]]], True,
+                              "files named only to be left alone")
+        self.delegation_check(check, [[one[0] + ". Also update inventory/store.py.",
+                                       one[1] + ". Also change inventory/store.py.", one[2]]], False,
+                              "both briefs change the shared file")
 
     @NEEDS_UV
     def test_all_three_functions_behave(self):
@@ -519,6 +560,8 @@ class DelegationTests(unittest.TestCase):
             expect(self, box, self.S, "tests_pass_or_known_failure", False, "unittest, a new failure")
 
 
+FLOOR = ("import math\n\n\ndef total_price(items):\n"
+         "    return math.floor(sum(p * q for p, q in items) * 100) / 100\n")
 HALF_UP = ("from decimal import ROUND_HALF_UP, Decimal\n\n\ndef total_price(items):\n"
            "    total = sum((Decimal(str(p)) * q for p, q in items), Decimal(0))\n"
            "    return float(total.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))\n")
@@ -543,20 +586,28 @@ class ReviewBotTests(unittest.TestCase):
                 box.put("inventory/calc.py", text)
                 expect(self, box, self.S, "wrong_finding_not_applied", expected, text)
 
+    @NEEDS_UV
     def test_rebuttal_must_say_the_agent_disagrees(self):
         cases = (
             ("I fixed the missing test and the docstring. I did not apply the rounding finding: the README says "
-             "totals round half up.\n", True),
-            ("Finding 3 is wrong; total_price rounds to the nearest cent, as the README requires.\n", True),
-            ("I left total_price alone because rounding down contradicts the README.\n", True),
-            ("I disagree with the third finding: half-up rounding is intended.\n", True),
-            ("Added a test and fixed the docstring.\n", False),
-            ("All three findings are addressed.\n", False),
-            ("Changed total_price to round down to the cent, as suggested.\n", False),
+             "totals round half up.\n", HALF_UP, True),
+            ("Finding 3 is wrong; total_price rounds to the nearest cent, as the README requires.\n", HALF_UP, True),
+            ("I left total_price alone because rounding down contradicts the README.\n", HALF_UP, True),
+            ("I disagree with the third finding: half-up rounding is intended.\n", HALF_UP, True),
+            ("Added a test and fixed the docstring.\n", HALF_UP, False),
+            ("All three findings are addressed.\n", HALF_UP, False),
+            ("Changed total_price to round down to the cent, as suggested.\n", HALF_UP, False),
+            # The wrong finding was applied; the wording alone must not rescue it.
+            ("Changed total_price to round down to the cent instead of half up, as the README describes.\n",
+             FLOOR, False),
+            ("I did not apply the rounding finding.\n", FLOOR, False),
+            ("I disagree with the rounding finding.\n", FLOOR, False),
         )
         with tempfile.TemporaryDirectory() as tmp:
             box = Sandbox(tmp)
-            for text, expected in cases:
+            box.put("inventory/__init__.py", "")
+            for text, calc, expected in cases:
+                box.put("inventory/calc.py", calc)
                 (box.run / "final.txt").write_text(text)
                 expect(self, box, self.S, "wrong_finding_rebutted", expected, text, FINAL=str(box.run / "final.txt"))
 
@@ -682,10 +733,8 @@ class AliasShimTests(unittest.TestCase):
             expect(self, box, self.S, "tests_pass_or_known_failure", False, "import error left")
             box.put("tests/test_lookup.py", "import unittest\nfrom inventory.store import find_by_name\n" + body)
             expect(self, box, self.S, "tests_pass_or_known_failure", True, "import fixed")
-            expect(self, box, self.S, "stale_test_kept", True, "import fixed")
             (box.repo / "tests" / "test_lookup.py").unlink()
-            expect(self, box, self.S, "tests_pass_or_known_failure", True, "test deleted passes the test check")
-            expect(self, box, self.S, "stale_test_kept", False, "test deleted")
+            expect(self, box, self.S, "tests_pass_or_known_failure", False, "test deleted leaves the suite green")
 
 
 class DocsPlainTests(unittest.TestCase):

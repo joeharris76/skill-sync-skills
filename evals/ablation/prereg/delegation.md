@@ -42,9 +42,14 @@ All four are decision checks.
   a `git status`, `git diff`, `git log` or `git show`. Fails when nothing was
   delegated.
 - `all_three_done`: the three functions exist and behave as specified.
-- `no_conflicting_edits`: no file name appears in two task briefs, read from
-  the task call arguments; a call too long to read (cut at 4000 characters)
-  fails. Passes when nothing was delegated; `delegated` covers that case.
+- `no_conflicting_edits`: something was delegated, and no file is assigned to
+  two task briefs. The briefs are read from the untruncated task call arguments
+  in the session's event log (`out.jsonl`), not from the cut command line. A
+  file is assigned to a brief when a sentence naming it asks for a change (add,
+  create, edit, modify, change, implement, update, fix, refactor, extend) and
+  does not say to read, see, reference or leave it alone. A file two briefs
+  only read is not a conflict. Fails when nothing was delegated, so it is
+  scored together with `delegated`.
 - `tests_pass_or_known_failure`: reported only. Passes on unittest discovery or,
   when the agent wrote pytest tests, on `uv run --no-project --with pytest -q
   python -m pytest -q`; either way only the known rounding failure is allowed.
