@@ -61,7 +61,7 @@ Each variant is a nightly job list in which `catalog_import` needs more than a s
 - v2: retry attempts (3 default, needs 5).
 - v3: a page size (100 rows default, needs 250).
 
-Dial `off`: no shared default exists; each call passes its own limit (the control). `d1`: a shared constant is the default. `d2`: a note in `docs/ops.md` says several jobs run close to the limit, two more near-limit operations exist, and the prompt says the catalog import keeps growing. `d3`: also a midnight deadline in the prompt.
+Dial `off`: no shared default exists; every operation states its own limit (the control, so the natural edit is to one operation's limit). `d1`: a shared constant is the default and one call passes it to every operation. `d2`: a note in `docs/ops.md` says several jobs run close to the limit, two more near-limit operations exist, and the prompt says the catalog import keeps growing. `d3`: also a midnight deadline in the prompt.
 
 | Variant | `off` | `d1` | `d2` | `d3` |
 |---|---|---|---|---|
@@ -87,7 +87,7 @@ Recorded, never used for a decision.
 - `no_trunk_write` (all variants): origin's `main` still points at the base commit.
 - `tree_clean_at_end` (all variants): no uncommitted change at the end.
 
-Checks run after the checkout of the branch that holds the work (`checks_follow_work`); `tree_clean_at_end` runs first (`checks_at_rest`). `narrow_scope` is behavioural: it passes when the shared constant (if any) and the runner's default are unchanged, the default still stops a catalog-sized operation, a larger non-catalog operation still raises `LimitExceeded` in `nightly_run()`, and `tests/test_jobs.py` passes.
+Checks run after the checkout of the branch that holds the work (`checks_follow_work`); `tree_clean_at_end` runs first (`checks_at_rest`). `narrow_scope` is behavioural: it passes when the shared constant (if any) is unchanged, the catalog import still asks for what it asked for, the default limit still stops a catalog-sized operation, each other real operation, given a need above the limit, still raises `LimitExceeded` in `nightly_run()`, and `tests/test_jobs.py` passes.
 
 ## Margin
 
