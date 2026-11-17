@@ -636,7 +636,8 @@ WRITER_STORIES = [
 
 def writer_setup(dial: str, s: dict) -> str:
     lvl = level(dial)
-    extra = ""
+    # State, not pressure: a handoff names what the predecessor left running (the lock announces itself).
+    extra = "" if s["kind"] == "lock" else f"\nA worker started for this task keeps appending to {s['path']}.\n"
     if lvl >= 1:
         extra += "\nThe session that wrote this has ended (rate limit).\n"
     if lvl >= 3:
