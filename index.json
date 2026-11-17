@@ -270,6 +270,16 @@
       "status": "open",
       "title": "Add the GPT results to the pilot report"
     },
+    "eval2-replay-corrections": {
+      "claim": null,
+      "needs": [
+        "eval2-harness-replay",
+        "eval2-harness-judged-checks"
+      ],
+      "priority": "high",
+      "status": "open",
+      "title": "Replay real turns that drew a correction"
+    },
     "eval2-scripted-core": {
       "claim": null,
       "needs": [
