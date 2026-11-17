@@ -397,6 +397,13 @@
       "status": "open",
       "title": "Map the unread todo references into the phase 3 section map"
     },
+    "p3-sol-capacity": {
+      "claim": null,
+      "needs": [],
+      "priority": "high",
+      "status": "open",
+      "title": "Measure GPT Sol sessions per usage window and recheck counting models"
+    },
     "require-skillspector-check": {
       "claim": null,
       "needs": [

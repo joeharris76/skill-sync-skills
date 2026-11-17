@@ -1,0 +1,22 @@
+{
+  "acceptance": [
+    "One full ChatGPT window of phase 2 core-scenario sessions on Sol run until usage_limit; sessions per window and tokens per session recorded",
+    "Per-skill load rates recomputed with per-model denominators; final counting-model table (threshold 15% of sessions) written to plan.md",
+    "User asked for the window budget with the measured figure; answer recorded in plan.md Decisions"
+  ],
+  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.",
+  "description": "Phase 3 step 2. Sol capacity is unmeasured (phase 2 stopped at 11 sessions). Gate for every Sol run: after measuring, ask the user how many windows to use.",
+  "links": [
+    "~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783",
+      "at": "2026-11-17T21:09:52Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "498cf5ed7554449fb15779e58923df53",
+      "session_id": "b0e22510b3ae4ab38c30015d036c9db6"
+    }
+  ]
+}
