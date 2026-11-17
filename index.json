@@ -426,15 +426,10 @@
       "title": "Add text-range skill drops, arm interleaving, read logging and equivalence statistics"
     },
     "p3-map-todo-references": {
-      "claim": {
-        "expires_at": "2026-11-18T21:12:30Z",
-        "generation": "abed790b6d264f04b9e3c4b439e6b609",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783"
-      },
+      "claim": null,
       "needs": [],
       "priority": "high",
-      "status": "active",
+      "status": "done",
       "title": "Map the unread todo references into the phase 3 section map"
     },
     "p3-report": {
