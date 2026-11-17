@@ -284,15 +284,10 @@
       "title": "Build a replay runner that resumes real sessions at a chosen turn under each arm"
     },
     "eval2-loading-map": {
-      "claim": {
-        "expires_at": "2026-11-18T14:21:40Z",
-        "generation": "d415a4e1e6f84284b217fdf916e77a0a",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:5243adc37b46b1197b4307b3"
-      },
+      "claim": null,
       "needs": [],
       "priority": "high",
-      "status": "active",
+      "status": "done",
       "title": "Map which instruction text each harness and role actually receives"
     },
     "eval2-outcomes": {
