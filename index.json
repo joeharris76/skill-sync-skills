@@ -222,6 +222,22 @@
       "status": "done",
       "title": "Select the imported skills in the global deployment and apply it"
     },
+    "eval2-apply-decisions": {
+      "claim": null,
+      "needs": [
+        "eval2-scripted-core",
+        "eval2-scripted-extended",
+        "eval2-replay-corrections",
+        "eval2-replay-reviews",
+        "eval2-subagent-briefs",
+        "eval2-skill-sections",
+        "eval2-repo-files",
+        "eval2-harness-claude-code"
+      ],
+      "priority": "high",
+      "status": "open",
+      "title": "Replicate and apply the phase decisions"
+    },
     "eval2-harness-claude-code": {
       "claim": null,
       "needs": [
