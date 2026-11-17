@@ -315,13 +315,18 @@
       "title": "Replay real turns that drew a correction"
     },
     "eval2-replay-reviews": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-18T18:41:16Z",
+        "generation": "e5c10069a5224a0ba0558a858ea79820",
+        "renewals": 0,
+        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783"
+      },
       "needs": [
         "eval2-harness-replay",
         "eval2-harness-judged-checks"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "active",
       "title": "Replay real review requests"
     },
     "eval2-repo-files": {
