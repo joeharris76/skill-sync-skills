@@ -458,6 +458,15 @@
       "status": "open",
       "title": "Split families whose candidate group matters into single sections"
     },
+    "p3-trigger-eval": {
+      "claim": null,
+      "needs": [
+        "p3-harness"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Measure how often each in-scope skill loads without being asked"
+    },
     "require-skillspector-check": {
       "claim": null,
       "needs": [
