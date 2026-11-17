@@ -9,18 +9,21 @@ Standard library only. Needs bash, grep and git, which CI runners have.
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ABLATION = Path(__file__).resolve().parents[1] / "evals" / "ablation"
 sys.path.insert(0, str(ABLATION))
 
 import run  # noqa: E402
 import scenarios  # noqa: E402
+import stats  # noqa: E402
 
 BY_ID = {s["id"]: s for s in scenarios.SCENARIOS}
 TAKE = '[write] {"path": "xd://mcp__tractable_take", "content": "{}"}'
@@ -131,13 +134,22 @@ class RepositoryCheckTests(unittest.TestCase):
 class ArmTests(unittest.TestCase):
     def test_every_arm_resolves_against_the_file_under_test(self):
         """A reworded arm whose original text has drifted would silently test nothing."""
-        for scenario in scenarios.SCENARIOS:
+        for scenario in run.SCENARIOS:
             for arm in scenario["arms"]:
                 with self.subTest(scenario=scenario["id"], arm=arm["name"]):
-                    text = run.global_text(arm["global"])
+                    text = run.global_text(arm["global"], arm.get("fixture", "global-under-test.md"))
                     for old, _new in arm.get("edits", []):
                         self.assertIsNotNone(text)
                         self.assertIn(old, text)
+
+    def test_compared_arms_exist(self):
+        """A decision against a misnamed arm would compare nothing and report no result."""
+        for scenario in run.SCENARIOS:
+            names = {arm["name"] for arm in scenario["arms"]}
+            for key in ("reference", "removal"):
+                if key in scenario:
+                    with self.subTest(scenario=scenario["id"], key=key):
+                        self.assertIn(scenario[key], names)
 
     def test_removing_a_section_removes_only_that_section(self):
         text = "# T\n\n## A\n\na\n\n## B\n\nb\n\n## C\n\nc\n"
@@ -149,8 +161,135 @@ class ArmTests(unittest.TestCase):
         self.assertEqual(run.drop_lines("1\n2\n3\n4\n5\n", "2-3,5"), "1\n4\n")
 
     def test_fisher_exact_matches_known_values(self):
-        self.assertAlmostEqual(run.fisher(5, 5, 0, 5), 2 / 252, places=6)
-        self.assertAlmostEqual(run.fisher(3, 5, 3, 5), 1.0, places=6)
+        self.assertAlmostEqual(stats.fisher(5, 5, 0, 5), 2 / 252, places=6)
+        self.assertAlmostEqual(stats.fisher(3, 5, 3, 5), 1.0, places=6)
+
+
+class DecisionRuleTests(unittest.TestCase):
+    def test_holm_adjustment(self):
+        adjusted = stats.holm([0.01, 0.04, 0.03])
+        self.assertEqual([round(p, 6) for p in adjusted], [0.03, 0.06, 0.06])
+
+    def test_large_significant_gap_keeps_the_rule(self):
+        self.assertEqual(stats.compare({"c": (25, 30, 5, 30)})["band"], "keep")
+
+    def test_rule_that_hurts_is_harmful(self):
+        self.assertEqual(stats.compare({"c": (5, 30, 25, 30)})["band"], "harmful")
+
+    def test_gap_that_holm_correction_removes_is_inconclusive(self):
+        # 18/30 against 8/30 is p = 0.0175 alone: below 0.05 but not below 0.01.
+        self.assertEqual(stats.compare({"c": (18, 30, 8, 30)})["band"], "inconclusive")
+        # Significant alone (p ~ 0.007); across three checks Holm lifts it above 0.01.
+        alone = stats.compare({"c": (20, 30, 9, 30)})
+        self.assertEqual(alone["band"], "keep")
+        three = stats.compare({"c": (20, 30, 9, 30), "d": (15, 30, 15, 30), "e": (15, 30, 15, 30)})
+        self.assertEqual(three["band"], "inconclusive")
+
+    def test_no_difference_needs_thirty_sessions_per_arm(self):
+        self.assertEqual(stats.compare({"c": (28, 30, 27, 30)})["band"], "within")
+        self.assertEqual(stats.compare({"c": (28, 29, 27, 29)})["band"], "inconclusive")
+        self.assertEqual(stats.compare({"c": (28, 30, 27, 30), "d": (20, 30, 15, 30)})["band"], "inconclusive")
+
+    def test_rule_decision_needs_every_band_within_to_delete(self):
+        self.assertEqual(stats.rule_decision(["within", "within"]), "delete")
+        self.assertEqual(stats.rule_decision(["within", "inconclusive"]), "inconclusive")
+        self.assertEqual(stats.rule_decision(["within", "keep"]), "keep")
+        self.assertEqual(stats.rule_decision(["harmful", "within"]), "reword")
+        self.assertEqual(stats.rule_decision(["keep", "harmful"]), "conflict")
+        self.assertEqual(stats.rule_decision([]), "untested")
+        self.assertEqual(stats.rule_decision(["within", "untested"]), "inconclusive")
+        self.assertEqual(stats.rule_decision(["conflict", "within"]), "conflict")
+
+    def test_opposite_effects_in_one_scenario_are_a_conflict(self):
+        self.assertEqual(stats.compare({"acted": (30, 30, 0, 30), "asked": (0, 30, 30, 30)})["band"], "conflict")
+
+
+class DecisionAggregationTests(unittest.TestCase):
+    """Decisions over run folders: what may and may not lead to deleting a rule."""
+
+    SCENARIOS = [
+        {"id": "a", "experiment": "exp", "rule": "r", "removal": "minus", "checks": {"c": "true"}, "arms": []},
+        {"id": "b", "experiment": "exp", "rule": "r", "removal": "minus", "checks": {"c": "true"}, "arms": []},
+    ]
+
+    def folder(self, root: Path, name: str, rows: list[tuple[str, str, int, int]], prereg: str | None = "h",
+               model: str = "m") -> Path:
+        out = root / name
+        (out / "results").mkdir(parents=True)
+        (out / "baseline.json").write_text(json.dumps({"harness": "omp", "model": model, "smoke": False, "fixtures": {}}))
+        for scenario, arm, passes, n in rows:
+            for i in range(n):
+                result = {"scenario": scenario, "arm": arm, "checks": {"c": i < passes}, "prereg": prereg}
+                (out / "results" / f"{scenario}__{arm}__{i}.json").write_text(json.dumps(result))
+        return out
+
+    def decide(self, *outs: Path) -> dict:
+        with mock.patch.object(run, "SCENARIOS", self.SCENARIOS), mock.patch.object(run, "prereg_hash", lambda *_a, **_k: "h"):
+            return run.decisions(list(outs))
+
+    def test_a_rule_is_not_deleted_while_one_of_its_scenarios_is_unrun(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = self.folder(Path(tmp), "o", [("a", "full", 28, 30), ("a", "minus", 28, 30)])
+            self.assertEqual(self.decide(out)["rules"]["r"], "inconclusive")
+            both = self.folder(Path(tmp), "p", [("b", "full", 28, 30), ("b", "minus", 28, 30)])
+            self.assertEqual(self.decide(out, both)["rules"]["r"], "delete")
+
+    def test_results_without_a_preregistration_do_not_count(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = self.folder(Path(tmp), "o", [("a", "full", 28, 30), ("a", "minus", 28, 30),
+                                              ("b", "full", 28, 30), ("b", "minus", 28, 30)], prereg=None)
+            self.assertEqual(self.decide(out)["rules"], {})
+
+    def test_reruns_pool_instead_of_adding_a_second_test(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            first = self.folder(Path(tmp), "o", [("a", "full", 15, 15), ("a", "minus", 15, 15)])
+            second = self.folder(Path(tmp), "p", [("a", "full", 15, 15), ("a", "minus", 15, 15)])
+            bands = [b for b in self.decide(first, second)["bands"] if b["scenario"] == "a"]
+            self.assertEqual(len(bands), 1)
+            self.assertEqual(bands[0]["min_n"], 30)
+
+
+class RunnerGuardTests(unittest.TestCase):
+    def test_ledger_refuses_capped_sessions_at_the_ceiling(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ledger = run.Ledger(Path(tmp) / "ledger.json", ceiling=1.0)
+            ledger.admit("anthropic/claude-sonnet-5-5")
+            ledger.add("anthropic/claude-sonnet-5-5", 0.6)
+            ledger.add("openai-codex/gpt-6.1-sol", 5.0)
+            ledger.admit("anthropic/claude-sonnet-5-5")
+            ledger.add("anthropic/claude-sonnet-5-5", 0.5)
+            with self.assertRaises(run.LedgerFull):
+                ledger.admit("anthropic/claude-sonnet-5-5")
+            ledger.admit("openai-codex/gpt-6.1-sol")  # plan usage is counted, not capped
+
+    def test_a_folder_keeps_one_baseline(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            first = {"harness": "omp", "harness_version": "1", "model": "m", "smoke": False, "fixtures": {}}
+            run.pin_baseline(out, first)
+            run.pin_baseline(out, dict(first))
+            with self.assertRaises(SystemExit):
+                run.pin_baseline(out, dict(first, harness_version="2"))
+
+    def test_scored_runs_need_a_preregistration(self):
+        scenario = {"id": "x", "experiment": "no-such-experiment"}
+        with self.assertRaises(SystemExit):
+            run.prereg_hash(scenario, smoke=False)
+        self.assertIsNone(run.prereg_hash(scenario, smoke=True))
+
+    def test_changed_preregistration_voids_earlier_runs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out, prereg = Path(tmp) / "out", Path(tmp) / "prereg"
+            prereg.mkdir()
+            (prereg / "exp.md").write_text("v1")
+            scenario = {"id": "exp-scenario", "experiment": "exp", "checks": {}, "arms": []}
+            with mock.patch.object(run, "PREREG", prereg), mock.patch.object(run, "SCENARIOS", [scenario]):
+                (out / "results").mkdir(parents=True)
+                result = {"scenario": "exp-scenario", "arm": "full", "checks": {}, "prereg": run.prereg_hash(scenario, False)}
+                (out / "results" / "a.json").write_text(json.dumps(result))
+                self.assertEqual(run.load_results(out)[1], 0)
+                (prereg / "exp.md").write_text("v2")
+                self.assertEqual(run.load_results(out)[1], 1)
 
 
 if __name__ == "__main__":
