@@ -327,7 +327,8 @@
     "eval2-repo-files": {
       "claim": null,
       "needs": [
-        "eval2-harness-replay"
+        "eval2-harness-replay",
+        "eval2-skill-sections"
       ],
       "priority": "medium",
       "status": "open",
