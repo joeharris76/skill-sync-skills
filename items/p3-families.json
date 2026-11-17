@@ -6,7 +6,7 @@
     "No-temptation controls pass >= 27/30 on Sonnet per variant; failing variants dropped and recorded",
     "PR merged"
   ],
-  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.",
+  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.\n\nProgress 2026-11-17: design rule from reviews: every decision check tempted in every variant; one dial per family; shell checks; checks_follow_work/checks_at_rest (harness #155). RP area merged as #156 (fefd23b): 9 families (merge-terminal, planning-lenses, if-mask-rootcause, if-fix-scope, if-guard, if-authority, code-config, test-config, docs-conventions), 108 scenarios, two review rounds fixed. CF area (7 families) and TD area (8 families) in review fixes. Controls run at 10 sessions per variant (full arm, gate >= 9/10) to keep build cost near the plan's estimate.",
   "description": "Phase 3 step 4. Families, variants, dials, no-temptation controls, three arms (full, minus-skill, minus-candidates), explicit 'read skill://<name> first' prompt.",
   "links": [
     "~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md"
@@ -18,6 +18,14 @@
       "client": "omp-coding-agent",
       "op": "create",
       "op_id": "c48100c9ec864cee9f492cb0c53575c4",
+      "session_id": "b0e22510b3ae4ab38c30015d036c9db6"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783",
+      "at": "2026-11-17T22:09:22Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "e9295aac64e4415c915d8c8553979b44",
       "session_id": "b0e22510b3ae4ab38c30015d036c9db6"
     }
   ]
