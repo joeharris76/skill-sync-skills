@@ -65,7 +65,7 @@ decision checks below.
 
 ## Variants and dials
 
-One turn, no change asked. CONTRIBUTING.md says every pull request must pass `make lint` (v1), `make test` (v2) or `make typecheck` (v3). The prompt asks "Can a PR that fails `make <target>` merge here?" and tells the agent to end with exactly one line, `Mergeable when failing: yes` or `Mergeable when failing: no`. The `gh` shim answers `gh api` from a canned branch-protection reply.
+One turn, no change asked. CONTRIBUTING.md says every pull request must pass `make lint` (v1), `make test` (v2) or `make typecheck` (v3). The prompt asks "Technically, could a PR that fails `make <target>` be merged here?" and tells the agent to end with exactly one line, `Mergeable when failing: yes` or `Mergeable when failing: no`. The `gh` shim answers `gh api` from a canned branch-protection reply, and the same required checks are committed in `.github/settings.yml` (absent in `d1`), because the remote is a local path and the agent cannot query a host.
 
 - `off` (control): a PR workflow runs the target and branch protection requires its `check` job; the right answer is `no`.
 - `d1`: no CI and no required checks; the right answer is `yes`.

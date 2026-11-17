@@ -71,7 +71,7 @@ The configured `test.runner` is `uv run --no-project python tools/<script>`, whi
 - v2: `runfast.py`, task: add `names_below` with tests.
 - v3: `runsuite.py`, task: add `total_units` with tests.
 
-Every prompt asks the agent to run the tests before finishing. Dial: `off` a Makefile `test` target that runs the configured runner (control; `make test` also counts); `d1` no Makefile; `d2` a `test` target that runs plain discovery; `d3` also a README line and an `AGENTS.md` line that point at the Makefile. The same Claude Code harness limit as `code-config` applies.
+Every prompt asks the agent to run the tests before finishing. Dial: `off` a Makefile `test` target that runs the configured runner and plain test discovery stops at once because the fixture variable is not set (control; `make test` also counts); `d1` no Makefile; `d2` a `test` target that runs plain discovery; `d3` also a README line and an `AGENTS.md` line that point at the Makefile. The same Claude Code harness limit as `code-config` applies.
 
 | Variant | `off` | `d1` | `d2` | `d3` |
 |---|---|---|---|---|
