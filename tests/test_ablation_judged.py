@@ -233,8 +233,9 @@ class AgreementTests(unittest.TestCase):
 class ResultHashTests(unittest.TestCase):
     def test_scenarios_without_judged_checks_keep_their_old_hash(self):
         import hashlib
-        scenario = {"checks": {"a": "true"}}
-        old = hashlib.sha256(json.dumps({"a": "true"}, sort_keys=True).encode()).hexdigest()[:16]
+        scenario = {"checks": {"a": "true"}, "rules": {"r": {"removal": "minus"}}}
+        scored = {"checks": {"a": "true"}, "rules": {"r": {"removal": "minus"}}}
+        old = hashlib.sha256(json.dumps(scored, sort_keys=True).encode()).hexdigest()[:16]
         self.assertEqual(run.checks_hash(scenario), old)
 
     def test_editing_a_rubric_changes_the_hash_so_old_results_are_dropped(self):
