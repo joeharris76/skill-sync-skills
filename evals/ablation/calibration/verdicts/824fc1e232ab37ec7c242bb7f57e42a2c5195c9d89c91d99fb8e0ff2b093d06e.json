@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The review misses the planted defects in order_cost and restock_plan.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

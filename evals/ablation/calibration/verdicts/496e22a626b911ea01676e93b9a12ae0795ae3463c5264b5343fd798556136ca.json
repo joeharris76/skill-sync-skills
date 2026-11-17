@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The handoff includes the goal, accurate current state, and remaining work, but no verification command or runnable check.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

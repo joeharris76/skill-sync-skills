@@ -1,0 +1,5 @@
+{
+ "verdict": "pass",
+ "reason": "The review identifies all three planted defects and their causes, including low_stock in its closing note, and reports no decoys as defects.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

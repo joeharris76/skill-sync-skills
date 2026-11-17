@@ -37,6 +37,7 @@ DISABLED_PROVIDERS = ["agents", "claude", "codex", "gemini", "opencode", "github
 sys.path.insert(0, str(HERE))
 from scenarios import SCENARIOS as PILOT_SCENARIOS  # noqa: E402
 from scenarios2 import SCENARIOS2  # noqa: E402
+import judge  # noqa: E402
 from stats import compare, fisher, rule_decision  # noqa: E402
 
 SCENARIOS = PILOT_SCENARIOS + SCENARIOS2
@@ -113,7 +114,9 @@ def pin_baseline(out: Path, current: dict) -> None:
 
 
 def checks_hash(scenario: dict) -> str:
-    return hashlib.sha256(json.dumps(scenario.get("checks", {}), sort_keys=True).encode()).hexdigest()[:16]
+    # A scenario without judged checks keeps the hash it always had, so earlier results stay valid.
+    parts = scenario.get("checks", {}) if "judged" not in scenario else [scenario.get("checks", {}), scenario["judged"]]
+    return hashlib.sha256(json.dumps(parts, sort_keys=True).encode()).hexdigest()[:16]
 
 
 def parse_events(stdout: str | bytes | None) -> list[dict]:
@@ -347,13 +350,16 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
     checks = {}
     for name, script in scenario["checks"].items():
         checks[name] = subprocess.run(["bash", "-c", script], cwd=repo, env=env, capture_output=True).returncode == 0
+    judged, judged_details, judged_unusable = judge.run_judged(
+        scenario, arm["name"], result_path.stem, repo, env, run, text, out, out.resolve().parent / "judge-cache", ledger)
+    checks.update(judged)  # only calibrated checks; the rest are listed under judged_unusable
     metrics = {}
     for name, script in scenario.get("metrics", {}).items():
         raw = subprocess.run(["bash", "-c", script], cwd=repo, env=env, capture_output=True, text=True).stdout.strip()
         metrics[name] = float(raw) if re.fullmatch(r"-?\d+(\.\d+)?", raw) else None
     result = {"scenario": scenario["id"], "arm": arm["name"], "rep": rep, "model": model, "run": str(run),
               "turns": len(prompts), "prereg": prereg, "checks_hash": checks_hash(scenario),
-              "checks": checks, "metrics": metrics, "cost": round(turn_cost(events), 4),
+              "checks": checks, "judged": judged_details, "judged_unusable": judged_unusable, "metrics": metrics, "cost": round(turn_cost(events), 4),
               "tool_calls": sum(ev.get("type") == "tool_execution_start" for ev in events),
               "skills_read": sorted(set(re.findall(r"skill://([\w-]+)", "".join(stdout))))}
     result_path.parent.mkdir(parents=True, exist_ok=True)
@@ -418,9 +424,11 @@ def decisions(outs: list[Path]) -> dict:
                 if not with_rule or not without:
                     result = {"band": "untested", "min_n": 0, "checks": {}}
                 else:
+                    names = list(sc.get("checks", {})) + [n for n in sc.get("judged", {})
+                                                          if all(n in r["checks"] for r in with_rule + without)]
                     result = compare({name: (sum(r["checks"].get(name, False) for r in with_rule), len(with_rule),
                                              sum(r["checks"].get(name, False) for r in without), len(without))
-                                      for name in sc["checks"]})
+                                      for name in names})
                 bands.append({"rule": rule, "scenario": sc["id"], "model": model, "harness": harness, **result})
                 rules.setdefault(rule, []).append(result["band"])
     return {"bands": bands, "rules": {rule: rule_decision(b) for rule, b in rules.items()}}
@@ -456,7 +464,9 @@ def report_folder(out: Path) -> None:
     for sid in dict.fromkeys(s for s, _ in rows):
         sc = by_id.get(sid, {})
         print(f"## {sid} — unit: {sc.get('unit', '?')}")
-        names = list(sc.get("checks", {})) or sorted({c for (s, _), rs in rows.items() if s == sid for r in rs for c in r["checks"]})
+        names = (list(sc.get("checks", {})) + [n for n in sc.get("judged", {})
+                                               if all(n in r["checks"] for (s, _), rs in rows.items() if s == sid for r in rs)]
+                 ) or sorted({c for (s, _), rs in rows.items() if s == sid for r in rs for c in r["checks"]})
         ref = rows.get((sid, sc.get("reference", "full")))
         print("| arm | n | " + " | ".join(names) + " | metrics (mean) | skills read | tools | $/run |")
         print("|---|---|" + "---|" * (len(names) + 4))

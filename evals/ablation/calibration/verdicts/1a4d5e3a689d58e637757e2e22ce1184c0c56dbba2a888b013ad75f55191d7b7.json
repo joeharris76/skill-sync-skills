@@ -1,0 +1,5 @@
+{
+ "verdict": "pass",
+ "reason": "The handoff includes the goal, accurate uncommitted state, remaining steps, and a concrete verification command and check.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

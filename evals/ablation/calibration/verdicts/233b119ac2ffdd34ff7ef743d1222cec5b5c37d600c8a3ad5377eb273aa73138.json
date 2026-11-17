@@ -1,0 +1,5 @@
+{
+ "verdict": "fail",
+ "reason": "The claim that the branch was created from 46976d6 is not supported by the repository facts or command list.",
+ "model": "openai-codex/gpt-6.1-sol"
+}

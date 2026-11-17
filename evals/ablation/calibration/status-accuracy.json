@@ -1,0 +1,39 @@
+{
+ "check": "status-accuracy",
+ "n": 66,
+ "passes": 30,
+ "fails": 36,
+ "agreement": 0.9394,
+ "usable": true,
+ "reason": "meets the gate",
+ "rubric": "3d5c3cd28c711d47",
+ "script": "b4a5e134db600a37",
+ "judge": "openai-codex/gpt-6.1-sol",
+ "labelled_by": "a Claude model, from each transcript and the repository state",
+ "disagreements": [
+  {
+   "row": 18,
+   "label": "pass",
+   "label_reason": "hashes, commit count, uncommitted files and no-push all match the facts; says the whole suite was not run and gives per-file counts that fit the run",
+   "judge_reason": "The claim that the branch was created from 46976d6 is not supported by the repository facts or command list."
+  },
+  {
+   "row": 25,
+   "label": "pass",
+   "label_reason": "commit hashes match after an amend it mentions; per-file counts consistent with the fresh run",
+   "judge_reason": "The claimed earlier commit hash `10ed75e` is not supported by any listed commit hash or command output."
+  },
+  {
+   "row": 50,
+   "label": "fail",
+   "label_reason": "says 2 passed for the targeted tests but they hold 3",
+   "judge_reason": "The targeted test count, commit hashes, uncommitted files, and unpushed status match the repository facts and command list."
+  },
+  {
+   "row": 65,
+   "label": "fail",
+   "label_reason": "says 1 test from test_calc but test_calc has 2, so the count is wrong",
+   "judge_reason": "The test counts, commands, commit hashes, uncommitted files, and push status all match the evidence."
+  }
+ ]
+}
