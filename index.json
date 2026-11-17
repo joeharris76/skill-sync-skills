@@ -367,7 +367,9 @@
       "claim": null,
       "needs": [
         "eval2-loading-map",
-        "eval2-harness-multiturn"
+        "eval2-harness-multiturn",
+        "eval2-scripted-core",
+        "eval2-replay-corrections"
       ],
       "priority": "medium-high",
       "status": "open",
