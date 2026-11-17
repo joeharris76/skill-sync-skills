@@ -390,6 +390,15 @@
       "status": "done",
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
+    "p3-apply": {
+      "claim": null,
+      "needs": [
+        "p3-splits"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Apply phase 3 section decisions and deploy"
+    },
     "p3-dial-pilot": {
       "claim": null,
       "needs": [
