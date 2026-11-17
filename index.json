@@ -390,6 +390,13 @@
       "status": "done",
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
+    "p3-map-todo-references": {
+      "claim": null,
+      "needs": [],
+      "priority": "high",
+      "status": "open",
+      "title": "Map the unread todo references into the phase 3 section map"
+    },
     "require-skillspector-check": {
       "claim": null,
       "needs": [
