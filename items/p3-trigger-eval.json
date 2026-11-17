@@ -3,7 +3,7 @@
     "About 20 prompts per in-scope skill (explicit, implicit, contextual, near-miss), 3 runs each, Sonnet; Sol after the window decision",
     "Load rate per prompt type and model; any description change is a separately tested candidate"
   ],
-  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.",
+  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.\n\nSonnet done 2026-11-17: PR #154 merged (8d70447); 540 sessions, 0 errors, $23.9 (phase3/trigger-sonnet). Load rate of the target skill, explicit/implicit/contextual/near-miss: change-framework 1/18,0/18,0/12,0/12; review-protocol 8/18,3/18,0/12,0/12; investigation-framework 0/18 all; agent-execution 8/18,0,0,0; session-takeover 15/18,5/18,1/12,0/12; todo 15/18,3/18,4/12,0/12; code 0 all; test 5/18,3/18,0,0; docs 4/18,1/18,0,0. Any skill read: explicit 63/162, implicit 17/162, contextual 7/108, near-miss 2/108. Sonnet rarely loads skills even when prompts name the activity; descriptions do not over-trigger. Sol part waits for the window decision (p3-sol-capacity).",
   "description": "Separate item per the user's decision: run now. Organic mode. Sol part waits for the window decision in p3-sol-capacity.",
   "links": [
     "~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md"
@@ -15,6 +15,14 @@
       "client": "omp-coding-agent",
       "op": "create",
       "op_id": "45dbf6eae3ea460db91c75f0d13de8cc",
+      "session_id": "b0e22510b3ae4ab38c30015d036c9db6"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:0c32f5c481549e3f50fdf783",
+      "at": "2026-11-17T21:57:47Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "bc116e02ffe34c5c8548509c2887c8ff",
       "session_id": "b0e22510b3ae4ab38c30015d036c9db6"
     }
   ]
