@@ -298,15 +298,10 @@
       "title": "Classify closed-unmerged PRs and reverts by cause"
     },
     "eval2-pilot-report-gpt-results": {
-      "claim": {
-        "expires_at": "2026-11-18T14:14:42Z",
-        "generation": "a70e3147130944f1a92285ff9f3ee50e",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:5243adc37b46b1197b4307b3"
-      },
+      "claim": null,
       "needs": [],
       "priority": "medium",
-      "status": "active",
+      "status": "done",
       "title": "Add the GPT results to the pilot report"
     },
     "eval2-replay-corrections": {
