@@ -459,6 +459,15 @@
       "status": "open",
       "title": "Measure GPT Sol sessions per usage window and recheck counting models"
     },
+    "p3-sol-run": {
+      "claim": null,
+      "needs": [
+        "p3-sol-capacity"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Run the phase 3 tests that wait for GPT Sol"
+    },
     "p3-splits": {
       "claim": null,
       "needs": [
