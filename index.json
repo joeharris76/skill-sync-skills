@@ -445,8 +445,7 @@
     "p3-scored-runs": {
       "claim": null,
       "needs": [
-        "p3-dial-pilot",
-        "p3-sol-capacity"
+        "p3-dial-pilot"
       ],
       "priority": "medium-high",
       "status": "open",
