@@ -443,17 +443,12 @@
       "title": "Report phase 3 results"
     },
     "p3-scored-runs": {
-      "claim": {
-        "expires_at": "2026-11-19T16:34:33Z",
-        "generation": "7f94cca1373e42f39b2de149ed0d5409",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f"
-      },
+      "claim": null,
       "needs": [
         "p3-dial-pilot"
       ],
       "priority": "medium-high",
-      "status": "active",
+      "status": "done",
       "title": "Run the three-arm families on every counting model"
     },
     "p3-sol-capacity": {
