@@ -18,9 +18,14 @@ straight to the lower dial, and it chose a level where `minus-skill` passed
 every session (code-config: 100% at d1 against 0% at d2). That makes a test
 unable to show a drop.
 
-The file covers the review, investigation, repository-convention,
-change-framework and takeover-resumption families. The todo and takeover
-families are added in a later commit, before their scored runs.
+The file covers all 24 families. The todo and takeover families were added
+in a second commit, from their own pilot, before their scored runs.
+
+takeover-live-writer's controls fall short of the gate on Sonnet (9 of 10
+sessions per variant passing every decision check): 5/10 in v1 and 7/10 in
+v3. The failing sessions failed `halted` and `partial_preserved`. The family
+counts only GPT Sol and gets no scored runs in this phase. Its controls must
+pass before the Sol run.
 
 ## Sample
 
