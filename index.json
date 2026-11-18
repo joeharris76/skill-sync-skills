@@ -469,17 +469,12 @@
       "title": "Split families whose candidate group matters into single sections"
     },
     "p3-trigger-eval": {
-      "claim": {
-        "expires_at": "2026-11-19T16:34:07Z",
-        "generation": "2ec23e924e784114872cee8ab30e28c4",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f"
-      },
+      "claim": null,
       "needs": [
         "p3-harness"
       ],
       "priority": "medium",
-      "status": "active",
+      "status": "done",
       "title": "Measure how often each in-scope skill loads without being asked"
     },
     "require-skillspector-check": {
