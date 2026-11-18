@@ -391,17 +391,12 @@
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
     "p3-apply": {
-      "claim": {
-        "expires_at": "2026-11-19T16:34:40Z",
-        "generation": "75d5934e68e5451f8165f496add2eef1",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f"
-      },
+      "claim": null,
       "needs": [
         "p3-scored-runs"
       ],
       "priority": "medium",
-      "status": "active",
+      "status": "done",
       "title": "Apply phase 3 section decisions and deploy"
     },
     "p3-dial-pilot": {
