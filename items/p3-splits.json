@@ -4,6 +4,7 @@
   ],
   "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.",
   "description": "Phase 3 step 7. Only for families where minus-candidates lowers a decision check.",
+  "drop_reason": "Moved to p3-sol-run. Splits only identify idle spans inside keep groups, which matters only for deletion; deletion waits for GPT Sol.",
   "links": [
     "~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md"
   ],
@@ -15,6 +16,14 @@
       "op": "create",
       "op_id": "074caf9c4cde419bb1669157b562ec61",
       "session_id": "b0e22510b3ae4ab38c30015d036c9db6"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f",
+      "at": "2026-11-18T16:34:38Z",
+      "client": "omp-coding-agent",
+      "op": "drop",
+      "op_id": "f1608958c5cc42f6a0891ed71c0aecb5",
+      "session_id": "920e8b441fb64cbf86f54c2adee36c57"
     }
   ]
 }

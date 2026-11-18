@@ -473,7 +473,7 @@
         "p3-scored-runs"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "dropped",
       "title": "Split families whose candidate group matters into single sections"
     },
     "p3-trigger-eval": {
