@@ -3,7 +3,7 @@
     "Sections equivalent on every counting model deleted from this catalog's skills (vendored skills untouched); harmful sections rewritten only after the rewrite passes its own three-arm test",
     "Safeguard tests updated; PR merged; skills deployed with skill-sync apply/verify/check"
   ],
-  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.",
+  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.\n\nNothing applied. No section can be deleted while GPT Sol has not run, and no section was harmful, so there was nothing to rewrite. Recorded in the phase 3 report (#165).",
   "description": "Phase 3 step 8. Auto-apply per the user's decision.",
   "links": [
     "~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md"
@@ -32,6 +32,14 @@
       "generation": "75d5934e68e5451f8165f496add2eef1",
       "op": "take",
       "op_id": "0741d59b1a4b46a28657f1d0ca7b5e2b",
+      "session_id": "920e8b441fb64cbf86f54c2adee36c57"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f",
+      "at": "2026-11-18T16:34:42Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "3c8c8cb14c4f4168b4c4a6dd555191e0",
       "session_id": "920e8b441fb64cbf86f54c2adee36c57"
     }
   ]
