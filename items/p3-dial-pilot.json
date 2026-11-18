@@ -2,7 +2,7 @@
   "acceptance": [
     "Chosen dial level per variant (minus-skill pass rate nearest 50%) committed in the pre-registration before any counting-model run"
   ],
-  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.\n\nStarted RP area 2026-11-17: controls-rp (off dial, full arm, 10/variant) and pilot-rp (d1-d3, minus-skill, 8/level) on Sonnet, worktree wt-p3-runs at main.",
+  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.\n\nStarted RP area 2026-11-17: controls-rp (off dial, full arm, 10/variant) and pilot-rp (d1-d3, minus-skill, 8/level) on Sonnet, worktree wt-p3-runs at main.\n\nDone. Dials for all 24 families frozen in evals/ablation/prereg/phase3-dials.json by #163 and #164, from discarded Sonnet minus-skill pilots.",
   "description": "Phase 3 step 5. 8 sessions per dial level, minus-skill arm only, Sonnet; pilot sessions discarded.",
   "links": [
     "~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md"
@@ -31,6 +31,14 @@
       "generation": "0c4c869d892e45be947d7e1cc7240fe3",
       "op": "take",
       "op_id": "a8d7acb238c748189ce302c155b37106",
+      "session_id": "920e8b441fb64cbf86f54c2adee36c57"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f",
+      "at": "2026-11-18T16:34:03Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "eac1a149adc1426190e464d1f7e96610",
       "session_id": "920e8b441fb64cbf86f54c2adee36c57"
     }
   ]
