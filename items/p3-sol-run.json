@@ -6,7 +6,7 @@
     "Splits (one candidate span at a time) only inside keep groups, and only where a deletion decision depends on them",
     "Deletions applied only where every counting model is equivalent, by PR, with a follow-up report"
   ],
-  "context": "Deferred on 2026-11-18 by the owner: Opus/Fable top-up of the review and change-framework families (578 sessions, about 190 USD) and the todo families on Fable (about 635 USD). Phase ledger at the end of the Claude runs: 1,007 USD of a 2,100 USD ceiling. run.py skips sessions that already have a result, so reruns into the same folders fill only the gaps; the folders are under ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/.",
+  "context": "Deferred on 2026-11-18 by the owner: Opus/Fable top-up of the review and change-framework families (578 sessions, about 190 USD) and the todo families on Fable (about 635 USD). Phase ledger at the end of the Claude runs: 1,007 USD of a 2,100 USD ceiling. run.py skips sessions that already have a result, so reruns into the same folders fill only the gaps; the folders are under ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/.\n\n2026-11-18: takeover-live-writer passes its controls on Sol (30/30 on every decision check; folder phase3/controls-livewriter-sol). Sol scored runs started into phase3/scored-sol and stopped after 9 sessions at the ChatGPT Plus 5-hour limit; about 50 Sol sessions use one 5-hour window and about 16% of the weekly quota. Bedrock Sol still returns 403. Eval sessions read the user's omp config: bash.gitGuard (now off again) blocked branch creation in sandboxes, so the first 11 Sol sessions were discarded; ~/.omp/agent/PERSONALITY.md also reaches sandboxes (prose only, equal across arms; disclose in the report). After the Sol run: test a subagent-only rule file (~/.omp/agent/rules/subagents.md, alwaysApply with agents: \"!main\") with the phase 2 delegation scenarios before adopting it; no user rule files may be added while evaluations run.",
   "description": "Phase 3 (evals/ablation/results/2026-11-18-phase-3.md) ran only the Claude models. Deletions need every model that really loads a skill, and GPT 6.1 Sol loads every skill tested. This item holds the work left for Sol.",
   "sessions": [
     {
@@ -15,6 +15,14 @@
       "client": "omp-coding-agent",
       "op": "create",
       "op_id": "555e600712f24bf6945c595289659fd3",
+      "session_id": "920e8b441fb64cbf86f54c2adee36c57"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f",
+      "at": "2026-11-18T22:12:11Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "ea2d8e3fda1341c781cac589f52deab6",
       "session_id": "920e8b441fb64cbf86f54c2adee36c57"
     }
   ]
