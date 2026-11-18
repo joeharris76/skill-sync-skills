@@ -455,7 +455,7 @@
       "claim": null,
       "needs": [],
       "priority": "high",
-      "status": "open",
+      "status": "dropped",
       "title": "Measure GPT Sol sessions per usage window and recheck counting models"
     },
     "p3-sol-run": {
