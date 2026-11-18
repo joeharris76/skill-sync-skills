@@ -400,12 +400,17 @@
       "title": "Apply phase 3 section decisions and deploy"
     },
     "p3-dial-pilot": {
-      "claim": null,
+      "claim": {
+        "expires_at": "2026-11-19T16:34:01Z",
+        "generation": "0c4c869d892e45be947d7e1cc7240fe3",
+        "renewals": 0,
+        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f"
+      },
       "needs": [
         "p3-families"
       ],
       "priority": "medium-high",
-      "status": "open",
+      "status": "active",
       "title": "Fix dial levels from a Sonnet pilot and freeze them"
     },
     "p3-families": {
