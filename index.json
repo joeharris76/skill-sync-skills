@@ -393,7 +393,7 @@
     "p3-apply": {
       "claim": null,
       "needs": [
-        "p3-splits"
+        "p3-scored-runs"
       ],
       "priority": "medium",
       "status": "open",
