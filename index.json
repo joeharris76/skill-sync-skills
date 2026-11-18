@@ -464,7 +464,7 @@
         "p3-sol-capacity"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "dropped",
       "title": "Run the phase 3 tests that wait for GPT Sol"
     },
     "p3-splits": {

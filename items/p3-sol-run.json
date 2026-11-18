@@ -8,6 +8,7 @@
   ],
   "context": "Deferred on 2026-11-18 by the owner: Opus/Fable top-up of the review and change-framework families (578 sessions, about 190 USD) and the todo families on Fable (about 635 USD). Phase ledger at the end of the Claude runs: 1,007 USD of a 2,100 USD ceiling. run.py skips sessions that already have a result, so reruns into the same folders fill only the gaps; the folders are under ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/.\n\n2026-11-18: takeover-live-writer passes its controls on Sol (30/30 on every decision check; folder phase3/controls-livewriter-sol). Sol scored runs started into phase3/scored-sol and stopped after 9 sessions at the ChatGPT Plus 5-hour limit; about 50 Sol sessions use one 5-hour window and about 16% of the weekly quota. Bedrock Sol still returns 403. Eval sessions read the user's omp config: bash.gitGuard (now off again) blocked branch creation in sandboxes, so the first 11 Sol sessions were discarded; ~/.omp/agent/PERSONALITY.md also reaches sandboxes (prose only, equal across arms; disclose in the report). After the Sol run: test a subagent-only rule file (~/.omp/agent/rules/subagents.md, alwaysApply with agents: \"!main\") with the phase 2 delegation scenarios before adopting it; no user rule files may be added while evaluations run.",
   "description": "Phase 3 (evals/ablation/results/2026-11-18-phase-3.md) ran only the Claude models. Deletions need every model that really loads a skill, and GPT 6.1 Sol loads every skill tested. This item holds the work left for Sol.",
+  "drop_reason": "Owner decision 2026-11-18: phase 3 stays Claude-only. The ChatGPT Plus quota allows about 50 Sol sessions per 5-hour window and about 300 a week, so the registered Sol run would take about 3 weeks, and a deletion-grade run about 6; Bedrock Sol returns 403. The deferred Opus/Fable top-up and Fable todo runs only fed Sol-gated deletion decisions and are dropped with it. takeover-live-writer passes its controls on Sol (30/30), recorded in the phase 3 report.",
   "sessions": [
     {
       "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f",
@@ -23,6 +24,14 @@
       "client": "omp-coding-agent",
       "op": "update",
       "op_id": "ea2d8e3fda1341c781cac589f52deab6",
+      "session_id": "920e8b441fb64cbf86f54c2adee36c57"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f",
+      "at": "2026-11-18T22:15:42Z",
+      "client": "omp-coding-agent",
+      "op": "drop",
+      "op_id": "cd78e15ff6a548eda277befa8dcc2684",
       "session_id": "920e8b441fb64cbf86f54c2adee36c57"
     }
   ]
