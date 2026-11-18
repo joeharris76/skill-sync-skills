@@ -409,18 +409,13 @@
       "title": "Fix dial levels from a Sonnet pilot and freeze them"
     },
     "p3-families": {
-      "claim": {
-        "expires_at": "2026-11-19T16:33:49Z",
-        "generation": "0b73bdebdb294354ad76b22c0254efa1",
-        "renewals": 0,
-        "worker": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f"
-      },
+      "claim": null,
       "needs": [
         "p3-map-todo-references",
         "p3-harness"
       ],
       "priority": "high",
-      "status": "active",
+      "status": "done",
       "title": "Build and pre-register the eleven phase 3 scenario families"
     },
     "p3-harness": {
