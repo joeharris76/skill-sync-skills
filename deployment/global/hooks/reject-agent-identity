@@ -7,8 +7,8 @@
 #   git config --global hook.reject-agent-identity.command ~/.agents/hooks/reject-agent-identity
 #   git config --global hook.reject-agent-identity.event pre-commit
 # A config-defined hook runs as well as a repository's own hooks. It runs for
-# `git commit` only: a tool that builds commits another way (omp's commit
-# helper, for one) does not run config-defined hooks.
+# `git commit` and for omp's commit helper; a tool that writes commits with
+# plumbing commands (`git commit-tree`) skips it.
 #
 # When a task really does name an agent identity, allow that one commit with
 #   ALLOW_AGENT_IDENTITY=1 git commit ...
