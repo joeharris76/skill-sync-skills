@@ -3,7 +3,7 @@
     "Band per family x check x model with loading rates; families whose full arm reads the skill < 90% reported as loading failures",
     "Report-only result folder per model; no voided results"
   ],
-  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.",
+  "context": "Shared guardrails (plan: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md): agents under test run only in /tmp/omp-ablation sandboxes under the deny profile; no real repository, session file or user config is written. Skills pinned to one catalog commit for the whole phase; skill sources never edited during experiments. Pre-registration and dial levels committed before scored runs; checks_hash voids changed results. Shell decision checks only (no judged checks). No deletion on an insensitive test, on one model, or on a copy unless the kept copies alone hold the rule. Phase 3 ledger with a $1,300 ceiling on Claude models; GPT Sol scored runs wait for the user's window decision. Serial batch: one worker per PR, leader is the only tracker writer. Commit identity Joe Harris <joeharris76@gmail.com>; plain-English durable text; no session labels in commits/PRs.\n\nDone for the Claude models: Opus and Fable on the review and change-framework families (stopped part-way by an API usage limit), Sonnet on delegated-member-stops, Opus and Sonnet on the todo families. Bands in the phase 3 report (#165). Sol runs, the Opus/Fable top-up and the Fable todo runs moved to p3-sol-run.",
   "description": "Phase 3 step 6. 70 sessions per arm (90 where full < 65%), interleaved; Opus and Fable on the phase ledger; Sol within the user's window budget.",
   "links": [
     "~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/plan.md"
@@ -32,6 +32,14 @@
       "generation": "7f94cca1373e42f39b2de149ed0d5409",
       "op": "take",
       "op_id": "2d70bdbacab24bd9852e0cc316b18002",
+      "session_id": "920e8b441fb64cbf86f54c2adee36c57"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:41494473a3311d1b73f3959f",
+      "at": "2026-11-18T16:34:35Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "dd6afb7d3ce04e988e29cf31fe7a5ae6",
       "session_id": "920e8b441fb64cbf86f54c2adee36c57"
     }
   ]
