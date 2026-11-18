@@ -131,6 +131,16 @@ def checks_hash(scenario: dict) -> str:
     return hashlib.sha256(json.dumps(scored, sort_keys=True).encode()).hexdigest()[:16]
 
 
+def scenario_hash(scenario: dict) -> str:
+    """Hash of the whole scenario definition: setup, prompts, arms, checks and every other field.
+
+    checks_hash covers only what scores a session, so a fixture or prompt change would leave earlier
+    results counted. Results record this hash, and load_results voids a result whose recorded hash no
+    longer matches. Files a scenario reads by path (shims, fixture files) are not covered.
+    """
+    return hashlib.sha256(json.dumps(scenario, sort_keys=True, default=str).encode()).hexdigest()[:16]
+
+
 def follow_work(repo: Path, base: str) -> str | None:
     """Check out the agent's newest commit when it left the repository back on the base commit.
 
@@ -773,6 +783,7 @@ def run_one(scenario: dict, arm: dict, rep: int, out: Path, cache: Path, ledger:
         metrics[name] = float(raw) if re.fullmatch(r"-?\d+(\.\d+)?", raw) else None
     result = {"scenario": scenario["id"], "arm": arm["name"], "rep": rep, "model": model, "run": str(run),
               "turns": len(prompts), "prereg": prereg, "checks_hash": checks_hash(scenario),
+              "scenario_hash": scenario_hash(scenario),
               "checks": checks, "judged": judged_details, "judged_unusable": judged_unusable,
               "judged_missing": judged_missing, **({"followed_commit": followed} if followed else {}),
               "metrics": metrics, "cost": round(h.turn_cost(events), 4),
@@ -808,7 +819,8 @@ def load_results(out: Path) -> tuple[dict[tuple[str, str], list[dict]], int]:
         r = json.loads(path.read_text())
         scenario = by_id.get(r["scenario"], {})
         if ((r.get("prereg") and r["prereg"] != prereg_hash(scenario, smoke=True))
-                or (r.get("checks_hash") and r["checks_hash"] != checks_hash(scenario))):
+                or (r.get("checks_hash") and r["checks_hash"] != checks_hash(scenario))
+                or (r.get("scenario_hash") and r["scenario_hash"] != scenario_hash(scenario))):
             void += 1
             continue
         rows.setdefault((r["scenario"], r["arm"]), []).append(r)

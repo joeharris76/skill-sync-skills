@@ -7,6 +7,7 @@ import re
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 ABLATION = Path(__file__).resolve().parents[1] / "evals" / "ablation"
@@ -131,6 +132,35 @@ class FollowWork(unittest.TestCase):
         plain = {"checks": {"a": "true"}, "rules": {}}
         self.assertEqual(run.checks_hash(plain), run.checks_hash({**plain, "checks_follow_work": False}))
         self.assertNotEqual(run.checks_hash(plain), run.checks_hash({**plain, "checks_follow_work": True}))
+
+
+class ScenarioHash(unittest.TestCase):
+    def test_setup_change_voids_a_recorded_result(self):
+        scenario = {"id": "s", "setup": "echo a", "prompts": ["p"], "checks": {"c": "true"}, "rules": {}}
+        changed = {**scenario, "setup": "echo b"}
+        self.assertEqual(run.checks_hash(scenario), run.checks_hash(changed))
+        self.assertNotEqual(run.scenario_hash(scenario), run.scenario_hash(changed))
+        out = Path(tempfile.mkdtemp())
+        (out / "results").mkdir()
+        result = {"scenario": "s", "arm": "full", "checks_hash": run.checks_hash(scenario),
+                  "scenario_hash": run.scenario_hash(scenario)}
+        (out / "results" / "s__full__0.json").write_text(json.dumps(result))
+        with unittest.mock.patch.object(run, "SCENARIOS", [scenario]):
+            rows, void = run.load_results(out)
+        self.assertEqual((len(rows), void), (1, 0))
+        with unittest.mock.patch.object(run, "SCENARIOS", [changed]):
+            rows, void = run.load_results(out)
+        self.assertEqual((len(rows), void), (0, 1))
+
+    def test_results_without_the_field_are_kept(self):
+        scenario = {"id": "s", "setup": "echo a", "checks": {"c": "true"}, "rules": {}}
+        out = Path(tempfile.mkdtemp())
+        (out / "results").mkdir()
+        (out / "results" / "s__full__0.json").write_text(json.dumps(
+            {"scenario": "s", "arm": "full", "checks_hash": run.checks_hash(scenario)}))
+        with unittest.mock.patch.object(run, "SCENARIOS", [scenario]):
+            rows, void = run.load_results(out)
+        self.assertEqual(void, 0)
 
 
 if __name__ == "__main__":
