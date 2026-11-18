@@ -54,7 +54,9 @@ that name. Requires tractable 1.0.0 or later.
   `E_MULTIPLE_CLAIMS`.
 - **Pass a unique `operation_id` (32 hex chars) on every write.** If a call
   times out or returns `E_UNKNOWN`, repeat it unchanged with the same id: a
-  landed write returns its original result and never applies twice.
+  landed write returns its original result and never applies twice. A write
+  sent without one gets a generated id in its acknowledgement; reconcile a
+  lost reply with that id.
 - **Only the claim holder may `renew`, `finish`, or `release` an item.** Keep
   the `generation` returned by `take`. The same stable actor may re-adopt after
   its previous server stops. For a default-identity ordinary reconnect, checkpoint
