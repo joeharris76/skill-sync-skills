@@ -275,6 +275,15 @@
       "status": "open",
       "title": "Commit the code-skill loading scenarios and measure the installed code-first rule"
     },
+    "code-first-shell-trigger": {
+      "claim": null,
+      "needs": [
+        "code-first-rule-coverage"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Design and test a trigger for the code skill when source is changed through the shell"
+    },
     "consumers-drop-tidy-perms": {
       "claim": null,
       "needs": [],
