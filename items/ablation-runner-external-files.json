@@ -1,0 +1,23 @@
+{
+  "acceptance": [
+    "The owner's go-ahead is recorded, or the item is dropped with the reason.",
+    "run.py accepts an external global file, an external scenario module and extra hidden paths; README documents each with one worked example.",
+    "A test proves a session cannot read a second copy of the file under test placed in an extra hidden path.",
+    "All existing ablation tests pass and run.py report over an existing results folder gives identical output before and after.",
+    "A smoke run of an external one-scenario module with an external file completes for under 1 USD."
+  ],
+  "description": "Problem: run.py reads its global text from fixtures/global-*.md, its skills from catalog commits, and hides a fixed list of home folders. Someone else cannot test their own AGENTS.md without editing Python, and their other copies of the file are not hidden. The blog post was retitled to avoid promising this. Outcome: documented options to point the runner at an external instruction file, an external scenario module and extra folders to hide. Decision gate: do this only if the owner wants the runner usable by others; ask before starting. If not wanted, drop the item with that reason. Guardrails: existing scenarios, fixtures, baselines and recorded results must keep their hashes and load unchanged; defaults stay as they are; the read sandbox must refuse to run if a path to hide does not exist or the file under test is readable at another unhidden path; no agent session is started against a user's real repository; macOS-only stays documented.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/README.md"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:07:28Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "12ca353865e24cc7a831211fc97f45e9",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    }
+  ]
+}

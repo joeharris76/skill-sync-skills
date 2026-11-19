@@ -199,6 +199,13 @@
     }
   },
   "items": {
+    "ablation-runner-external-files": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Let the ablation runner test an instruction file and scenarios from outside this repository"
+    },
     "allowlist-reviewer-classification": {
       "claim": null,
       "needs": [],
