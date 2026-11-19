@@ -210,7 +210,7 @@
       "claim": null,
       "needs": [],
       "priority": "low",
-      "status": "open",
+      "status": "blocked",
       "title": "Let the ablation runner test an instruction file and scenarios from outside this repository"
     },
     "allowlist-reviewer-classification": {
