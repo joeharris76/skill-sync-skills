@@ -206,6 +206,13 @@
       "status": "open",
       "title": "Decide whether tool-allowlist reviewers stay Hard Read-Only when run in the reviewed worktree"
     },
+    "blog-post-second-critique": {
+      "claim": null,
+      "needs": [],
+      "priority": "medium-high",
+      "status": "open",
+      "title": "Critique the second draft of the agent-instruction testing post and trim it to length"
+    },
     "consumers-drop-tidy-perms": {
       "claim": null,
       "needs": [],
