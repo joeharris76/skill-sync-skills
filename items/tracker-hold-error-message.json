@@ -1,11 +1,12 @@
 {
   "acceptance": [
-    "The exact call, tractable version and full error text with its recovery list are quoted in the closing note.",
-    "It is stated whether the message comes from tractable or from evals/ablation/tracker.py.",
-    "If still misleading: an upstream issue or a tracker item in the tractable project exists and is linked; or, for the stand-in, a PR with a test and a dated amendment is merged.",
-    "The phase 3 report's limit is updated with a dated note pointing to the outcome."
+    "The exact call, the tractable-mcp version and the full error text with its recovery list are quoted in the closing note, with a statement of which recovery line is wrong and what the right action is.",
+    "If still misleading: an issue or tracker item in the tractable project exists and is linked.",
+    "The phase 3 report's limit has a dated note pointing to the outcome.",
+    "No hold on a real item in this tracker was set or cleared."
   ],
-  "description": "Problem: the phase 3 report lists a confound, equal across arms: when take or finish hits a not_before hold, the tracker server's error message suggests the wrong recovery action. It may steer agents in real sessions to clear or work around a hold. The exact message and call were not recorded in the report. Outcome: the message reproduced and quoted, and the defect reported where the tracker is maintained. Decision gate: if the current tractable version no longer shows a misleading recovery hint, close with the quoted current message. If it does, file it upstream; fix it here only if the fault is in evals/ablation/tracker.py (the test stand-in) and not in tractable itself. Guardrails: reproduce against a throwaway store or the test stand-in, never by setting or clearing a hold on a real item in this tracker; do not change the todo skill's guidance in this item; a fix to the stand-in changes scenario behaviour, so it needs a dated amendment and must not be applied while phase 3 results are being pooled with new runs.",
+  "context": "Phase 3 transcripts that show the message: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/phase3/ (tracker-holds family).",
+  "description": "Problem: the phase 3 report lists a confound, equal across arms: when take or finish hits a not_before hold, the tracker server's error message suggests the wrong recovery action. evals/ablation/tracker.py is only a client that starts the real tractable-mcp, so the message comes from tractable itself, and it may steer agents in real sessions to clear or work around a hold. The exact message and call were not recorded in the report. Outcome: the message reproduced and quoted, and the defect reported in the tractable project. Decision gate: reproduce on the installed tractable-mcp version. If the recovery hint is no longer misleading, close with the quoted current message. If it is, file it in the tractable project's tracker or issue list; it is not fixed in this repository. Guardrails: reproduce against a throwaway store (for example the sandbox store that tracker.py seeds), never by setting or clearing a hold on a real item in this tracker; do not change the todo skill's guidance in this item; do not upgrade tractable-mcp while any evaluation is running, since an upgrade changes todo-family scenario behaviour, and record its version in the closing note.",
   "links": [
     "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/2026-11-18-phase-3.md",
     "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/tracker.py"
@@ -17,6 +18,14 @@
       "client": "omp-coding-agent",
       "op": "create",
       "op_id": "d25f1c11ecf94f58b3290696d0fb954a",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:21:02Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "431a928a0ccc41ee975ee91301ac6a5a",
       "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
     }
   ]
