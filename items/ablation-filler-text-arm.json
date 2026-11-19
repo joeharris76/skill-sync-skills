@@ -6,6 +6,7 @@
     "phase3_bands.py over the original phase 3 folders gives the same output as before; the phase 3 report has a dated note with the result.",
     "Ledger total is 60 USD or less."
   ],
+  "context": "Blocked 2026-11-19: awaiting the owner's go-ahead on the 60 USD ceiling. Unblock when the owner answers.",
   "description": "Problem: arXiv 2604.11088 reports that random rule files raise task pass rates as much as curated ones. Phase 3's 17 keep results compare the skill with its sections removed; no arm replaced the removed sections with unrelated text of the same length. The checks are behaviour-specific, so presence alone is an unlikely cause, but that was never tested. Outcome: for three keep families on Sonnet 5.5, a minus-candidates-plus-filler arm compared with full and minus-candidates. Decision gate, fixed before the runs: draw 3 families by seeded random draw among the keep families that have a Sonnet result (delegated-member-stops, batch-handoff-contents, tracker-confirm, tracker-mcp-only, tracker-planning). All three arms are run fresh on the current omp, 36 sessions each (12 per variant) at the frozen dial; nothing is pooled with phase 3. 'Filler restores the effect' means stats.exceeds_p(filler, minus_candidates, 0.5 x the observed full-minus-minus-candidates gap) is rejected at Holm alpha 0.05 over the three families, a Holm family separate from phase 3's 244 tests. If it is rejected for any family, report it in a dated note in the phase 3 report and tell the owner before any further use of the keep results. Otherwise add a dated note stating the result. Guardrails: (1) agents under test run only in /tmp/omp-ablation sandboxes through evals/ablation/run.py, replay.py or the loading-map probe; (2) change nothing under ~/.omp/agent, ~/.claude or ~/.agents while sessions run, upgrade neither omp, Claude Code nor tractable-mcp during a run, and start no run while another evaluation is running; (3) commit the pre-registration (hypothesis, arms, checks, sample, decision, Holm family and alpha) before any scored session; smoke runs never count; (4) use a new out folder and a ledger with the ceiling stated here; stop at the ceiling and report; raising it needs the owner's approval in a later message; (5) record the omp, Claude Code and tractable-mcp versions with the results; never pool new sessions with results from another harness version; new comparisons form their own Holm family and published bands are left unchanged; (6) existing scenarios and pre-registration files are not edited: new arms use new scenario ids and a new pre-registration file, and run.py report or phase3_bands.py over the existing result folders gives the same output before and after; (7) read at least 5 transcripts per arm before reporting any number, and report grader faults found; (8) delete or weaken no instruction or skill text on this evidence; (9) a published number in a report is never rewritten: add a dated note after it; (10) scenario and scratch code that produced a result is committed with it; (11) if a result changes a claim in the blog post 'Testing agent instructions', correct the draft by PR, or if the post is published add a dated correction note and update its 'updated' time; (12) publish by task branch and draft PR with identity Joe Harris <joeharris76@gmail.com>; the item stays open until its PR is merged through the repository's usual flow (green CI, squash merge), and anything this item reserves for the owner is not merged or installed without the owner's message. Spend ceiling 60 USD. Spend gate: before the first paid session, tell the owner the ceiling and wait for a go-ahead in a later message; the item is blocked until then. Extra: phase3-dials.json is used unchanged; filler is rule-like prose from an unrelated domain with the same token count within 5%, committed as a fixture; the filler arm is a new arm name handled outside phase3_bands.py's three-arm reader.",
   "links": [
     "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/2026-11-18-phase-3.md",
@@ -26,6 +27,14 @@
       "client": "omp-coding-agent",
       "op": "update",
       "op_id": "0a2cb1dcaaac4b3cab6d1cd2e82da52e",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:20:52Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "2d39154029484d5b98c7526c76f8fe5e",
       "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
     }
   ]
