@@ -76,9 +76,10 @@ Reported cost of the final 15 sessions: $0.925 (omp $0.18 per three sessions, su
 ## Limits
 
 - Quoting is evidence of presence, not of influence. A model could omit a marker it holds; the brief markers were quoted every time, which shows the method works for text that is present, and the control was never quoted.
-- Three sessions per cell, one model per harness. Each session probes all roles at once, so a subagent's answer comes from one spawn per session.
+- Three sessions per cell. The sessions ran on Sonnet in both harnesses, except omp's `reviewer` subagent, which ran on Opus. Each session probes all roles at once, so a subagent's answer comes from one spawn per session.
 - The task and reviewer prompts forbid tools, so "skill body" means "present without loading"; loading a skill was not tested.
 - In omp the subagent briefs are rewritten by the harness ("Complete assignment thoroughly: ..."), so the brief cell shows the parent's text arrives, not that it arrives unchanged.
 - Claude Code's user-level `~/.claude/CLAUDE.md` and user skills were excluded by design (`--setting-sources project`).
 - The first omp columns share the same sessions' skill and brief results; only the global-file and project-file rows differ between configurations.
 - Raw transcripts and per-session JSON are under `/tmp/loading-map-probe/` and are not committed.
+- Recommendation 4 says the `@AGENTS.md` import was not tested. It was tested afterwards: a `CLAUDE.md` containing `@AGENTS.md` loaded the file in 3 of 3 Claude Code sessions, and a prose pointer in 0 of 3 (`2026-11-17-phase-2.md`, "Where instructions load").
