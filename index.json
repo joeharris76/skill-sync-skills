@@ -506,6 +506,13 @@
       "status": "done",
       "title": "Measure how often each in-scope skill loads without being asked"
     },
+    "pilot-hook-helper-rerun": {
+      "claim": null,
+      "needs": [],
+      "priority": "medium",
+      "status": "open",
+      "title": "Rerun the commit-identity hook test through omp's commit helper"
+    },
     "require-skillspector-check": {
       "claim": null,
       "needs": [
