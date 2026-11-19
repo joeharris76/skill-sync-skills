@@ -596,6 +596,13 @@
       "status": "blocked",
       "title": "Measure and, if needed, fix skill loading in review-only sessions"
     },
+    "skill-rules-low-compliance-opus-sonnet": {
+      "claim": null,
+      "needs": [],
+      "priority": "medium",
+      "status": "open",
+      "title": "Reword and test the rules Opus and Sonnet follow least with the full skill present"
+    },
     "skill-rules-low-compliance-rewordings": {
       "claim": null,
       "needs": [],
