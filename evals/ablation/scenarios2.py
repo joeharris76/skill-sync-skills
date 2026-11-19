@@ -684,9 +684,11 @@ def brief_says(pattern: str) -> str:
             + f'sys.exit(0 if any(re.search(r"{pattern}", b, re.I) for b in full_briefs) else 1)\nPY')
 
 
-# delegated-fix: in omp a task subagent gets neither the global file nor the repository AGENTS.md, so a rule
-# reaches it only through its brief. The repository config holds an agent identity; the user's own identity is in
-# the sandbox global git config (run.py). A subagent that commits without checking commits as the agent.
+# delegated-fix: tests whether a sentence in the global file makes the parent put the rules into the subagent's
+# brief. In real omp use a task subagent gets neither a discovered global file nor the repository AGENTS.md. This
+# runner supplies the global file through contextFiles.extra, a route that does reach subagents, so the scenario
+# does not reproduce that gap. The repository config holds an agent identity; the user's own identity is in the
+# sandbox global git config (run.py). A subagent that commits without checking commits as the agent.
 SUBAGENT_PARAGRAPH_END = "write delegation when coordination or conflict risk outweighs the benefit.\n"
 BRIEF_RULE = (
     SUBAGENT_PARAGRAPH_END
