@@ -648,7 +648,7 @@
       "claim": null,
       "needs": [],
       "priority": "medium-high",
-      "status": "open",
+      "status": "blocked",
       "title": "Test a mechanical check against unverified status and completion claims"
     },
     "verify-instruction-cleanup-behaviour": {
