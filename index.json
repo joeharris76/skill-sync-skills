@@ -495,7 +495,7 @@
       "claim": null,
       "needs": [],
       "priority": "low",
-      "status": "open",
+      "status": "dropped",
       "title": "Owner review of the Oxbow uv.lock refresh (draft PR 17)"
     },
     "p3-apply": {

@@ -5,6 +5,7 @@
     "git worktree list in ~/Developer/Oxbow no longer shows Oxbow.wt-relock, and the branch is deleted locally and on the remote."
   ],
   "description": "Repository: Oxbow (not this one). Problem: draft PR 17 on branch chore/relock-letterops-wheel refreshes uv.lock. make tools-test passed locally (36 tests) but the repository has no CI, so nothing but the owner's review stands between the PR and main. The worktree ~/Developer/Oxbow.wt-relock is still on disk. Outcome: the PR merged or closed by the owner's decision, and the worktree removed. Decision gate: the owner reviews and says merge or close. An agent does not mark it ready or merge it without that message. If main has moved, regenerate the lock from current main and rerun make tools-test before asking again. Guardrails: lock file changes only, no dependency edits in pyproject.toml; no --no-verify; no force-push; remove the worktree only after the PR is merged or closed and with git worktree remove, never rm -rf.",
+  "drop_reason": "Filed in the wrong tracker on 2026-11-19 by the agent that created it. The work belongs to the Oxbow repository, which has its own tracker store; it must be filed there from a session bound to that store. Nothing was done under this item.",
   "links": [
     "https://github.com/joeharris76/Oxbow/pull/17"
   ],
@@ -15,6 +16,14 @@
       "client": "omp-coding-agent",
       "op": "create",
       "op_id": "13e48a44a7064854b26f8afd272f0a81",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:21:35Z",
+      "client": "omp-coding-agent",
+      "op": "drop",
+      "op_id": "37ead1cc709e42d6ba0b01f6f8c5b9a2",
       "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
     }
   ]
