@@ -1,13 +1,14 @@
 {
   "acceptance": [
-    "An independent reviewer applied skills/blog/references/critique.md and both voice guides to the current draft and returned a verdict and score; the report is saved beside the private plan.",
+    "An independent reviewer applied skills/blog/references/critique.md and both voice guides to the current draft and returned a verdict and score; the report is saved as ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/blog/critique-2-<date>.md.",
     "Every factual, link, formatting and local-wording finding is applied or has a written reason for rejection; thesis, title and structure findings are listed for the owner and unapplied.",
-    "Word count of the draft body, excluding tables, the status comment and references, is 3,300 or less.",
+    "Word count of the draft body, excluding tables, the status comment and references, is 3,300 or less; or the proposed cuts are listed for the owner and the item is left open.",
     "A second independent fact check of the final text reports zero wrong and zero misleading claims, or each remaining one is fixed and re-checked.",
-    "The outline agrees with the draft on every figure; npm run build and npm run check pass; the change is merged by PR in joeharris76.com."
+    "The outline agrees with the draft on every figure; npm run build and npm run check pass; the change is merged by PR in joeharris76.com.",
+    "A grep for em and en dashes in the draft and outline returns 0."
   ],
   "context": "Reviews so far are summarised in ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/blog/reviews-2026-11-19.md. Word count command: sed '1,7d' <draft> | grep -v '^|' | sed '/^## References/,$d' | wc -w.",
-  "description": "Repository: joeharris76/joeharris76.com (not this one). Files: _blog/drafts/agent-instructions/testing-agent-instructions.md and _blog/outlines/agent-instructions/testing-agent-instructions.md. Problem: the second draft was fact-checked by an independent reviewer but has had no editorial critique; the first draft scored 6/10. The 14 corrections applied after the second fact check were never re-checked, and the draft is about 3,400 words against a 3,300 limit. Outcome: an independent critique of the current draft, its findings applied, the draft at or under 3,300 words, and a clean fact re-check. Decision gate: apply a finding only if it is a factual error, a broken link, a formatting fault or local wording. Findings that change the thesis, title, structure or a judgment go to the owner as a list and are not applied. If the critique scores the draft below 7/10, stop after reporting and do not apply anything. Guardrails: the critic and the fact checker are reviewer agents that did not write the draft and are given no author reasoning; they change no files. Fixed author decisions are not relitigated: first person singular, one post, models and public repositories named, Oxbow unnamed, costs per round, no account of how the work was organised. Every number added or changed is traced to a public report in evals/ablation/results or marked as from private notes. No em or en dashes. Merging _blog/ changes publishes nothing; do not touch content/ or public/ in this item.",
+  "description": "Repository: joeharris76/joeharris76.com (not this one). Files: _blog/drafts/agent-instructions/testing-agent-instructions.md and _blog/outlines/agent-instructions/testing-agent-instructions.md. Problem: the second draft was fact-checked by an independent reviewer but has had no editorial critique; the first draft scored 6/10. The 14 corrections applied after the second fact check were never re-checked, and the draft is about 3,400 words against a 3,300 limit. Outcome: an independent critique of the current draft, its findings applied, the draft at or under 3,300 words, and a clean fact re-check. Decision gate: apply a finding only if it is a factual error, a broken link, a formatting fault or local wording. Findings that change the thesis, title, structure or a judgment go to the owner as a list and are not applied. If the critique scores the draft below 7/10, stop after reporting and do not apply anything. If local wording edits cannot bring the draft to 3,300 words, list proposed cuts for the owner and stop; do not cut a section or a result without the owner. This item runs after the loading-map rerun so that it is the last edit before the owner reads the draft. Guardrails: the critic and the fact checker are reviewer agents that did not write the draft and are given no author reasoning; they change no files. Fixed author decisions are not relitigated: first person singular, one post, models and public repositories named, Oxbow unnamed, costs per round, no account of how the work was organised. Every number added or changed is traced to a public report in evals/ablation/results or marked as from private notes. No em or en dashes (a grep for U+2014 and U+2013 in the draft returns 0). Merging _blog/ changes publishes nothing; do not touch content/ or public/ in this item.",
   "links": [
     "https://github.com/joeharris76/joeharris76.com/pull/11"
   ],
@@ -18,6 +19,14 @@
       "client": "omp-coding-agent",
       "op": "create",
       "op_id": "73438a2ce925468fb79e4467867960a1",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:21:20Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "c4d16a58eece48768379be1fd6ab3279",
       "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
     }
   ]

@@ -245,7 +245,9 @@
     },
     "blog-post-second-critique": {
       "claim": null,
-      "needs": [],
+      "needs": [
+        "loading-map-rerun-current-harnesses"
+      ],
       "priority": "medium-high",
       "status": "open",
       "title": "Critique the second draft of the agent-instruction testing post and trim it to length"
