@@ -257,7 +257,7 @@
       "needs": [],
       "priority": "medium",
       "status": "open",
-      "title": "Close the gaps in the code-first omp rule: shell edits and the untested description"
+      "title": "Commit the code-skill loading scenarios and measure the installed code-first rule"
     },
     "consumers-drop-tidy-perms": {
       "claim": null,
