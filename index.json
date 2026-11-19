@@ -577,6 +577,13 @@
       "status": "done",
       "title": "Run one SkillSpector LLM semantic pass over the catalog and triage it"
     },
+    "unchecked-claims-mechanical-check": {
+      "claim": null,
+      "needs": [],
+      "priority": "medium-high",
+      "status": "open",
+      "title": "Test a mechanical check against unverified status and completion claims"
+    },
     "verify-instruction-cleanup-behaviour": {
       "claim": null,
       "needs": [],
