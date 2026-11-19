@@ -1,0 +1,10 @@
+# SkillSpector baseline for skills/typesafe-ai. Suppress by
+# fingerprint only, never by rule; each reason comes from docs/skillspector-triage.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:3d3122bca766ecba423773dcd95cfa2a9a002c602ebfe907d76bb85b536bc5d7
+  rule_id: E1
+  file: SKILL.md
+  reason: "Declared purpose: a link to the vendor's published API schema; the skill sends no data."

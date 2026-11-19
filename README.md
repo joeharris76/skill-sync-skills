@@ -31,6 +31,13 @@ commit, keep `skill.yaml` and `LICENSE`, and update the commit and tree above
 rerun the tests and scan the refreshed skill before committing. Report a
 problem in a vendored skill upstream instead of patching it here.
 
+`skills/typesafe-ai` is copied unmodified from
+[typesafe-ai/skills](https://github.com/typesafe-ai/skills) at commit
+`302eea662c54bca6730873fe245bec1d69ebc23d` (upstream path
+`skills/typesafe-ai`, tree `1d7aa7574f194619b5189d96c6f79bdd4cc452f2`). It is
+© 2026 TypeSafe AI under the MIT licence in its `LICENSE`. The catalog adds
+only `skill.yaml`. Refresh it the same way.
+
 ## Global loader folders
 
 `deployment/global/skill-sync.conf` composes exact product and catalog commits

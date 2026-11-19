@@ -65,7 +65,8 @@ def parse_simple_yaml(text: str) -> dict:
     """Parse the clean subset of YAML used by skill.yaml and SKILL.md frontmatter.
 
     Supports top-level key-values, lists of scalars, mappings of scalar booleans,
-    and lists of small dictionaries (e.g. config_inputs).
+    lists of small dictionaries (e.g. config_inputs), and top-level folded (``>``)
+    or literal (``|``) block scalars, as vendored SKILL.md frontmatter uses.
     Rejects malformed lines, unquoted colons in scalars, and invalid list items.
     """
     lines = text.splitlines()
@@ -164,6 +165,15 @@ def parse_simple_yaml(text: str) -> dict:
                     root[k] = current_list
                 else:
                     root[k] = {}
+            elif v in (">", "|", ">-", "|-"):
+                block = []
+                j = i + 1
+                while j < len(lines) and (not lines[j].strip() or lines[j].startswith((" ", "\t"))):
+                    block.append(lines[j].strip())
+                    j += 1
+                root[k] = (" " if v.startswith(">") else "\n").join(b for b in block if b)
+                i = j
+                continue
             else:
                 if not (v.startswith('"') or v.startswith("'")):
                     if ": " in v:
