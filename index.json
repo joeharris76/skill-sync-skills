@@ -213,6 +213,13 @@
       "status": "blocked",
       "title": "Let the ablation runner test an instruction file and scenarios from outside this repository"
     },
+    "ablation-version-pooling-guard": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Stop the ablation reports from pooling results across harness and tracker versions unnoticed"
+    },
     "allowlist-reviewer-classification": {
       "claim": null,
       "needs": [],

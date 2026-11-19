@@ -1,0 +1,23 @@
+{
+  "acceptance": [
+    "A test shows run.py report and phase3_bands.py refuse or warn when two folders differ in harness minor version, and pool when the flag is given, printing the versions.",
+    "New baselines record the tractable-mcp version; a test covers reading an old baseline without it.",
+    "Report output over the published phase 2 and phase 3 folders is unchanged apart from the version line (diff attached to the PR).",
+    "README 'Guards' documents the rule."
+  ],
+  "description": "Problem: run.py report leaves harness_version out when it checks that folders share a baseline, and phase3_bands.py checks no versions, so sessions from omp 18.22 and omp 19 can be pooled into one test without any notice. The baseline does not record the tractable-mcp version, although the todo families' behaviour depends on it. omp is now 19.0.0 and all published results are from 18.20 to 18.22. Outcome: both reports refuse, or print a clear warning for, pooled folders whose harness versions differ, and new baselines record the tractable-mcp version. Decision gate: default is to refuse, with an explicit flag to pool anyway that prints the versions in the report. If refusing would break rereading the published phase 2 or phase 3 folders (which already span 18.22.0 to 18.22.2), treat patch versions within one minor version as the same and say so in the README. Guardrails: existing result files and baselines are not rewritten; a baseline without the new field is read as 'unknown' and not refused on that ground alone; report output for the published folders is identical before and after apart from an added version line; publish by task branch and draft PR, and the item stays open until merged.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/run.py",
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/phase3_bands.py"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:21:14Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "8e8cfdcb28c74888b95a02b1b6ef1ce5",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    }
+  ]
+}
