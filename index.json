@@ -397,6 +397,13 @@
       "status": "done",
       "title": "Land the remediation as one PR (#118) once checks pass"
     },
+    "loading-map-rerun-current-harnesses": {
+      "claim": null,
+      "needs": [],
+      "priority": "medium",
+      "status": "open",
+      "title": "Rerun the instruction loading probe on the current omp and Claude Code releases"
+    },
     "p3-apply": {
       "claim": null,
       "needs": [

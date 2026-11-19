@@ -1,0 +1,25 @@
+{
+  "acceptance": [
+    "probe.py run and report complete for every configuration on the installed omp and Claude Code versions, with the control marker quoted in 0 answers; versions and date are recorded.",
+    "A user-level CLAUDE.md row for Claude Code (main, task subagent, reviewer) is measured at 3 sessions per cell.",
+    "loading-map.md has a dated section with the new table and a list of every cell that differs from 2026-11-17, or the statement that none differs.",
+    "If any cell differs, the blog draft and outline are updated to the new values with versions and date, in a separate PR in joeharris76.com.",
+    "Ledger total is 5 USD or less."
+  ],
+  "context": "Command: uv run --no-project python evals/ablation/loading-map/probe.py run --out /tmp/loading-map-probe/out --reps 3 --jobs 4, then report. A new Claude Code configuration is needed for the user-level file.",
+  "description": "Problem: results/loading-map.md was measured on omp 18.22.0 and Claude Code 2.1.323 on 2026-11-17. omp is now 19.0.0. The blog post's first check rests on these cells, and two routes were never measured: a user-level ~/.claude/CLAUDE.md in Claude Code (the route the ablation runner uses) and whether listing the global file under contextFiles.extra duplicates it in the omp main session. Outcome: a dated second measurement in loading-map.md, with the two unmeasured routes added. Decision gate: the owner confirms the rerun before it starts (open question 2 in the blog outline). If any cell changes state (received to not received or the reverse), stop and report before editing the blog draft, because sections 2 and 5 of the post and the adopted brief sentence depend on those cells. Guardrails: (1) agents under test run only in /tmp/omp-ablation sandboxes through evals/ablation/run.py or the loading-map probe; (2) do not change ~/.omp/agent/config.yml or ~/.omp/agent/rules while sessions run, and start no run while another evaluation is running; (3) write the pre-registration (hypothesis, arms, checks, sample, decision) and commit it before any scored session; smoke runs never count; (4) use a new out folder and a ledger with the ceiling stated here; stop at the ceiling and report, do not raise it without the owner's approval; (5) read at least 5 transcripts per arm before reporting any number, and report grader faults found; (6) delete or weaken no instruction or skill text on this evidence; (7) correct an existing report with a dated note, never by silently rewriting a published number; (8) scenario and scratch code that is part of the result is committed with it; (9) publish by task branch and draft PR with identity Joe Harris <joeharris76@gmail.com>. Spend ceiling 5 USD. Extra: add the new results as a dated section; keep the 2026-11-17 table unchanged. The probe plants its own files and must not read or write the user's real instruction files.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/loading-map.md",
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/loading-map/probe.py"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:07:13Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "6c9af9ab92334b0397e13ef36fe7f3c9",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    }
+  ]
+}
