@@ -243,6 +243,15 @@
       "status": "open",
       "title": "Test the subagent-brief sentence when omp finds the global file by discovery"
     },
+    "code-first-claude-code-hook": {
+      "claim": null,
+      "needs": [
+        "code-first-rule-coverage"
+      ],
+      "priority": "low",
+      "status": "open",
+      "title": "Decide on and, if wanted, build a Claude Code equivalent of the code-first rule"
+    },
     "code-first-rule-coverage": {
       "claim": null,
       "needs": [],
