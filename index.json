@@ -281,7 +281,7 @@
         "code-first-rule-coverage"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "blocked",
       "title": "Design and test a trigger for the code skill when source is changed through the shell"
     },
     "consumers-drop-tidy-perms": {

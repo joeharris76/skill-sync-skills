@@ -7,6 +7,7 @@
     "Any change to ~/.omp/agent/rules/code-first.md follows an owner message approving it and is verified in one normal session.",
     "Ledger total is 40 USD or less."
   ],
+  "context": "Blocked 2026-11-19: awaiting the owner's go-ahead on the 40 USD ceiling. Unblock when the owner answers.",
   "description": "Problem: the code-first omp rule matches the edit and write tools only. When an agent changes source only through the shell (sed -i, a redirect, a python one-liner), the rule cannot fire; at least four Sonnet sessions did this in the first test and none read the skill. Outcome: a tested decision on a shell-edit trigger. Decision gate, fixed before the runs: first establish from omp's documentation or a smoke test whether a rule can be scoped to shell commands; if it cannot, record the evidence and close. Otherwise write prompts that make shell edits likely and collect at least 15 Sonnet sessions that change a source file only through the shell, identified by a detector written into the pre-registration (sed -i, a redirect to a source path, python -c or a heredoc writing a file, rm or mv of a source file). Adopt the trigger only if the skill is read in at least 80% of those sessions, it fires in 0 near-miss sessions, and it fires in 0 sessions of a control set of at least 4 prompts whose shell commands read but do not change source (grep, cat, running tests, git log). Anything else is reported and not installed. Guardrails: (1) agents under test run only in /tmp/omp-ablation sandboxes through evals/ablation/run.py, replay.py or the loading-map probe; (2) change nothing under ~/.omp/agent, ~/.claude or ~/.agents while sessions run, upgrade neither omp, Claude Code nor tractable-mcp during a run, and start no run while another evaluation is running; (3) commit the pre-registration (hypothesis, arms, checks, sample, decision, Holm family and alpha) before any scored session; smoke runs never count; (4) use a new out folder and a ledger with the ceiling stated here; stop at the ceiling and report; raising it needs the owner's approval in a later message; (5) record the omp, Claude Code and tractable-mcp versions with the results; never pool new sessions with results from another harness version; new comparisons form their own Holm family and published bands are left unchanged; (6) existing scenarios and pre-registration files are not edited: new arms use new scenario ids and a new pre-registration file, and run.py report or phase3_bands.py over the existing result folders gives the same output before and after; (7) read at least 5 transcripts per arm before reporting any number, and report grader faults found; (8) delete or weaken no instruction or skill text on this evidence; (9) a published number in a report is never rewritten: add a dated note after it; (10) scenario and scratch code that produced a result is committed with it; (11) if a result changes a claim in the blog post 'Testing agent instructions', correct the draft by PR, or if the post is published add a dated correction note and update its 'updated' time; (12) publish by task branch and draft PR with identity Joe Harris <joeharris76@gmail.com>; the item stays open until its PR is merged through the repository's usual flow (green CI, squash merge), and anything this item reserves for the owner is not merged or installed without the owner's message. Spend ceiling 40 USD. Spend gate: before the first paid session, tell the owner the ceiling and wait for a go-ahead in a later message; the item is blocked until then. Extra: the sandbox rule file must have a name not used in ~/.omp/agent/rules and must be shown firing in a smoke session; the user-level rule file is changed only after the owner approves the measured result, when no evaluation is running, and is then checked in one normal session.",
   "links": [
     "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/2026-11-18-code-skill-loading.md"
@@ -18,6 +19,14 @@
       "client": "omp-coding-agent",
       "op": "create",
       "op_id": "9370f6606b9d4a0a969a6ab44da9f59b",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:21:29Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "ad5a99bed4864f12b837e04fc4e521f2",
       "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
     }
   ]
