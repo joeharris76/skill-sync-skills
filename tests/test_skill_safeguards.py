@@ -55,8 +55,9 @@ SAFEGUARDS = [
      "Performance budgets are measured. Measured: three models skip it without this bullet.",
      ["measure stated performance budgets before and after relevant changes"]),
     ("deployment/global/AGENTS.md",
-     "Rules reach a subagent only through its brief. Measured: Sonnet subagents committed under the agent identity "
-     "in 0 of 30 sessions with this sentence, 14 of 30 without.",
+     "In omp a subagent does not receive the discovered global file, so a rule reaches it through its brief. "
+     "Measured: with this sentence Sonnet named the identity rule in the brief in 29 of 30 sessions, against 11 of "
+     "30 without, and committed under the agent identity in 0 of 30 against 14 of 30.",
      ["put the rules the subagent needs into its brief",
       "subagents do not receive this file"]),
 ]
