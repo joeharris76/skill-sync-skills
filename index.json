@@ -536,6 +536,13 @@
       "status": "done",
       "title": "Retire the tidy-perms skill from the catalog and the global loaders"
     },
+    "review-sessions-skill-loading": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Measure and, if needed, fix skill loading in review-only sessions"
+    },
     "skill-sync-operator-as3-triage": {
       "claim": null,
       "needs": [],

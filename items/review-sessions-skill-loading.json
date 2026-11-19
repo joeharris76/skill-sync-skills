@@ -1,0 +1,22 @@
+{
+  "acceptance": [
+    "A pre-registered comparison of force-loaded against not-loaded review skills is reported with counts, bands and p-values for each decision check.",
+    "The gate outcome is recorded; if within or inconclusive, nothing was built.",
+    "If a trigger was built: its loading rate in review sessions and its near-miss count are reported, and the owner's approval precedes any install.",
+    "Ledger total is 40 USD or less."
+  ],
+  "description": "Problem: the code-first rule fires on edits, so a review, which edits nothing, never triggers it. In the trigger evaluation Sonnet loaded review-protocol in 8/18 explicit and 3/18 implicit sessions and code in 0/18. Review rules therefore often do not reach the model in review sessions. Phase 2 found review-only behaviour held without any instructions (30/30), so it is not known that this costs anything. Outcome: evidence on whether missing skill text changes review quality, and a tested trigger only if it does. Decision gate: first run the planted-defect review scenario with the review skills force-loaded against not loaded, 30 per arm on Sonnet, using the calibrated review-findings-match check. Build a trigger only if force-loading is keep (at least 30 points, Holm p < 0.01) on a decision check. If it is within or inconclusive, close with the result and build nothing. Guardrails: (1) agents under test run only in /tmp/omp-ablation sandboxes through evals/ablation/run.py or the loading-map probe; (2) do not change ~/.omp/agent/config.yml or ~/.omp/agent/rules while sessions run, and start no run while another evaluation is running; (3) write the pre-registration (hypothesis, arms, checks, sample, decision) and commit it before any scored session; smoke runs never count; (4) use a new out folder and a ledger with the ceiling stated here; stop at the ceiling and report, do not raise it without the owner's approval; (5) read at least 5 transcripts per arm before reporting any number, and report grader faults found; (6) delete or weaken no instruction or skill text on this evidence; (7) correct an existing report with a dated note, never by silently rewriting a published number; (8) scenario and scratch code that is part of the result is committed with it; (9) publish by task branch and draft PR with identity Joe Harris <joeharris76@gmail.com>. Spend ceiling 40 USD. Extra: a judged check counts only while its calibration is valid for the current judge, rubric and evidence script; a trigger, if built, must fire in 0 near-miss sessions and is installed for the user only after the owner approves.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/2026-11-18-phase-3.md"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:07:23Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "8b300620b05e44b8b75a633dc5ac20d7",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    }
+  ]
+}
