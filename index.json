@@ -527,6 +527,13 @@
       "status": "done",
       "title": "Measure how often each in-scope skill loads without being asked"
     },
+    "phase3-unjudged-families": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Decide what to do with the phase 3 families that could not judge their sections"
+    },
     "pilot-hook-helper-rerun": {
       "claim": null,
       "needs": [],
