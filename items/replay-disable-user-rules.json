@@ -1,0 +1,24 @@
+{
+  "acceptance": [
+    "replay.py and run.py take the disabledRules lines from one shared function.",
+    "A test fails if either overlay omits a rule file present in a stand-in rules directory.",
+    "One smoke replay of a turn that edits a .py file shows no 'TTSR matched rule' in its output, with the user's code-first rule installed.",
+    "The PR lists every other overlay builder in evals/ablation and what was done for each.",
+    "Existing ablation tests pass."
+  ],
+  "description": "Problem: run.py lists every file in ~/.omp/agent/rules under ttsr.disabledRules in its sandbox overlay, so a user rule cannot change an evaluation arm. replay.py builds its own overlay and does not. The code-first rule is now installed, so any replay that edits a source file would get the injected reminder in every arm. Outcome: replay sessions disable user rule files exactly as run.py sessions do, from one shared piece of code. Decision gate: none; this is a defect fix. If any other session launcher in evals/ablation builds its own overlay (the loading-map probe, isolation_probe.py), list it in the PR and apply the same fix or state why it is not needed. Guardrails: no change to what replay.py writes into results or to scenario and check hashes; no edits to the user's rules directory; do not run a replay against a real session's original files other than through replay.py's own copy; verify with one smoke replay costing under 2 USD; publish by task branch and draft PR as Joe Harris <joeharris76@gmail.com>, and the item stays open until merged.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/replay.py",
+    "https://github.com/joeharris76/skill-sync-skills/pull/173"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:21:12Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "054a1e74fd464290bbad1d7bb8065436",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    }
+  ]
+}

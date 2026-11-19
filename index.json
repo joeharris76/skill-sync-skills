@@ -573,6 +573,13 @@
       "status": "open",
       "title": "Rerun the commit-identity hook test through omp's commit helper"
     },
+    "replay-disable-user-rules": {
+      "claim": null,
+      "needs": [],
+      "priority": "medium",
+      "status": "open",
+      "title": "Disable the user's omp rule files in replay sessions"
+    },
     "require-skillspector-check": {
       "claim": null,
       "needs": [
