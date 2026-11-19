@@ -557,6 +557,13 @@
       "status": "open",
       "title": "Measure and, if needed, fix skill loading in review-only sessions"
     },
+    "skill-rules-low-compliance-rewordings": {
+      "claim": null,
+      "needs": [],
+      "priority": "medium",
+      "status": "open",
+      "title": "Reword and test the skill rules that models follow least with the full skill present"
+    },
     "skill-sync-operator-as3-triage": {
       "claim": null,
       "needs": [],
