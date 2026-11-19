@@ -605,6 +605,13 @@
       "status": "done",
       "title": "Run one SkillSpector LLM semantic pass over the catalog and triage it"
     },
+    "tracker-hold-error-message": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Reproduce and report the tracker hold error that suggests the wrong recovery action"
+    },
     "unchecked-claims-mechanical-check": {
       "claim": null,
       "needs": [],

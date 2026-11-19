@@ -1,0 +1,23 @@
+{
+  "acceptance": [
+    "The exact call, tractable version and full error text with its recovery list are quoted in the closing note.",
+    "It is stated whether the message comes from tractable or from evals/ablation/tracker.py.",
+    "If still misleading: an upstream issue or a tracker item in the tractable project exists and is linked; or, for the stand-in, a PR with a test and a dated amendment is merged.",
+    "The phase 3 report's limit is updated with a dated note pointing to the outcome."
+  ],
+  "description": "Problem: the phase 3 report lists a confound, equal across arms: when take or finish hits a not_before hold, the tracker server's error message suggests the wrong recovery action. It may steer agents in real sessions to clear or work around a hold. The exact message and call were not recorded in the report. Outcome: the message reproduced and quoted, and the defect reported where the tracker is maintained. Decision gate: if the current tractable version no longer shows a misleading recovery hint, close with the quoted current message. If it does, file it upstream; fix it here only if the fault is in evals/ablation/tracker.py (the test stand-in) and not in tractable itself. Guardrails: reproduce against a throwaway store or the test stand-in, never by setting or clearing a hold on a real item in this tracker; do not change the todo skill's guidance in this item; a fix to the stand-in changes scenario behaviour, so it needs a dated amendment and must not be applied while phase 3 results are being pooled with new runs.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/2026-11-18-phase-3.md",
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/tracker.py"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:07:38Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "d25f1c11ecf94f58b3290696d0fb954a",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    }
+  ]
+}
