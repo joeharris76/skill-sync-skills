@@ -601,7 +601,7 @@
       "needs": [],
       "priority": "medium",
       "status": "open",
-      "title": "Reword and test the skill rules that models follow least with the full skill present"
+      "title": "Reword and test the review and change rules Fable follows least with the full skill present"
     },
     "skill-sync-operator-as3-triage": {
       "claim": null,
