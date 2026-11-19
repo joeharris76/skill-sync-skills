@@ -600,7 +600,7 @@
       "claim": null,
       "needs": [],
       "priority": "medium",
-      "status": "open",
+      "status": "blocked",
       "title": "Reword and test the review and change rules Fable follows least with the full skill present"
     },
     "skill-sync-operator-as3-triage": {
