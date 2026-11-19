@@ -35,6 +35,9 @@ DEFAULT_REPS = 30
 SPEND_CEILING = 800.0  # USD on Claude providers, for the whole phase
 DISABLED_PROVIDERS = ["agents", "claude", "codex", "gemini", "opencode", "github",
                       "claude-plugins", "omp-plugins", "agent-plugins", "cursor", "windsurf", "cline"]
+# The user's own omp rule files. Sessions read the user's omp configuration, and a rule that injects text at a
+# tool call would change every arm, so the overlay disables each one by name.
+USER_RULES = Path.home() / ".omp" / "agent" / "rules"
 
 sys.path.insert(0, str(HERE))
 from scenarios import SCENARIOS as PILOT_SCENARIOS  # noqa: E402
@@ -406,13 +409,15 @@ class Omp:
             with (self.repo / ".git" / "info" / "exclude").open("a") as fh:
                 fh.write("GLOBAL.md\n")
         overlay = self.run / "overlay.yml"
+        user_rules = sorted(p.stem for p in USER_RULES.glob("*.md*") if p.suffix in (".md", ".mdc"))
         overlay.write_text(
             "contextFiles:\n  extra:\n    - GLOBAL.md\ndisabledProviders:\n"
             + "".join(f"  - {p}\n" for p in DISABLED_PROVIDERS)
             + f"skills:\n  customDirectories:\n    - {skills_dir(arm['skills'], cache, arm.get('descriptions'), arm.get('skill_drops'), arm.get('skill_cuts'), arm['name'])}\n"
             # The user's config falls back to another model on a provider error; a session must not. An empty
             # fallbackChains map merges into the user's chains rather than replacing them, so switch fallback off.
-            + "retry:\n  modelFallback: false\n  usageAwareFallback: false\n")
+            + "retry:\n  modelFallback: false\n  usageAwareFallback: false\n"
+            + ("ttsr:\n  disabledRules:\n" + "".join(f"    - {n}\n" for n in user_rules) if user_rules else ""))
 
     def command(self, prompt: str, turn: int, turns: int, model: str, fresh: bool = False) -> list[str]:
         """``fresh`` starts a new session (another agent taking over); later turns continue the newest one."""
