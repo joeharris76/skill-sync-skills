@@ -5,10 +5,11 @@
     "For omp with the global file both discovered and listed under contextFiles.extra, it is reported whether the main session holds the marker once or twice, at 3 sessions.",
     "loading-map.md has a dated section with the new table and a list of every cell that differs from 2026-11-17, or the statement that none differs.",
     "If any cell differs, the owner was told before the blog draft and outline were updated, and those updates are a separate PR in joeharris76.com.",
-    "Ledger or reported cost total is 5 USD or less."
+    "Ledger or reported cost total is 5 USD or less.",
+    "The report lists the answering model for every role, and no counted session was answered by a fallback model."
   ],
   "context": "Command: uv run --no-project python evals/ablation/loading-map/probe.py run --out /tmp/loading-map-probe/out --reps 3 --jobs 4, then report. A new Claude Code configuration is needed for the user-level file.",
-  "description": "Problem: results/loading-map.md was measured on omp 18.22.0 and Claude Code 2.1.323 on 2026-11-17. omp is now 19.0.0 (Claude Code is still 2.1.323). The blog post's first check rests on these cells, and four routes were never measured: a user-level ~/.claude/CLAUDE.md in Claude Code (the route the ablation runner uses); whether a global file that is both discovered and listed under contextFiles.extra appears twice in the omp main session; Claude Code user-level skills; and whether a subagent can load a skill body. Outcome: a dated second measurement in loading-map.md with those routes added. Decision gate: no approval is needed to run (ceiling 5 USD). If any cell changes state (received to not received or the reverse) against 2026-11-17, stop and report to the owner before editing the blog draft, because sections 2 and 5 of the post and the adopted brief sentence depend on those cells. Guardrails: sessions run only through evals/ablation/loading-map/probe.py in its own sandbox; the probe plants its own files and must not read or write the user's real instruction files; change nothing under ~/.omp/agent, ~/.claude or ~/.agents while it runs; no pre-registration is needed for a probe, but read every transcript; the probe does not disable the user's omp rule files, so confirm in the transcripts that no user rule fired (search for 'TTSR matched rule'), and if one did, discard the run and disable it in the probe's overlay first; add results as a dated section and keep the 2026-11-17 table unchanged; rerun Claude Code only for the new rows; record both versions; ceiling 5 USD, stop there; publish by task branch and draft PR as Joe Harris <joeharris76@gmail.com>, and the item stays open until the PR is merged.",
+  "description": "Problem: results/loading-map.md was measured on omp 18.22.0 and Claude Code 2.1.323 on 2026-11-17. omp is now 19.0.0 (Claude Code is still 2.1.323). The blog post's first check rests on these cells, and four routes were never measured: a user-level ~/.claude/CLAUDE.md in Claude Code (the route the ablation runner uses); whether a global file that is both discovered and listed under contextFiles.extra appears twice in the omp main session; Claude Code user-level skills; and whether a subagent can load a skill body. Outcome: a dated second measurement in loading-map.md with those routes added. Decision gate: no approval is needed to run (ceiling 5 USD). If any cell changes state (received to not received or the reverse) against 2026-11-17, stop and report to the owner before editing the blog draft, because sections 2 and 5 of the post and the adopted brief sentence depend on those cells. Guardrails: sessions run only through evals/ablation/loading-map/probe.py in its own sandbox; the probe plants its own files and must not read or write the user's real instruction files; change nothing under ~/.omp/agent, ~/.claude or ~/.agents while it runs; no pre-registration is needed for a probe, but read every transcript; the probe does not disable the user's omp rule files, so confirm in the transcripts that no user rule fired (search for 'TTSR matched rule'), and if one did, discard the run and disable it in the probe's overlay first; add results as a dated section and keep the 2026-11-17 table unchanged; rerun Claude Code only for the new rows; the probe overlay must set retry.modelFallback: false as run.py does, the report lists every answering model per role, and a session answered by a model other than the one requested is discarded; the skill-load row uses its own prompt that permits loading the skill, since the quoting prompt forbids tools; record both versions; ceiling 5 USD, stop there; publish by task branch and draft PR as Joe Harris <joeharris76@gmail.com>, and the item stays open until the PR is merged.",
   "links": [
     "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/loading-map.md",
     "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/loading-map/probe.py"
@@ -28,6 +29,14 @@
       "client": "omp-coding-agent",
       "op": "update",
       "op_id": "dc5877689b1e46a1afc6d54e73441b36",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:34:06Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "dac5d90a377e49cabb1cb1c7b507c636",
       "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
     }
   ]
