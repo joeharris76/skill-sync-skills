@@ -7,7 +7,7 @@
     "After the owner-approved merge, the deploy workflow succeeds and https://joeharris76.com/2026/MM/testing-agent-instructions.html returns 200 and appears on the home page and in the Atom feed.",
     "The _blog draft and outline for this post are removed in the same PR."
   ],
-  "description": "Repository: joeharris76/joeharris76.com (not this one). Files: _blog/drafts/agent-instructions/testing-agent-instructions.md and _blog/outlines/agent-instructions/testing-agent-instructions.md. Problem: the post exists only as a Markdown draft under _blog/, which the site build ignores. Outcome: the post is live at /2026/MM/testing-agent-instructions.html. Decision gates, all required before the publishing PR is merged: (1) the owner has read the draft and approved it in a message sent after the second critique landed; (2) the owner has named the labels (the site has none for agent tooling); (3) loading-map-rerun-current-harnesses is done or dropped, and the post states the harness versions and dates it relies on; (4) the owner approves the merge itself, because a push to main deploys the public site. Without all four, stop at a draft PR. Guardrails: follow joeharris76.com AGENTS.md. The post file is HTML with JSON front matter and a new permanent id tag:joeharris76.com,2026:testing-agent-instructions; the path is the URL and must not change after publishing. Convert the Markdown faithfully: no wording, number or table cell changes during conversion. Do not edit any imported post, inventory/legacy-urls.json, DNS or deploy settings. No runtime dependency is added to the site. Delete the draft and outline in the same PR. No private paths, client names or Oxbow in the published text.",
+  "description": "Repository: joeharris76/joeharris76.com (not this one). Files: _blog/drafts/agent-instructions/testing-agent-instructions.md and _blog/outlines/agent-instructions/testing-agent-instructions.md. Problem: the post exists only as a Markdown draft under _blog/, which the site build ignores. Outcome: the post is live at /2026/MM/testing-agent-instructions.html. Decision gates, all required before the publishing PR is merged: (1) the owner has read the draft and approved it in a message sent after the last change to the draft; any later edit needs a new approval; (2) the owner has named the labels (the site has none for agent tooling); (3) loading-map-rerun-current-harnesses is done or dropped, and the post states the harness versions and dates it relies on; (4) the owner approves the merge itself, because a push to main deploys the public site. Without all four, stop at a draft PR. Guardrails: follow joeharris76.com AGENTS.md. The post file is HTML with JSON front matter and a new permanent id tag:joeharris76.com,2026:testing-agent-instructions; the path is the URL and must not change after publishing. Convert the Markdown faithfully: no wording, number or table cell changes during conversion. Do not edit any imported post, inventory/legacy-urls.json, DNS or deploy settings. No runtime dependency is added to the site. Delete the draft and outline in the same PR. No private paths, client names or Oxbow in the published text.",
   "links": [
     "https://github.com/joeharris76/joeharris76.com/blob/main/_blog/README.md"
   ],
@@ -18,6 +18,14 @@
       "client": "omp-coding-agent",
       "op": "create",
       "op_id": "3ece0730316845f5b8dea0ccde69a2cc",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    },
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:21:23Z",
+      "client": "omp-coding-agent",
+      "op": "update",
+      "op_id": "5f51aa89e86e4e6ab71cb5a584230c16",
       "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
     }
   ]
