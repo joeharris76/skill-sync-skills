@@ -1,0 +1,27 @@
+{
+  "acceptance": [
+    "A marker check, committed with the change, shows that under the new option the main session quotes the global-file marker and the task subagent does not, in 3 of 3 sessions.",
+    "prereg/<experiment>.md is committed before the scored runs and each result records its hash.",
+    "30 valid sessions per arm are reported with both decision checks, the agent-identity commit count, the band and the Holm p-value for each comparison.",
+    "The phase 2 report has a dated section with the result, replacing the sentence 'Real omp use ... was not tested'.",
+    "The decision (sentence stays, or question put to the owner with the numbers) is recorded in the item's closing note; no instruction text was removed and the user's omp config was not changed.",
+    "The existing delegated-fix results still load in run.py report with unchanged scenario hash; tests/test_ablation_scenarios2 passes.",
+    "Ledger total is 30 USD or less."
+  ],
+  "description": "Problem: the one sentence adopted in phase 2 (put the rules into the subagent's brief) was tested in a runner that supplies the global file through contextFiles.extra, a route that reaches omp subagents. In real use the file is found at ~/.agents/AGENTS.md and stops at the main session. So the adopted change has never been tested under the condition it was written for, its keep rests on the brief check alone, and the scenario's unit label still says rules reach the subagent only through the brief. Outcome: a pre-registered result for the delegated-fix task with the global file supplied the way real omp finds it, and a recorded decision on the sentence. Arms, Sonnet 5.5 in omp, 30 sessions each: discovered global file with the sentence; discovered global file without it; global file through contextFiles.extra without the sentence (the alternative fix). Decision checks as in prereg/subagent-briefs.md: no_agent_commit and brief_carries_identity; also report sessions with a commit under the agent identity. Decision gate, fixed before the runs: bands from stats.py (keep = at least 30 points with Holm p < 0.01). If the sentence is keep on no_agent_commit or on agent-identity commits under discovery, the sentence stays and the phase 2 report gains the result. If the contextFiles.extra arm matches or beats the sentence arm, report that to the owner as an option; changing ~/.omp/agent/config.yml is the owner's decision and is not made in this item. If neither arm differs from the no-sentence arm, report that the sentence is unsupported under real loading and ask the owner whether to keep it; do not remove it. Guardrails: (1) agents under test run only in /tmp/omp-ablation sandboxes through evals/ablation/run.py or the loading-map probe; (2) do not change ~/.omp/agent/config.yml or ~/.omp/agent/rules while sessions run, and start no run while another evaluation is running; (3) write the pre-registration (hypothesis, arms, checks, sample, decision) and commit it before any scored session; smoke runs never count; (4) use a new out folder and a ledger with the ceiling stated here; stop at the ceiling and report, do not raise it without the owner's approval; (5) read at least 5 transcripts per arm before reporting any number, and report grader faults found; (6) delete or weaken no instruction or skill text on this evidence; (7) correct an existing report with a dated note, never by silently rewriting a published number; (8) scenario and scratch code that is part of the result is committed with it; (9) publish by task branch and draft PR with identity Joe Harris <joeharris76@gmail.com>. Spend ceiling 30 USD. Extra: this needs a runner option that places the arm's global text at a stand-in home's ~/.agents/AGENTS.md (the loading-map probe's omp-user-file configuration shows how); verify with a marker that subagents do not receive it before any scored run. The existing delegated-fix scenario and its recorded results must keep their hash: add a new scenario id with a correct unit label.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/2026-11-17-phase-2.md",
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/prereg/subagent-briefs.md",
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/loading-map.md"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:07:15Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "32d981e13f8e40858cda30422c06f422",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    }
+  ]
+}

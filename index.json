@@ -213,6 +213,13 @@
       "status": "open",
       "title": "Critique the second draft of the agent-instruction testing post and trim it to length"
     },
+    "brief-sentence-discovered-global-test": {
+      "claim": null,
+      "needs": [],
+      "priority": "high",
+      "status": "open",
+      "title": "Test the subagent-brief sentence when omp finds the global file by discovery"
+    },
     "consumers-drop-tidy-perms": {
       "claim": null,
       "needs": [],
