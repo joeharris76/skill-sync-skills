@@ -600,7 +600,7 @@
       "claim": null,
       "needs": [],
       "priority": "medium",
-      "status": "open",
+      "status": "blocked",
       "title": "Reword and test the rules Opus and Sonnet follow least with the full skill present"
     },
     "skill-rules-low-compliance-rewordings": {
