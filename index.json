@@ -439,6 +439,13 @@
       "status": "open",
       "title": "Decide whether to evaluate the instruction files on the Muse Spark model family"
     },
+    "oxbow-relock-pr-review": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Owner review of the Oxbow uv.lock refresh (draft PR 17)"
+    },
     "p3-apply": {
       "claim": null,
       "needs": [
