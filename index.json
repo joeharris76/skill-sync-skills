@@ -563,7 +563,7 @@
       "claim": null,
       "needs": [],
       "priority": "low",
-      "status": "open",
+      "status": "blocked",
       "title": "Decide what to do with the phase 3 families that could not judge their sections"
     },
     "pilot-hook-helper-rerun": {
