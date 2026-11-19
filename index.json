@@ -467,7 +467,7 @@
         "code-first-rule-coverage"
       ],
       "priority": "medium",
-      "status": "open",
+      "status": "blocked",
       "title": "Get the skills that hold the keep rules loaded on Sonnet when the work needs them"
     },
     "land-skillspector-pr": {
