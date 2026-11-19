@@ -1,0 +1,22 @@
+{
+  "acceptance": [
+    "Each of the five entries has an estimate and the owner's decision quoted in the closing note.",
+    "Every entry the owner chose to test has a filed item that passes the todo review checklist (gate, rubric, guardrails).",
+    "No paid session was run and no file was changed under this item."
+  ],
+  "description": "Problem: the reports list text and failures that no test reached, and nobody has decided whether any is worth the spend: (1) the global file's delegation rule is 'keep, untested' because no session delegated in any arm; (2) nine of ten sections of BenchBox's AGENTS.md, and the agent files of benchbox-site, Oxbow and textcharts, are untested; (3) many real turns could not be replayed (omp exit 3 with no error text), which limits replay coverage; (4) the false review credit, where agents credited reviews to a tool they never ran, recurred in every replay arm and has no test of a fix; (5) the skills not covered by any round: docs, blog, substack, benchbox. Outcome: a recorded owner decision per entry: test it (a new item is filed with its own gate, rubric and guardrails), or leave it untested with the reason. Decision gate: the owner decides each entry. Before asking, attach to each a one-paragraph estimate: what scenario or replay it needs, sessions, cost from the reports' per-session figures, and what decision the result could change. An entry whose result could change nothing while deletions are off the table is recommended as 'leave'. Guardrails: this item runs no paid sessions and changes no instruction text or report; it files items only for entries the owner chose; it does not reopen the dropped GPT Sol work.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/2026-11-17-phase-2.md",
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/2026-11-15-pilot.md"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:21:18Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "6a744ca900b341e3836110b4221da5b4",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    }
+  ]
+}

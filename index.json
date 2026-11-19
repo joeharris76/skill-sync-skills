@@ -213,6 +213,13 @@
       "status": "blocked",
       "title": "Let the ablation runner test an instruction file and scenarios from outside this repository"
     },
+    "ablation-untested-coverage": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Decide which untested instruction text and failures to cover next"
+    },
     "ablation-version-pooling-guard": {
       "claim": null,
       "needs": [],
