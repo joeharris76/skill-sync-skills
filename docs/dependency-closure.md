@@ -48,6 +48,7 @@ receipt while stale copies linger.
 | substack | `shared-change-framework` | `shared-change-framework` | `shared-change-framework`, `substack` |
 | test | `shared-change-framework`, `shared-investigation-framework` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `test` |
 | todo | `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol` | `shared-agent-execution`, `shared-change-framework`, `shared-investigation-framework`, `shared-review-protocol`, `todo` |
+| typesafe-ai | (none) | (none) | `typesafe-ai` |
 | writing-for-agents | (none) | (none) | `writing-for-agents` |
 
 ## Staying current

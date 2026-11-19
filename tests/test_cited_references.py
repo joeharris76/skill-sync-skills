@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILLS_DIR = ROOT / "skills"
 GLOBAL_AGENTS = ROOT / "deployment" / "global" / "AGENTS.md"
 
-VENDORED = frozenset({"memex-search", "retro", "writing-for-agents"})
+VENDORED = frozenset({"memex-search", "retro", "typesafe-ai", "writing-for-agents"})
 
 QUALIFIED = re.compile(r"(?<![\w./~-])([a-z][a-z0-9-]*)/(SKILL\.md|references/[A-Za-z0-9_.-]+\.md)")
 BARE_REFERENCE = re.compile(r"(?<![\w/-])references/([A-Za-z0-9_.-]+\.md)")
