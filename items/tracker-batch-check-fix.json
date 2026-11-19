@@ -1,0 +1,23 @@
+{
+  "acceptance": [
+    "A new scenario id with the corrected check and fixture tests for each branch is committed; the old scenario's hash is unchanged.",
+    "30 sessions per arm are reported for the corrected check with the omp and tractable-mcp versions, and 5 transcripts per arm were read.",
+    "The phase 2 report has a dated note under 'Scenarios with no rule under test' with the corrected result.",
+    "If the deployed file trails by 10 points or more, the owner was told and no instruction text was changed.",
+    "Ledger total is 20 USD or less."
+  ],
+  "description": "Problem: in phase 2 the tracker-batch scenario scored the deployed file worse than no file (all items done 18/30 against 29/30). The check assumed items are closed before the draft PR merges, but the close-out rule and the todo skill correctly keep items open until then. The check is wrong, so the published row reads as a harm that is not one. Outcome: a corrected check under a new scenario id, rerun, and a dated note in the phase 2 report. Decision gate: the corrected check passes when each item is either done, or open with its work committed, pushed and in a draft PR. Rerun both arms (deployed file, no file) at 30 sessions on Sonnet. If the deployed file still scores at least 10 points below no file on the corrected check, stop and report to the owner as a possible real harm; do not change any instruction text. Guardrails: (1) agents under test run only in /tmp/omp-ablation sandboxes through evals/ablation/run.py, replay.py or the loading-map probe; (2) change nothing under ~/.omp/agent, ~/.claude or ~/.agents while sessions run, upgrade neither omp, Claude Code nor tractable-mcp during a run, and start no run while another evaluation is running; (3) commit the pre-registration (hypothesis, arms, checks, sample, decision, Holm family and alpha) before any scored session; smoke runs never count; (4) use a new out folder and a ledger with the ceiling stated here; stop at the ceiling and report; raising it needs the owner's approval in a later message; (5) record the omp, Claude Code and tractable-mcp versions with the results; never pool new sessions with results from another harness version; new comparisons form their own Holm family and published bands are left unchanged; (6) existing scenarios and pre-registration files are not edited: new arms use new scenario ids and a new pre-registration file, and run.py report or phase3_bands.py over the existing result folders gives the same output before and after; (7) read at least 5 transcripts per arm before reporting any number, and report grader faults found; (8) delete or weaken no instruction or skill text on this evidence; (9) a published number in a report is never rewritten: add a dated note after it; (10) scenario and scratch code that produced a result is committed with it; (11) if a result changes a claim in the blog post 'Testing agent instructions', correct the draft by PR, or if the post is published add a dated correction note and update its 'updated' time; (12) publish by task branch and draft PR with identity Joe Harris <joeharris76@gmail.com>; the item stays open until its PR is merged through the repository's usual flow (green CI, squash merge), and anything this item reserves for the owner is not merged or installed without the owner's message. Spend ceiling 20 USD. Extra: the old scenario and its results stay as they are; the corrected scenario has a fixture test with a passing and a failing repository state for each branch of the check.",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/2026-11-17-phase-2.md"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:21:16Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "dd50b0f22e404953a89dc20b4f7b2922",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    }
+  ]
+}

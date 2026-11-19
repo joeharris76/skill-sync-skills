@@ -658,6 +658,13 @@
       "status": "done",
       "title": "Run one SkillSpector LLM semantic pass over the catalog and triage it"
     },
+    "tracker-batch-check-fix": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Fix the tracker-batch check that assumes items close before the draft PR merges"
+    },
     "tracker-hold-error-message": {
       "claim": null,
       "needs": [],
