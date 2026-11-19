@@ -432,6 +432,13 @@
       "status": "open",
       "title": "Rerun the instruction loading probe on the current omp and Claude Code releases"
     },
+    "muse-model-coverage": {
+      "claim": null,
+      "needs": [],
+      "priority": "low",
+      "status": "open",
+      "title": "Decide whether to evaluate the instruction files on the Muse Spark model family"
+    },
     "p3-apply": {
       "claim": null,
       "needs": [
