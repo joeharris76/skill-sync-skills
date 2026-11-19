@@ -220,6 +220,15 @@
       "status": "open",
       "title": "Decide whether tool-allowlist reviewers stay Hard Read-Only when run in the reviewed worktree"
     },
+    "blog-post-publish": {
+      "claim": null,
+      "needs": [
+        "blog-post-second-critique"
+      ],
+      "priority": "medium-high",
+      "status": "open",
+      "title": "Publish the agent-instruction testing post on joeharris76.com"
+    },
     "blog-post-second-critique": {
       "claim": null,
       "needs": [],
