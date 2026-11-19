@@ -593,7 +593,7 @@
       "claim": null,
       "needs": [],
       "priority": "low",
-      "status": "open",
+      "status": "blocked",
       "title": "Measure and, if needed, fix skill loading in review-only sessions"
     },
     "skill-rules-low-compliance-rewordings": {
