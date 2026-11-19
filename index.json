@@ -461,6 +461,15 @@
       "status": "done",
       "title": "Import retro and writing-for-agents from mattpocock/skills into the catalog"
     },
+    "keep-rule-skills-loading": {
+      "claim": null,
+      "needs": [
+        "code-first-rule-coverage"
+      ],
+      "priority": "medium",
+      "status": "open",
+      "title": "Get the skills that hold the keep rules loaded on Sonnet when the work needs them"
+    },
     "land-skillspector-pr": {
       "claim": null,
       "needs": [],
