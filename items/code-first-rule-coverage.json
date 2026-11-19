@@ -1,0 +1,26 @@
+{
+  "acceptance": [
+    "A scenario file for the code-skill loading test is committed, with its arms, and reproduces the current and rule arms from results/2026-11-18-code-skill-loading.md within 15 points on Sonnet.",
+    "The rule with the current description is measured: sessions where it fired, and sessions among those that read the skill.",
+    "A read-only-shell control set of at least 4 prompts exists and the candidate shell trigger fires in 0 of its sessions.",
+    "The shell trigger's loading rate among shell-edit sessions and its near-miss count are reported against the gate, and the adopt or reject decision is stated.",
+    "results/2026-11-18-code-skill-loading.md has a dated section with these results; its limit 'the scenario file was not kept' is replaced by the path of the committed file.",
+    "Any change to ~/.omp/agent/rules/code-first.md was approved by the owner in a later message and verified in one normal session outside the sandbox.",
+    "Ledger total is 40 USD or less."
+  ],
+  "context": "Prompts: PROMPTS['code'] in evals/ablation/scenarios3_trigger.py (6 explicit, 6 implicit, 4 contextual, 4 near-miss). Raw results of the first run: ~/.tractable/finding-drafts/skill-sync-skills/2026-11-15-ablation-eval/code-trigger/.",
+  "description": "Problem: the installed rule ~/.omp/agent/rules/code-first.md makes the agent read the code skill at its first edit or write of a source file. Two gaps: (1) it does not fire when the agent changes source only through the shell (sed -i, redirects, python one-liners); at least four Sonnet sessions did so and none read the skill; (2) it was tested only together with a rewritten skill description, while the installed setup uses the current description, so the installed combination is untested. The scenario file of the first test was not kept. Outcome: a committed, repeatable scenario set; a measurement of the rule with the current description; and a tested decision on a shell-edit trigger. Decision gate, fixed before the runs: adopt a shell trigger only if, on Sonnet at 3 sessions per prompt, it raises loading among sessions that change source through the shell to at least 80%, fires on 0 of the near-miss sessions, and fires in 0 sessions of a new control set whose shell commands read but do not change source (grep, cat, python -m unittest, git). If the rule with the current description loads the skill in fewer of the firing sessions than 95%, report it and do not change the installed rule without the owner. If omp cannot scope a rule to shell commands, record that with evidence and close. Guardrails: (1) agents under test run only in /tmp/omp-ablation sandboxes through evals/ablation/run.py or the loading-map probe; (2) do not change ~/.omp/agent/config.yml or ~/.omp/agent/rules while sessions run, and start no run while another evaluation is running; (3) write the pre-registration (hypothesis, arms, checks, sample, decision) and commit it before any scored session; smoke runs never count; (4) use a new out folder and a ledger with the ceiling stated here; stop at the ceiling and report, do not raise it without the owner's approval; (5) read at least 5 transcripts per arm before reporting any number, and report grader faults found; (6) delete or weaken no instruction or skill text on this evidence; (7) correct an existing report with a dated note, never by silently rewriting a published number; (8) scenario and scratch code that is part of the result is committed with it; (9) publish by task branch and draft PR with identity Joe Harris <joeharris76@gmail.com>. Spend ceiling 40 USD. Extra: the rule under test lives in the sandbox repository's .omp/rules, never in the user's rules directory, during runs; the user-level rule file is changed only after the owner approves the result and when no evaluation is running; run.py already disables user rule files in sandboxes and that must stay true (check one overlay).",
+  "links": [
+    "https://github.com/joeharris76/skill-sync-skills/blob/main/evals/ablation/results/2026-11-18-code-skill-loading.md"
+  ],
+  "sessions": [
+    {
+      "actor": "mcp:omp-coding-agent:joe@joe-mac-mini.local:10818abeb24d256e85c05818",
+      "at": "2026-11-19T22:07:20Z",
+      "client": "omp-coding-agent",
+      "op": "create",
+      "op_id": "1647a1d0c601493eb8bdd02b4de04c4f",
+      "session_id": "0b30bbc4019e4f5dbdf28532c02c385d"
+    }
+  ]
+}

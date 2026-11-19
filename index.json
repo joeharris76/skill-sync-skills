@@ -220,6 +220,13 @@
       "status": "open",
       "title": "Test the subagent-brief sentence when omp finds the global file by discovery"
     },
+    "code-first-rule-coverage": {
+      "claim": null,
+      "needs": [],
+      "priority": "medium",
+      "status": "open",
+      "title": "Close the gaps in the code-first omp rule: shell edits and the untested description"
+    },
     "consumers-drop-tidy-perms": {
       "claim": null,
       "needs": [],
