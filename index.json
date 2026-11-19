@@ -446,7 +446,7 @@
     "loading-map-rerun-current-harnesses": {
       "claim": null,
       "needs": [],
-      "priority": "medium",
+      "priority": "medium-high",
       "status": "open",
       "title": "Rerun the instruction loading probe on the current omp and Claude Code releases"
     },
