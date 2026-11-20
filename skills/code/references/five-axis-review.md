@@ -45,6 +45,8 @@ planning depth, defect handling, capture, and remediation.
 - Are module boundaries clean and free of circular dependencies?
 - Should duplicated code be shared?
 - Is the abstraction neither over-engineered nor tightly coupled?
+- Is this the change a maintainer would choose, or the quickest one that
+  passes?
 
 ### 4. Security
 - Is user input validated at boundaries?
